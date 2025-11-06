@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "437570902163",
+    "project_id": "whosin-992db",
+    "storage_bucket": "whosin-992db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:437570902163:android:9bcdc8ae6bd5406777d566",
+        "android_client_info": {
+          "package_name": "com.ucb.whosin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-foGBulcCnpcYBkcm0wkq7fJ5eo7CaVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

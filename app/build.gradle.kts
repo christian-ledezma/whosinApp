@@ -6,6 +6,7 @@ plugins {
     id("io.sentry.android.gradle") version "5.12.1"
     //alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -62,6 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.firebase.database)
     //implementation(libs.firebase.database)
     //implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
