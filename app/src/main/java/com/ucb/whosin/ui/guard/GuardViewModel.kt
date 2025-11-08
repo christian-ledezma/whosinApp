@@ -2,8 +2,8 @@ package com.ucb.whosin.ui.guard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ucb.whosin.data.model.Guest
-import com.ucb.whosin.data.repository.GuardRepository
+import com.ucb.whosin.features.Guard.data.model.Guest
+import com.ucb.whosin.features.Guard.data.repository.GuardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

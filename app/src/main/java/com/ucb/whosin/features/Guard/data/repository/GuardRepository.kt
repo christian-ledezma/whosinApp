@@ -1,10 +1,9 @@
-package com.ucb.whosin.data.repository
+package com.ucb.whosin.features.Guard.data.repository
 
-import com.ucb.whosin.data.model.Guest
+import com.ucb.whosin.features.Guard.data.model.Guest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 
 interface GuardRepository {
     fun getGuests(eventId: String): Flow<List<Guest>>

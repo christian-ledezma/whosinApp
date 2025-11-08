@@ -1,7 +1,7 @@
 package com.ucb.whosin.di
 
-import com.ucb.whosin.data.repository.GuardRepository
-import com.ucb.whosin.data.repository.GuardRepositoryImpl
+import com.ucb.whosin.features.Guard.data.repository.GuardRepository
+import com.ucb.whosin.features.Guard.data.repository.GuardRepositoryImpl
 import com.ucb.whosin.ui.guard.GuardViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module

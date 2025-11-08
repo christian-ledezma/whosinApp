@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.ucb.whosin.data.model.Guest
+import com.ucb.whosin.features.Guard.data.model.Guest
 
 @Composable
 fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {

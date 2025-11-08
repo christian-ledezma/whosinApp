@@ -1,4 +1,4 @@
-package com.ucb.whosin.data.model
+package com.ucb.whosin.features.Guard.data.model
 
 // Using Long for timestamp to be compatible with Room
 data class Guest(
