@@ -16,6 +16,6 @@ fun AppNavigation() {
         startDestination = Screen.Register.route
     ) {
 
-        composable(Screen.Register.route) { RegisterScreen () }
+        composable(Screen.Register.route) { RegisterScreen (navController = navController) }
     }
 }
