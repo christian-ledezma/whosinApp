@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.ucb.whosin.features.Guest.presentation.GuestScreen
 
 import com.ucb.whosin.ui.guard.GuardScreen
 
@@ -12,14 +13,14 @@ import com.ucb.whosin.ui.guard.GuardScreen
 fun AppNavigation(modifier: Modifier, navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Guard.route,
+        startDestination = Screen.Guest.route,
         modifier = modifier
     ) {
         composable(Screen.Guard.route) {
             GuardScreen()
         }
         composable(Screen.Guest.route) {
-            // GuestScreen()
+            GuestScreen()
 
 
         }
