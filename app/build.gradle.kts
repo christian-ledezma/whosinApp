@@ -94,4 +94,7 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
 
+    //google fonts material
+    implementation(libs.androidx.ui.text.google.fonts)
+
 }
