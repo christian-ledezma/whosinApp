@@ -15,6 +15,6 @@ sealed class NavigationDrawer(
     val label: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    val route: String)
-
-
+    val route: String) {
+    object Staff : NavigationDrawer("Staff", Icons.Filled.Home, Icons.Outlined.Home, Screen.Staff.route)
+}
