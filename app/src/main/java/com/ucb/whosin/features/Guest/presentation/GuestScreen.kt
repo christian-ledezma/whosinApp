@@ -1,0 +1,546 @@
+package com.ucb.whosin.features.Guest.presentation
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.ucb.whosin.features.Guest.domain.model.Guest
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GuestScreen() {
+    // DATOS HARDCODEADOS PARA PREVIEW
+    val hardcodedGuests = remember {
+        listOf(
+            Guest(
+                userId = "1",
+                name = "John Doe",
+                plusOnesAllowed = 2,
+                groupSize = 1,
+                checkedIn = false,
+                checkedInAt = null,
+                qrCode = "QR123",
+                inviteStatus = "pending",
+                note = null
+            ),
+            Guest(
+                userId = "2",
+                name = "Jane Smith",
+                plusOnesAllowed = 0,
+                groupSize = 1,
+                checkedIn = true,
+                checkedInAt = System.currentTimeMillis(),
+                qrCode = "QR456",
+                inviteStatus = "confirmed",
+                note = "VIP guest"
+            ),
+            Guest(
+                userId = "3",
+                name = "Peter Jones",
+                plusOnesAllowed = 1,
+                groupSize = 1,
+                checkedIn = false,
+                checkedInAt = null,
+                qrCode = "QR789",
+                inviteStatus = "pending",
+                note = null
+            ),
+            Guest(
+                userId = "4",
+                name = "Maria Garcia",
+                plusOnesAllowed = 3,
+                groupSize = 1,
+                checkedIn = true,
+                checkedInAt = System.currentTimeMillis(),
+                qrCode = "QR101",
+                inviteStatus = "confirmed",
+                note = null
+            ),
+            Guest(
+                userId = "5",
+                name = "Carlos Rodriguez",
+                plusOnesAllowed = 0,
+                groupSize = 1,
+                checkedIn = false,
+                checkedInAt = null,
+                qrCode = "QR202",
+                inviteStatus = "declined",
+                note = "Cannot attend"
+            ),
+            Guest(
+                userId = "6",
+                name = "Ana Martinez",
+                plusOnesAllowed = 2,
+                groupSize = 1,
+                checkedIn = true,
+                checkedInAt = System.currentTimeMillis(),
+                qrCode = "QR303",
+                inviteStatus = "confirmed",
+                note = null
+            )
+        )
+    }
+
+    var searchQuery by remember { mutableStateOf("") }
+    var showAddDialog by remember { mutableStateOf(false) }
+
+    val filteredGuests = remember(searchQuery) {
+        if (searchQuery.isBlank()) {
+            hardcodedGuests
+        } else {
+            hardcodedGuests.filter { it.name.contains(searchQuery, ignoreCase = true) }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Invitados") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF5E6FA3),
+                    titleContentColor = Color.White
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = Color(0xFF5E6FA3)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Agregar invitado",
+                    tint = Color.White
+                )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            // Barra de búsqueda
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Buscar invitados...") },
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = "Buscar")
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF5E6FA3),
+                    focusedLabelColor = Color(0xFF5E6FA3)
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Estadísticas rápidas
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StatCard(
+                    title = "Total",
+                    value = hardcodedGuests.size.toString(),
+                    color = Color(0xFF5E6FA3)
+                )
+                StatCard(
+                    title = "Confirmados",
+                    value = hardcodedGuests.count { it.inviteStatus == "confirmed" }.toString(),
+                    color = Color(0xFF4CAF50)
+                )
+                StatCard(
+                    title = "Check-in",
+                    value = hardcodedGuests.count { it.checkedIn }.toString(),
+                    color = Color(0xFF2196F3)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Lista de invitados
+            if (filteredGuests.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (searchQuery.isNotEmpty())
+                            "No se encontraron invitados"
+                        else
+                            "No hay invitados aún",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredGuests) { guest ->
+                        GuestCard(
+                            guest = guest,
+                            onDelete = { /* Delete action */ }
+                        )
+                    }
+                }
+            }
+        }
+
+        // Diálogo para agregar invitado
+        if (showAddDialog) {
+            AddGuestDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { guest ->
+                    // Add guest action
+                    showAddDialog = false
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun StatCard(
+    title: String,
+    value: String,
+    color: Color
+) {
+    Card(
+        modifier = Modifier
+            .width(110.dp)
+            .height(80.dp),
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodySmall,
+                color = color.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+fun GuestCard(
+    guest: Guest,
+    onDelete: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF5F5F5)
+        ),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                // Avatar con inicial
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = Color(0xFF5E6FA3).copy(alpha = 0.2f)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = guest.name.firstOrNull()?.toString()?.uppercase() ?: "?",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF5E6FA3)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = guest.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A1A1A)
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Estado de invitación
+                        StatusChip(
+                            text = when (guest.inviteStatus) {
+                                "confirmed" -> "Confirmado"
+                                "pending" -> "Pendiente"
+                                "declined" -> "Rechazado"
+                                else -> "Sin estado"
+                            },
+                            color = when (guest.inviteStatus) {
+                                "confirmed" -> Color(0xFF4CAF50)
+                                "pending" -> Color(0xFFFFA726)
+                                "declined" -> Color(0xFFE57373)
+                                else -> Color.Gray
+                            }
+                        )
+
+                        // Check-in status
+                        if (guest.checkedIn) {
+                            StatusChip(
+                                text = "✓ Check-in",
+                                color = Color(0xFF2196F3)
+                            )
+                        }
+                    }
+
+                    // Información adicional
+                    if (guest.plusOnesAllowed > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "+${guest.plusOnesAllowed} acompañante${if (guest.plusOnesAllowed > 1) "s" else ""}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF666666)
+                        )
+                    }
+
+                    // Nota
+                    if (!guest.note.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "📝 ${guest.note}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFF888888),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        )
+                    }
+                }
+            }
+
+            // Botón de eliminar (opcional)
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar",
+                    tint = Color(0xFFE57373)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun StatusChip(
+    text: String,
+    color: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = color.copy(alpha = 0.15f)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddGuestDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (Guest) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var plusOnes by remember { mutableStateOf("0") }
+    var note by remember { mutableStateOf("") }
+    var inviteStatus by remember { mutableStateOf("pending") }
+    var expanded by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Agregar Invitado",
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF5E6FA3)
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre completo") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF5E6FA3),
+                        focusedLabelColor = Color(0xFF5E6FA3)
+                    )
+                )
+
+                OutlinedTextField(
+                    value = plusOnes,
+                    onValueChange = { if (it.all { char -> char.isDigit() }) plusOnes = it },
+                    label = { Text("Acompañantes permitidos") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF5E6FA3),
+                        focusedLabelColor = Color(0xFF5E6FA3)
+                    )
+                )
+
+                // Dropdown para estado de invitación
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = when (inviteStatus) {
+                            "pending" -> "Pendiente"
+                            "confirmed" -> "Confirmado"
+                            "declined" -> "Rechazado"
+                            else -> "Pendiente"
+                        },
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Estado") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFF5E6FA3),
+                            focusedLabelColor = Color(0xFF5E6FA3)
+                        )
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Pendiente") },
+                            onClick = {
+                                inviteStatus = "pending"
+                                expanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Confirmado") },
+                            onClick = {
+                                inviteStatus = "confirmed"
+                                expanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Rechazado") },
+                            onClick = {
+                                inviteStatus = "declined"
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = note,
+                    onValueChange = { note = it },
+                    label = { Text("Nota (opcional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 3,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF5E6FA3),
+                        focusedLabelColor = Color(0xFF5E6FA3)
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (name.isNotBlank()) {
+                        onConfirm(
+                            Guest(
+                                userId = null,
+                                name = name,
+                                plusOnesAllowed = plusOnes.toIntOrNull() ?: 0,
+                                groupSize = 0,
+                                checkedIn = false,
+                                checkedInAt = null,
+                                qrCode = "",
+                                inviteStatus = inviteStatus,
+                                note = note.ifBlank { null }
+                            )
+                        )
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF5E6FA3)
+                ),
+                enabled = name.isNotBlank()
+            ) {
+                Text("Agregar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", color = Color(0xFF5E6FA3))
+            }
+        }
+    )
+}
