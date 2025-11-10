@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.ucb.whosin.features.login.presentation.HomeScreen
 import com.ucb.whosin.features.login.presentation.LoginScreen
 import com.ucb.whosin.features.login.presentation.RegisterScreen
@@ -35,7 +34,7 @@ fun AppNavigation(
                                 popUpTo(Screen.Home.route) { inclusive = true }
                             }
                             else -> {
-                                // Navegación normal
+
                             }
                         }
                     }
@@ -82,7 +81,6 @@ fun AppNavigation(
             )
         }
 
-        // Pantallas con navegación (después del login)
         composable(Screen.Home.route) {
             HomeScreen(
                 navigationViewModel = navigationViewModel,
