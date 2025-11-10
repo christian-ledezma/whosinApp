@@ -27,6 +27,9 @@ ksp = "2.0.20-1.0.24"
 room = "2.8.0"
 firebaseMessaging = "25.0.0"
 datastore = "1.0.0"
+firebaseAuth = "23.1.0"
+firebaseBom = "33.8.0"
+coroutinesPlayServices = "1.9.0"
 uiTextGoogleFonts = "1.9.4"
 firebaseAuthKtx = "24.0.1"
 
@@ -73,7 +76,10 @@ room-guava = { group="androidx.room", name="room-guava", version.ref="room"}
 room-testing = { group="androidx.room", name="room-testing", version.ref="room"}
 room-paging = { group="androidx.room", name="room-paging", version.ref="room"}
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
-
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
+kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutinesPlayServices" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

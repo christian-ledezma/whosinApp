@@ -70,8 +70,10 @@ dependencies {
     // 🔹 FIREBASE (usando BOM)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.firestore)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.firebase.firestore)
     // implementation(libs.firebase.messaging) // si lo usas después, descomenta
 
     // 🔹 INYECCIÓN DE DEPENDENCIAS (KOIN)

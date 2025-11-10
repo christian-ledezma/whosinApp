@@ -13,10 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
-.idea/gradle.xml
-.idea/misc.xml
-.idea/.name
-.idea/appInsightsSettings.xml
 
 # Sentry Config File
 sentry.properties

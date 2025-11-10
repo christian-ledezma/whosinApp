@@ -5,7 +5,6 @@ import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.ucb.whosin.di.appModule
-import com.ucb.whosin.di.guardModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -36,9 +35,7 @@ class App : Application() {
         startKoin {
             androidContext( this@App )
             modules(
-                appModule,
-                guardModule
-            )
+                appModule,)
         }
     }
 }
