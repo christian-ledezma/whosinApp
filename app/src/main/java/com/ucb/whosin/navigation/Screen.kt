@@ -5,6 +5,5 @@ sealed class Screen(val route: String) {
     object Staff : Screen("staff")
 
     object Guest : Screen("guest")
-
     object Event : Screen("event")
 }

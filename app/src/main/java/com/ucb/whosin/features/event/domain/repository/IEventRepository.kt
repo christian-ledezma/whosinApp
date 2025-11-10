@@ -1,7 +1,22 @@
 package com.ucb.whosin.features.event.domain.repository
 
-import com.ucb.whosin.features.event.domain.model.EventModel
+import com.google.firebase.Timestamp
+import com.ucb.whosin.features.event.domain.model.EventResult
 
 interface IEventRepository {
-    fun findByName(value: String): Result<EventModel>
+    suspend fun findByName(value: String): EventResult
+
+    suspend fun registerEvent(
+        eventId: String,
+        userId: String,
+        name: String,
+        date: Timestamp,
+        locationName: String,
+        capacity: Int,
+        status: String,
+        guardModeEnabled: Boolean,
+        createdAt: Timestamp,
+        totalCheckedIn: Int,
+        totalInvited: Int
+                             ): EventResult
 }
