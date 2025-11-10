@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.firebase.firestore)
     //implementation(libs.firebase.database)
     //implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
@@ -97,5 +98,8 @@ dependencies {
 
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    //google fonts material
+    implementation(libs.androidx.ui.text.google.fonts)
 
 }
