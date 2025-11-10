@@ -48,7 +48,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route,
+        startDestination = Screen.Event.route,
         modifier = modifier
     ) {
         // Pantallas de autenticación (sin drawer)
