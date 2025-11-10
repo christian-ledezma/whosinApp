@@ -15,9 +15,13 @@ enum class NavigationOptions {
 class NavigationViewModel : ViewModel() {
 
     sealed class NavigationCommand {
-        data class NavigateTo(val route: String, val options: NavigationOptions = NavigationOptions.DEFAULT) : NavigationCommand()
+        data class NavigateTo(
+            val route: String,
+            val options: NavigationOptions = NavigationOptions.DEFAULT
+        ) : NavigationCommand()
         object PopBackStack : NavigationCommand()
     }
+
     private val _navigationCommand = MutableSharedFlow<NavigationCommand>()
     val navigationCommand = _navigationCommand.asSharedFlow()
 
@@ -59,32 +63,47 @@ class NavigationViewModel : ViewModel() {
                         handleClickAction(clickAction)
                     }
                     else -> {
-                        Log.d("NavigationViewModel", "Navegación por defecto a Dollar")
-
+                        Log.d("NavigationViewModel", "Navegación por defecto a Login")
+                        navigateTo(Screen.Login.route, NavigationOptions.CLEAR_BACK_STACK)
                     }
                 }
             } catch (e: Exception) {
                 Log.e("NavigationViewModel", "Error en handleDeepLink", e)
-
+                navigateTo(Screen.Login.route, NavigationOptions.CLEAR_BACK_STACK)
             }
         }
     }
 
     private fun handleClickAction(clickAction: String?) {
         when (clickAction) {
-
+            "OPEN_HOME" -> navigateTo(Screen.Home.route, NavigationOptions.REPLACE_HOME)
+            "OPEN_EVENTS" -> navigateTo(Screen.Event.route, NavigationOptions.REPLACE_HOME)
+            "OPEN_GUESTS" -> navigateTo(Screen.Guest.route, NavigationOptions.REPLACE_HOME)
+            "OPEN_GUARD" -> navigateTo(Screen.Guard.route, NavigationOptions.REPLACE_HOME)
+            "OPEN_STAFF" -> navigateTo(Screen.Staff.route, NavigationOptions.REPLACE_HOME)
+            else -> navigateTo(Screen.Home.route, NavigationOptions.CLEAR_BACK_STACK)
         }
     }
 
     private fun handleUriDeepLink(uri: android.net.Uri?) {
         when (uri?.host) {
-
+            "home" -> navigateTo(Screen.Home.route, NavigationOptions.REPLACE_HOME)
+            "events" -> navigateTo(Screen.Event.route, NavigationOptions.REPLACE_HOME)
+            "guests" -> navigateTo(Screen.Guest.route, NavigationOptions.REPLACE_HOME)
+            "guard" -> navigateTo(Screen.Guard.route, NavigationOptions.REPLACE_HOME)
+            "staff" -> navigateTo(Screen.Staff.route, NavigationOptions.REPLACE_HOME)
+            else -> navigateTo(Screen.Home.route, NavigationOptions.CLEAR_BACK_STACK)
         }
     }
 
     private fun handleNavigationDestination(destination: String?) {
         when (destination?.uppercase()) {
-
+            "HOME" -> navigateTo(Screen.Home.route, NavigationOptions.REPLACE_HOME)
+            "EVENT", "EVENTS" -> navigateTo(Screen.Event.route, NavigationOptions.REPLACE_HOME)
+            "GUEST", "GUESTS" -> navigateTo(Screen.Guest.route, NavigationOptions.REPLACE_HOME)
+            "GUARD" -> navigateTo(Screen.Guard.route, NavigationOptions.REPLACE_HOME)
+            "STAFF" -> navigateTo(Screen.Staff.route, NavigationOptions.REPLACE_HOME)
+            else -> navigateTo(Screen.Home.route, NavigationOptions.CLEAR_BACK_STACK)
         }
     }
 }

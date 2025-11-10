@@ -1,6 +1,7 @@
 package com.ucb.whosin.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -15,28 +16,56 @@ import com.ucb.whosin.features.event.presentation.EventScreen
 import com.ucb.whosin.ui.guard.GuardScreen
 
 @Composable
-fun AppNavigation() {
-    val navController: NavHostController = rememberNavController()
+fun AppNavigation(
+    navigationViewModel: NavigationViewModel,
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
+    LaunchedEffect(Unit) {
+        navigationViewModel.navigationCommand.collect { command ->
+            when (command) {
+                is NavigationViewModel.NavigationCommand.NavigateTo -> {
+                    navController.navigate(command.route) {
+                        // Configuración del back stack según sea necesario
+                        when (command.options) {
+                            NavigationOptions.CLEAR_BACK_STACK -> {
+                                popUpTo(0) { inclusive = true }
+                            }
+                            NavigationOptions.REPLACE_HOME -> {
+                                popUpTo(Screen.Home.route) { inclusive = true }
+                            }
+                            else -> {
+                                // Navegación normal
+                            }
+                        }
+                    }
+                }
+                is NavigationViewModel.NavigationCommand.PopBackStack -> {
+                    navController.popBackStack()
+                }
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.Login.route,
+        modifier = modifier
     ) {
+        // Pantallas de autenticación (sin drawer)
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
+                    // Navegar al Home y limpiar el back stack
+                    navigationViewModel.navigateTo(
+                        Screen.Home.route,
+                        NavigationOptions.CLEAR_BACK_STACK
+                    )
                 },
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register.route)
                 }
             )
-        }
-
-        composable(Screen.Guard.route) {
-            GuardScreen()
         }
 
         composable(Screen.Register.route) {
@@ -53,18 +82,28 @@ fun AppNavigation() {
             )
         }
 
+        // Pantallas con navegación (después del login)
+        composable(Screen.Home.route) {
+            HomeScreen(
+                navigationViewModel = navigationViewModel,
+                navController = navController
+            )
+        }
+
+        composable(Screen.Guard.route) {
+            GuardScreen()
+        }
+
         composable(Screen.Guest.route) {
             GuestScreen()
         }
-        composable(Screen.Staff.route) {
-            // StaffScreen()
-        }
+
         composable(Screen.Event.route) {
             EventScreen()
         }
 
-        composable(Screen.Home.route) {
-            HomeScreen()
+        composable(Screen.Staff.route) {
+            // StaffScreen()
         }
     }
 }
