@@ -13,6 +13,7 @@
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.Modifier
     import androidx.compose.ui.draw.clip
+    import androidx.compose.ui.draw.shadow
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.unit.dp
@@ -119,61 +120,58 @@
                     is EventViewModel.EventStateUI.Success -> {
                         val event = st.event
 
-                        // 🔹 Card con datos del evento
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 8.dp),
+                                .padding(vertical = 12.dp)
+                                .shadow(8.dp, RoundedCornerShape(12.dp)),
                             colors = CardDefaults.cardColors(containerColor = cardColor),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                         ) {
-                            Row(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-
-                                // Círculo decorativo
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(CircleShape)
-                                        .background(accentColor)
-                                )
-
-                                Column(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .padding(horizontal = 12.dp)
+                                // Encabezado con título y fecha
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = event.name,
-                                        color = textColor,
-                                        fontWeight = FontWeight.Bold
+                                        text = "🎉 ${event.name}",
+                                        color = accentColor,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp
                                     )
                                     Text(
-                                        text = event.locationName,
-                                        color = Color.Gray,
-                                        fontSize = 12.sp
+                                        text = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(event.date.toDate()),
+                                        color = Color.LightGray,
+                                        fontSize = 13.sp
                                     )
                                 }
 
-                                val formattedDate = SimpleDateFormat(
-                                    "dd/MM/yyyy",
-                                    Locale.getDefault()
-                                ).format(event.date.toDate())
+                                Divider(color = accentColor.copy(alpha = 0.3f), thickness = 1.dp)
 
-                                Text(
-                                    text = formattedDate,
-                                    color = textColor,
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 12.sp
+                                // Detalles con íconos y espaciado
+                                EventInfoRow("📍 Location", event.locationName, textColor)
+                                EventInfoRow("📅 Status", event.status, textColor)
+                                EventInfoRow("👥 Capacity", "${event.capacity}", textColor)
+                                EventInfoRow("✅ Checked In", "${event.totalCheckedIn}", textColor)
+                                EventInfoRow("✉️ Total Invited", "${event.totalInvited}", textColor)
+                                EventInfoRow("🛡️ Guard Mode", if (event.guardModeEnabled) "Enabled" else "Disabled", textColor)
+                                EventInfoRow(
+                                    "🕒 Created At",
+                                    SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(event.createdAt.toDate()),
+                                    textColor
                                 )
                             }
                         }
                     }
+
                 }
             }
 
@@ -211,5 +209,17 @@
                 color = textColor,
                 fontSize = 14.sp
             )
+        }
+    }
+
+    @Composable
+    fun EventInfoRow(label: String, value: String, textColor: Color) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = label, color = textColor.copy(alpha = 0.8f), fontSize = 13.sp)
+            Text(text = value, color = Color.White, fontWeight = FontWeight.Medium, fontSize = 13.sp)
         }
     }
