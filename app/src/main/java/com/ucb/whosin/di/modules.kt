@@ -1,10 +1,14 @@
 package com.ucb.whosin.di
 
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.data.repository.EventRepository
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
 import com.ucb.whosin.features.event.domain.usecase.FindByNameUseCase
-import com.ucb.whosin.features.event.presentation.EventViewModel
+import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
+import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,7 +50,21 @@ val appModule = module {
             .build()
     }
 
-    single<IEventRepository>{ EventRepository() }
-    factory { FindByNameUseCase(get()) }
-    viewModel{ EventViewModel(get()) }
+    // Firebase
+    single { FirebaseAuth.getInstance() }
+    single { FirebaseFirestore.getInstance() }
+
+    // DataSource
+    single { FirebaseEventDataSource(get()) }
+
+    // Repository
+    single<IEventRepository> { EventRepository(get()) }
+
+    // Use Cases
+    single { FindByNameUseCase(get()) }
+    single { RegisterEventUseCase(get()) }
+
+    // ViewModels
+    viewModel { RegisterEventViewModel(get()) }
+
 }

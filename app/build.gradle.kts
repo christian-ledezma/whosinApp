@@ -55,6 +55,7 @@ sentry {
 
 dependencies {
 
+    // 🔹 ANDROIDX BÁSICO Y COMPOSE
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -63,43 +64,51 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.firebase.database)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.ui.text.google.fonts)
+
+    // 🔹 FIREBASE (usando BOM)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.database)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.firebase.firestore)
-    //implementation(libs.firebase.database)
-    //implementation(libs.firebase.messaging)
+    // implementation(libs.firebase.messaging) // si lo usas después, descomenta
+
+    // 🔹 INYECCIÓN DE DEPENDENCIAS (KOIN)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.navigation)
+    implementation(libs.koin.androidx.compose)
+
+    // 🔹 NETWORKING Y SERIALIZACIÓN
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // 🔹 IMÁGENES
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network)
+
+    // 🔹 ROOM (Persistencia local)
+    implementation(libs.bundles.local)
+    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
+
+    // 🔹 DATASTORE (almacenamiento liviano)
+    implementation(libs.datastore)
+
+    // 🔹 MONITOREO / LOGGING
+    implementation(libs.sentry)
+
+    // 🔹 TESTING
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.room.testing)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.retrofit)
-    implementation(libs.converter.gson)
-    implementation (libs.koin.android)
-    implementation (libs.koin.androidx.navigation)
-    implementation (libs.koin.androidx.compose)
-    implementation(libs.coil.compose)
-    implementation(libs.coil.network)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.sentry)
-
-    //local bundle room
-    implementation(libs.bundles.local)
-    annotationProcessor(libs.room.compiler)
-    ksp(libs.room.compiler)
-    testImplementation(libs.room.testing)
-
-    implementation(libs.datastore)
-
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
-
-    //google fonts material
-    implementation(libs.androidx.ui.text.google.fonts)
-
 }

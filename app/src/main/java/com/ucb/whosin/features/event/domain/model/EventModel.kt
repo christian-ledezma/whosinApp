@@ -15,3 +15,8 @@ data class EventModel(
     val totalCheckedIn: Int = 0,
     val totalInvited: Int = 0
 )
+
+sealed class EventResult {
+    data class Success(val event: EventModel) : EventResult()
+    data class Error(val message: String) : EventResult()
+}

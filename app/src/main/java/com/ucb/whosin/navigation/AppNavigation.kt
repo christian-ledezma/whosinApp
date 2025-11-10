@@ -10,7 +10,7 @@ import com.ucb.whosin.features.login.presentation.HomeScreen
 import com.ucb.whosin.features.login.presentation.LoginScreen
 import com.ucb.whosin.features.login.presentation.RegisterScreen
 import com.ucb.whosin.features.Guest.presentation.GuestScreen
-import com.ucb.whosin.features.event.presentation.EventScreen
+import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 
 import com.ucb.whosin.ui.guard.GuardScreen
 
@@ -97,7 +97,7 @@ fun AppNavigation(
         }
 
         composable(Screen.Event.route) {
-            EventScreen()
+            RegisterEventScreen()
         }
 
         composable(Screen.Staff.route) {
