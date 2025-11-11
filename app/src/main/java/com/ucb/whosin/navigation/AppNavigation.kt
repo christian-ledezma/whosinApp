@@ -6,10 +6,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.ucb.whosin.features.Guest.presentation.GuestListScreen
 import com.ucb.whosin.features.login.presentation.HomeScreen
 import com.ucb.whosin.features.login.presentation.LoginScreen
 import com.ucb.whosin.features.login.presentation.RegisterScreen
-import com.ucb.whosin.features.Guest.presentation.GuestScreen
+
 import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 
 import com.ucb.whosin.ui.guard.GuardScreen
@@ -48,7 +49,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Event.route,
+        startDestination = Screen.Guest.route,
         modifier = modifier
     ) {
         // Pantallas de autenticación (sin drawer)
@@ -88,13 +89,11 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Guard.route) {
-            GuardScreen()
+        composable(Screen.Guest.route) {
+            GuestListScreen()
         }
 
-        composable(Screen.Guest.route) {
-            GuestScreen()
-        }
+
 
         composable(Screen.Event.route) {
             RegisterEventScreen()

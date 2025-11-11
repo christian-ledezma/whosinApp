@@ -1,15 +1,11 @@
 package com.ucb.whosin.features.Guest.presentation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,94 +15,67 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ucb.whosin.features.Guest.domain.model.Guest
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GuestScreen() {
-    // DATOS HARDCODEADOS PARA PREVIEW
-    val hardcodedGuests = remember {
-        listOf(
-            Guest(
-                userId = "1",
-                name = "John Doe",
-                plusOnesAllowed = 2,
-                groupSize = 1,
-                checkedIn = false,
-                checkedInAt = null,
-                qrCode = "QR123",
-                inviteStatus = "pending",
-                note = null
-            ),
-            Guest(
-                userId = "2",
-                name = "Jane Smith",
-                plusOnesAllowed = 0,
-                groupSize = 1,
-                checkedIn = true,
-                checkedInAt = System.currentTimeMillis(),
-                qrCode = "QR456",
-                inviteStatus = "confirmed",
-                note = "VIP guest"
-            ),
-            Guest(
-                userId = "3",
-                name = "Peter Jones",
-                plusOnesAllowed = 1,
-                groupSize = 1,
-                checkedIn = false,
-                checkedInAt = null,
-                qrCode = "QR789",
-                inviteStatus = "pending",
-                note = null
-            ),
-            Guest(
-                userId = "4",
-                name = "Maria Garcia",
-                plusOnesAllowed = 3,
-                groupSize = 1,
-                checkedIn = true,
-                checkedInAt = System.currentTimeMillis(),
-                qrCode = "QR101",
-                inviteStatus = "confirmed",
-                note = null
-            ),
-            Guest(
-                userId = "5",
-                name = "Carlos Rodriguez",
-                plusOnesAllowed = 0,
-                groupSize = 1,
-                checkedIn = false,
-                checkedInAt = null,
-                qrCode = "QR202",
-                inviteStatus = "declined",
-                note = "Cannot attend"
-            ),
-            Guest(
-                userId = "6",
-                name = "Ana Martinez",
-                plusOnesAllowed = 2,
-                groupSize = 1,
-                checkedIn = true,
-                checkedInAt = System.currentTimeMillis(),
-                qrCode = "QR303",
-                inviteStatus = "confirmed",
-                note = null
-            )
-        )
-    }
+fun GuestListScreen(
+    listViewModel: GuestListViewModel = koinViewModel(),
+    addViewModel: AddGuestViewModel = koinViewModel(),
+    onNavigateToAddGuest: () -> Unit = {}
+) {
+    val listUiState by listViewModel.uiState.collectAsState()
+    val addUiState by addViewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    var searchQuery by remember { mutableStateOf("") }
     var showAddDialog by remember { mutableStateOf(false) }
 
-    val filteredGuests = remember(searchQuery) {
-        if (searchQuery.isBlank()) {
-            hardcodedGuests
-        } else {
-            hardcodedGuests.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    // Recargar lista cuando se agrega un invitado exitosamente
+    LaunchedEffect(addUiState.isSuccess) {
+        if (addUiState.isSuccess) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "¡Invitado agregado exitosamente!",
+                    duration = SnackbarDuration.Short
+                )
+                delay(500)
+                listViewModel.loadGuests()
+                showAddDialog = false
+            }
+        }
+    }
+
+    // Mostrar errores de agregar
+    LaunchedEffect(addUiState.errorMessage) {
+        addUiState.errorMessage?.let { error ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = error,
+                    duration = SnackbarDuration.Long
+                )
+                addViewModel.clearError()
+            }
+        }
+    }
+
+    // Mostrar errores de lista
+    LaunchedEffect(listUiState.errorMessage) {
+        listUiState.errorMessage?.let { error ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = error,
+                    duration = SnackbarDuration.Long
+                )
+                listViewModel.clearError()
+            }
         }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Invitados") },
@@ -137,8 +106,8 @@ fun GuestScreen() {
         ) {
             // Barra de búsqueda
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+                value = listUiState.searchQuery,
+                onValueChange = { listViewModel.onSearchQueryChange(it) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Buscar invitados...") },
                 leadingIcon = {
@@ -161,17 +130,17 @@ fun GuestScreen() {
             ) {
                 StatCard(
                     title = "Total",
-                    value = hardcodedGuests.size.toString(),
+                    value = listUiState.guests.size.toString(),
                     color = Color(0xFF5E6FA3)
                 )
                 StatCard(
                     title = "Confirmados",
-                    value = hardcodedGuests.count { it.inviteStatus == "confirmed" }.toString(),
+                    value = listUiState.guests.count { it.inviteStatus == "confirmed" }.toString(),
                     color = Color(0xFF4CAF50)
                 )
                 StatCard(
                     title = "Check-in",
-                    value = hardcodedGuests.count { it.checkedIn }.toString(),
+                    value = listUiState.guests.count { it.checkedIn }.toString(),
                     color = Color(0xFF2196F3)
                 )
             }
@@ -179,16 +148,23 @@ fun GuestScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Lista de invitados
-            if (filteredGuests.isEmpty()) {
+            if (listUiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color(0xFF5E6FA3))
+                }
+            } else if (listUiState.filteredGuests.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (searchQuery.isNotEmpty())
+                        text = if (listUiState.searchQuery.isNotEmpty())
                             "No se encontraron invitados"
                         else
-                            "No hay invitados aún",
+                            "No hay invitados aún.\nToca + para agregar uno.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.Gray
                     )
@@ -197,11 +173,8 @@ fun GuestScreen() {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(filteredGuests) { guest ->
-                        GuestCard(
-                            guest = guest,
-                            onDelete = { /* Delete action */ }
-                        )
+                    items(listUiState.filteredGuests) { guest ->
+                        GuestCard(guest = guest)
                     }
                 }
             }
@@ -210,10 +183,10 @@ fun GuestScreen() {
         // Diálogo para agregar invitado
         if (showAddDialog) {
             AddGuestDialog(
+                isLoading = addUiState.isLoading,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { guest ->
-                    // Add guest action
-                    showAddDialog = false
+                onConfirm = { name, plusOnes, status, note ->
+                    addViewModel.addGuest(name, plusOnes, status, note)
                 }
             )
         }
@@ -256,10 +229,7 @@ fun StatCard(
 }
 
 @Composable
-fun GuestCard(
-    guest: Guest,
-    onDelete: () -> Unit
-) {
+fun GuestCard(guest: Guest) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -360,18 +330,6 @@ fun GuestCard(
                     }
                 }
             }
-
-            // Botón de eliminar (opcional)
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar",
-                    tint = Color(0xFFE57373)
-                )
-            }
         }
     }
 }
@@ -398,8 +356,9 @@ fun StatusChip(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddGuestDialog(
+    isLoading: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (Guest) -> Unit
+    onConfirm: (String, Int, String, String?) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var plusOnes by remember { mutableStateOf("0") }
@@ -426,6 +385,7 @@ fun AddGuestDialog(
                     label = { Text("Nombre completo") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF5E6FA3),
                         focusedLabelColor = Color(0xFF5E6FA3)
@@ -438,6 +398,7 @@ fun AddGuestDialog(
                     label = { Text("Acompañantes permitidos") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF5E6FA3),
                         focusedLabelColor = Color(0xFF5E6FA3)
@@ -447,7 +408,7 @@ fun AddGuestDialog(
                 // Dropdown para estado de invitación
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
+                    onExpandedChange = { if (!isLoading) expanded = !expanded }
                 ) {
                     OutlinedTextField(
                         value = when (inviteStatus) {
@@ -463,6 +424,7 @@ fun AddGuestDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor(),
+                        enabled = !isLoading,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = Color(0xFF5E6FA3),
                             focusedLabelColor = Color(0xFF5E6FA3)
@@ -503,6 +465,7 @@ fun AddGuestDialog(
                     label = { Text("Nota (opcional)") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
+                    enabled = !isLoading,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF5E6FA3),
                         focusedLabelColor = Color(0xFF5E6FA3)
@@ -515,30 +478,34 @@ fun AddGuestDialog(
                 onClick = {
                     if (name.isNotBlank()) {
                         onConfirm(
-                            Guest(
-                                userId = null,
-                                name = name,
-                                plusOnesAllowed = plusOnes.toIntOrNull() ?: 0,
-                                groupSize = 0,
-                                checkedIn = false,
-                                checkedInAt = null,
-                                qrCode = "",
-                                inviteStatus = inviteStatus,
-                                note = note.ifBlank { null }
-                            )
+                            name,
+                            plusOnes.toIntOrNull() ?: 0,
+                            inviteStatus,
+                            note.ifBlank { null }
                         )
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF5E6FA3)
                 ),
-                enabled = name.isNotBlank()
+                enabled = !isLoading && name.isNotBlank()
             ) {
-                Text("Agregar")
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Agregar")
+                }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isLoading
+            ) {
                 Text("Cancelar", color = Color(0xFF5E6FA3))
             }
         }
