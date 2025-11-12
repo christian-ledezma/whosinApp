@@ -11,12 +11,16 @@ import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
 import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import com.ucb.whosin.features.login.data.AuthRepositoryImpl
+import com.ucb.whosin.features.login.data.SessionManager
 import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
+import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.domain.usecase.LoginUserUseCase
+import com.ucb.whosin.features.login.domain.usecase.LogoutUseCase
 import com.ucb.whosin.features.login.domain.usecase.RegisterUserUseCase
 import com.ucb.whosin.features.login.presentation.LoginViewModel
 import com.ucb.whosin.features.login.presentation.RegisterViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 val appModule = module {
@@ -24,19 +28,24 @@ val appModule = module {
     single { FirebaseAuth.getInstance() }
     single { FirebaseFirestore.getInstance() }
 
+    // SessionManager
+    single { SessionManager(androidContext()) }
+
     // DataSource
     single { FirebaseAuthDataSource(get(), get()) }
 
     // Repository
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
 
     // Use Cases
     single { RegisterUserUseCase(get()) }
     single { LoginUserUseCase(get()) }
+    single { CheckSessionUseCase(get()) }
+    single { LogoutUseCase(get(), get()) }
 
     // ViewModels
-    viewModel { RegisterViewModel(get()) }
-    viewModel { LoginViewModel(get()) }
+    viewModel { RegisterViewModel(get(), get()) }
+    viewModel { LoginViewModel(get(), get()) }
 
     // DataSource
     single { FirebaseEventDataSource(get()) }

@@ -22,6 +22,7 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -29,8 +30,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.ucb.whosin.features.login.domain.usecase.LogoutUseCase
 import com.ucb.whosin.navigation.NavigationDrawer
 import com.ucb.whosin.navigation.NavigationViewModel
+import com.ucb.whosin.navigation.Screen
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +43,7 @@ fun HomeScreen(
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val logoutUseCase: LogoutUseCase = org.koin.androidx.compose.get()
     val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntry?.destination?.route ?: ""
 
@@ -106,6 +110,18 @@ fun HomeScreen(
                                 imageVector = Icons.Default.Menu,
                                 contentDescription = "Menú"
                             )
+                        }
+                    },
+                    actions = {
+                        TextButton(onClick = {
+                            scope.launch {
+                                logoutUseCase()
+                                navController.navigate(Screen.Login.route) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        }) {
+                            Text("Cerrar Sesión")
                         }
                     }
                 )

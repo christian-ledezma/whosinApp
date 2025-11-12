@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.datastore.core)
     //implementation(libs.firebase.database)
     //implementation(libs.firebase.messaging)
     testImplementation(libs.junit)

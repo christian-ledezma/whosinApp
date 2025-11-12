@@ -2,6 +2,8 @@ package com.ucb.whosin.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -12,6 +14,7 @@ import com.ucb.whosin.features.login.presentation.LoginScreen
 import com.ucb.whosin.features.login.presentation.RegisterScreen
 
 import com.ucb.whosin.features.event.presentation.RegisterEventScreen
+import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 
 import com.ucb.whosin.ui.guard.GuardScreen
 
@@ -21,6 +24,9 @@ fun AppNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    val checkSessionUseCase: CheckSessionUseCase = org.koin.androidx.compose.get()
+    val isLoggedIn by checkSessionUseCase().collectAsState(initial = false)
+
     LaunchedEffect(Unit) {
         navigationViewModel.navigationCommand.collect { command ->
             when (command) {
@@ -49,7 +55,7 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Guest.route,
+        startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route,
         modifier = modifier
     ) {
         // Pantallas de autenticación (sin drawer)
