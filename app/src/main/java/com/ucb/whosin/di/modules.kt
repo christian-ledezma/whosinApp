@@ -48,7 +48,7 @@ val appModule = module {
     viewModel { LoginViewModel(get(), get()) }
 
     // DataSource
-    single { FirebaseEventDataSource(get()) }
+    single { FirebaseEventDataSource(get(), get()) }
 
     // Repository
     single<IEventRepository> { EventRepository(get()) }
@@ -59,5 +59,4 @@ val appModule = module {
 
     // ViewModels
     viewModel { RegisterEventViewModel(get()) }
-
 }

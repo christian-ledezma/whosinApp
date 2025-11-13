@@ -7,7 +7,6 @@ import com.ucb.whosin.features.event.domain.repository.IEventRepository
 class RegisterEventUseCase (private val repository: IEventRepository) {
     suspend operator fun invoke(
                                         eventId: String,
-                                        userId: String,
                                         name: String,
                                         date: Timestamp,
                                         locationName: String,
@@ -22,7 +21,6 @@ class RegisterEventUseCase (private val repository: IEventRepository) {
 
         if (
                 eventId.isBlank() ||
-                userId.isBlank() ||
                 name.isBlank() ||
                 locationName.isBlank() ||
                 capacity <= 0 ||
@@ -34,7 +32,6 @@ class RegisterEventUseCase (private val repository: IEventRepository) {
 
         return repository.registerEvent(
             eventId,
-            userId,
             name,
             date,
             locationName,
