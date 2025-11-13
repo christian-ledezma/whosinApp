@@ -25,7 +25,6 @@ class RegisterEventViewModel(
 
     fun registerEvent(
         eventId: String,
-        userId: String,
         name: String,
         date: Timestamp,
         locationName: String,
@@ -41,7 +40,6 @@ class RegisterEventViewModel(
 
             val result = registerEventUseCase(
                 eventId = eventId,
-                userId = userId,
                 name = name,
                 date = date,
                 locationName = locationName,

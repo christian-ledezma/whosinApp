@@ -37,7 +37,6 @@ fun RegisterEventScreen(
 
     // Campos automáticos
     val eventId = remember { UUID.randomUUID().toString() }
-    val userId = remember { "usuario_demo" } // si tienes auth, reemplázalo por el user real
     val createdAt = remember { Timestamp.now() }
     val totalCheckedIn = 0
     val guardModeEnabled = true
@@ -167,7 +166,6 @@ fun RegisterEventScreen(
 
                     viewModel.registerEvent(
                         eventId = eventId,
-                        userId = userId,
                         name = name,
                         date = eventDate, // 👈 ahora se envía correctamente
                         locationName = locationName,

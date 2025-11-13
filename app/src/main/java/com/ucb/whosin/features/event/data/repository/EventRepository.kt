@@ -12,7 +12,6 @@ class EventRepository(
 
     override suspend fun registerEvent(
         eventId: String,
-        userId: String,
         name: String,
         date: Timestamp,
         locationName: String,
@@ -25,7 +24,6 @@ class EventRepository(
     ): EventResult {
         val event = EventModel(
             eventId = eventId,
-            userId = userId,
             name = name,
             date = date,
             locationName = locationName,

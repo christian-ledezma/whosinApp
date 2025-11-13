@@ -8,7 +8,6 @@ interface IEventRepository {
 
     suspend fun registerEvent(
         eventId: String,
-        userId: String,
         name: String,
         date: Timestamp,
         locationName: String,

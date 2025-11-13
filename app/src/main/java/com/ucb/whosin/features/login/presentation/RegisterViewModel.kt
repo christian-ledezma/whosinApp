@@ -3,6 +3,7 @@ package com.ucb.whosin.features.login.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucb.whosin.features.login.domain.model.AuthResult
+import com.ucb.whosin.features.login.domain.repository.AuthRepository
 import com.ucb.whosin.features.login.domain.usecase.RegisterUserUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,8 @@ data class RegisterUiState(
 )
 
 class RegisterViewModel(
-    private val registerUserUseCase: RegisterUserUseCase
+    private val registerUserUseCase: RegisterUserUseCase,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
@@ -28,6 +30,10 @@ class RegisterViewModel(
 
             when (val result = registerUserUseCase(email, password)) {
                 is AuthResult.Success -> {
+                    authRepository.saveSession(
+                        result.user.uid,
+                        result.user.email
+                    )
                     _uiState.value = RegisterUiState(isSuccess = true)
                 }
                 is AuthResult.Error -> {
