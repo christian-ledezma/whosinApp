@@ -49,11 +49,11 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Guest.route,
+        startDestination = Screen.Login.route,
         modifier = modifier
     ) {
         // Pantallas de autenticación (sin drawer)
-        composable(Screen.Login.route) {
+        composable(Screen.Guest.route) {
             LoginScreen(
                 onLoginSuccess = {
                     // Navegar al Home y limpiar el back stack
