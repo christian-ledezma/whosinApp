@@ -1,17 +1,28 @@
 package com.ucb.whosin.features.event.data.datasource
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
 import kotlinx.coroutines.tasks.await
 
 class FirebaseEventDataSource(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val firebaseAuth: FirebaseAuth
 ) {
 
     suspend fun register(event: EventModel): EventResult {
         return try {
+
+            val currentUser = firebaseAuth.currentUser
+            if (currentUser == null) {
+                Log.e("FirebaseEvent", "❌ No hay usuario logueado.")
+                return EventResult.Error("No hay usuario autenticado")
+            }
+
+            val userId = currentUser.uid
+
             Log.d("FirebaseEvent", "🔹 Iniciando registro de evento: ${event.name}")
 
             // Referencia a la colección "events"
@@ -23,7 +34,7 @@ class FirebaseEventDataSource(
             // Datos a guardar
             val eventData = hashMapOf(
                 "eventId" to eventId,
-                "userId" to event.userId,
+                "userId" to userId,
                 "name" to event.name,
                 "date" to event.date,
                 "locationName" to event.locationName,
@@ -39,7 +50,7 @@ class FirebaseEventDataSource(
             eventsRef.document(eventId).set(eventData).await()
             Log.d("FirebaseEvent", "✅ Evento guardado correctamente en Firestore (ID: $eventId)")
 
-            EventResult.Success(event.copy(eventId = eventId))
+            EventResult.Success(event.copy(eventId = eventId, userId = userId))
 
         } catch (e: Exception) {
             Log.e("FirebaseEvent", "❌ Error al registrar evento", e)
@@ -47,5 +58,3 @@ class FirebaseEventDataSource(
         }
     }
 }
-
-//private val firebaseAuth: FirebaseAuth,
