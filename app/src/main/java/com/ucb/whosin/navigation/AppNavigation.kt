@@ -6,16 +6,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.ucb.whosin.features.Guest.presentation.EventSelectorScreen
 import com.ucb.whosin.features.Guest.presentation.GuestListScreen
 import com.ucb.whosin.features.login.presentation.HomeScreen
 import com.ucb.whosin.features.login.presentation.LoginScreen
 import com.ucb.whosin.features.login.presentation.RegisterScreen
-
 import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
-
 import com.ucb.whosin.ui.guard.GuardScreen
 
 @Composable
@@ -32,7 +33,6 @@ fun AppNavigation(
             when (command) {
                 is NavigationViewModel.NavigationCommand.NavigateTo -> {
                     navController.navigate(command.route) {
-                        // Configuración del back stack según sea necesario
                         when (command.options) {
                             NavigationOptions.CLEAR_BACK_STACK -> {
                                 popUpTo(0) { inclusive = true }
@@ -40,9 +40,7 @@ fun AppNavigation(
                             NavigationOptions.REPLACE_HOME -> {
                                 popUpTo(Screen.Home.route) { inclusive = true }
                             }
-                            else -> {
-
-                            }
+                            else -> {}
                         }
                     }
                 }
@@ -58,11 +56,9 @@ fun AppNavigation(
         startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route,
         modifier = modifier
     ) {
-        // Pantallas de autenticación (sin drawer)
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    // Navegar al Home y limpiar el back stack
                     navigationViewModel.navigateTo(
                         Screen.Home.route,
                         NavigationOptions.CLEAR_BACK_STACK
@@ -77,7 +73,6 @@ fun AppNavigation(
         composable(Screen.Register.route) {
             RegisterScreen(
                 onRegisterSuccess = {
-                    // Navegar al login después de registrarse
                     navController.navigate(Screen.Login.route) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
@@ -95,11 +90,26 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Guest.route) {
-            GuestListScreen()
+        composable(Screen.Guard.route) {
+            GuardScreen()
         }
 
+        // Pantalla para seleccionar evento
+        composable(Screen.Guest.route) {
+            EventSelectorScreen(
+                onEventSelected = { eventId ->
+                    navController.navigate("guest/$eventId")
+                }
+            )
+        }
 
+        // Pantalla de invitados con eventId
+        composable(
+            route = "guest/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
+            GuestListScreen()
+        }
 
         composable(Screen.Event.route) {
             RegisterEventScreen()

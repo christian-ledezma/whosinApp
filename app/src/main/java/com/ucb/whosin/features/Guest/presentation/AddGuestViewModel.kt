@@ -1,7 +1,9 @@
 package com.ucb.whosin.features.Guest.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.Guest.domain.model.Guest
 import com.ucb.whosin.features.Guest.domain.model.GuestResult
 import com.ucb.whosin.features.Guest.domain.usecase.AddGuestUseCase
@@ -17,14 +19,16 @@ data class AddGuestUiState(
 )
 
 class AddGuestViewModel(
-    private val addGuestUseCase: AddGuestUseCase
+    private val addGuestUseCase: AddGuestUseCase,
+    private val firebaseAuth: FirebaseAuth,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddGuestUiState())
     val uiState: StateFlow<AddGuestUiState> = _uiState.asStateFlow()
 
-    // Hardcoded eventId para testing
-    private val currentEventId = "test-event-123"
+    // Obtener eventId desde la navegación, o usar el hardcoded para testing
+    private val eventId: String = savedStateHandle.get<String>("eventId") ?: "test-event-123"
 
     fun addGuest(
         name: String,
@@ -32,6 +36,13 @@ class AddGuestViewModel(
         inviteStatus: String,
         note: String?
     ) {
+        if (firebaseAuth.currentUser == null) {
+            _uiState.value = AddGuestUiState(
+                errorMessage = "No hay usuario autenticado"
+            )
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = AddGuestUiState(isLoading = true)
 
@@ -48,7 +59,7 @@ class AddGuestViewModel(
                 note = note
             )
 
-            when (val result = addGuestUseCase(currentEventId, guest)) {
+            when (val result = addGuestUseCase(eventId, guest)) {
                 is GuestResult.Success -> {
                     _uiState.value = AddGuestUiState(isSuccess = true)
                 }
