@@ -10,7 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.ucb.whosin.features.event.presentation.EventSelectorScreen
+import com.ucb.whosin.features.Guest.presentation.EventSelectorScreen
 import com.ucb.whosin.features.Guest.presentation.GuestListScreen
 import com.ucb.whosin.features.login.presentation.HomeScreen
 import com.ucb.whosin.features.login.presentation.LoginScreen

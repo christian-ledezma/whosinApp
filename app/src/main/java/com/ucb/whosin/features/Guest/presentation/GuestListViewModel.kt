@@ -1,4 +1,4 @@
-package com.ucb.whosin.features.event.presentation
+package com.ucb.whosin.features.Guest.presentation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
