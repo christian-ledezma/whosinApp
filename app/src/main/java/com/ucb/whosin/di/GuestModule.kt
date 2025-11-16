@@ -8,7 +8,7 @@ import com.ucb.whosin.features.Guest.domain.repository.IGuestRepository
 import com.ucb.whosin.features.Guest.domain.usecase.AddGuestUseCase
 import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
 import com.ucb.whosin.features.Guest.presentation.AddGuestViewModel
-import com.ucb.whosin.features.Guest.presentation.GuestListViewModel
+import com.ucb.whosin.features.event.presentation.GuestListViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
