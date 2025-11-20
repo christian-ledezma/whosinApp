@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.ucb.whosin.features.Guard.data.model.Guest
+import com.ucb.whosin.features.Guest.domain.model.Guest
 import com.ucb.whosin.features.Guest.domain.model.GuestResult
 import com.ucb.whosin.features.Guest.domain.usecase.AddGuestUseCase
 import com.ucb.whosin.features.event.domain.model.EventModel

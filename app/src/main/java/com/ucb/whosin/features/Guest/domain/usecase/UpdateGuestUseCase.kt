@@ -1,6 +1,6 @@
 package com.ucb.whosin.features.Guest.domain.usecase
 
-import com.ucb.whosin.features.Guard.data.model.Guest
+import com.ucb.whosin.features.Guest.domain.model.Guest
 import com.ucb.whosin.features.Guest.domain.model.GuestResult
 import com.ucb.whosin.features.Guest.domain.repository.IGuestRepository
 
