@@ -10,6 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.ucb.whosin.features.Guest.presentation.AcceptInvitationScreen
 import com.ucb.whosin.features.Guest.presentation.EventSelectorScreen
 import com.ucb.whosin.features.Guest.presentation.GuestListScreen
 import com.ucb.whosin.features.login.presentation.HomeScreen
@@ -94,7 +95,7 @@ fun AppNavigation(
             GuardScreen()
         }
 
-        // Pantalla para seleccionar evento
+        // Pantalla para seleccionar evento owner
         composable(Screen.Guest.route) {
             EventSelectorScreen(
                 onEventSelected = { eventId ->
@@ -117,6 +118,15 @@ fun AppNavigation(
 
         composable(Screen.Staff.route) {
             // StaffScreen()
+        }
+
+        // Pantalla para aceptar invitación
+        composable(Screen.AcceptInvitation.route) {
+            AcceptInvitationScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

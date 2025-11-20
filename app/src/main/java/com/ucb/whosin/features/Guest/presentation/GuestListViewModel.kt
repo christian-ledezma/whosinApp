@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.Guest.domain.model.Guest
 import com.ucb.whosin.features.Guest.domain.model.GuestResult
+import com.ucb.whosin.features.Guest.domain.usecase.DeleteGuestUseCase
 import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
+import com.ucb.whosin.features.Guest.domain.usecase.UpdateGuestUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,11 +20,15 @@ data class GuestListUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val searchQuery: String = "",
-    val isAuthenticated: Boolean = false
+    val isAuthenticated: Boolean = false,
+    val updateSuccess: Boolean = false,
+    val deleteSuccess: Boolean = false
 )
 
 class GuestListViewModel(
     private val getGuestsUseCase: GetGuestsUseCase,
+    private val updateGuestUseCase: UpdateGuestUseCase,
+    private val deleteGuestUseCase: DeleteGuestUseCase,
     private val firebaseAuth: FirebaseAuth,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -81,6 +87,85 @@ class GuestListViewModel(
                 else -> {
                     _uiState.value = _uiState.value.copy(
                         errorMessage = "Error inesperado",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateGuestCompanions(guestId: String, newCompanions: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null,
+                updateSuccess = false
+            )
+
+            // Buscar el invitado actual
+            val currentGuest = _uiState.value.guests.find { it.guestId == guestId }
+
+            if (currentGuest == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "No se encontró el invitado",
+                    isLoading = false
+                )
+                return@launch
+            }
+
+            // Crear una copia actualizada
+            val updatedGuest = currentGuest.copy(
+                plusOnesAllowed = newCompanions,
+                groupSize = newCompanions + 1
+            )
+
+            when (val result = updateGuestUseCase(eventId, guestId, updatedGuest)) {
+                is GuestResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        updateSuccess = true,
+                        isLoading = false
+                    )
+                }
+                is GuestResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = result.message,
+                        isLoading = false
+                    )
+                }
+                else -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Error inesperado al actualizar",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun deleteGuest(guestId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null,
+                deleteSuccess = false
+            )
+
+            when (val result = deleteGuestUseCase(eventId, guestId)) {
+                is GuestResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        deleteSuccess = true,
+                        isLoading = false
+                    )
+                }
+                is GuestResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = result.message,
+                        isLoading = false
+                    )
+                }
+                else -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Error inesperado al eliminar",
                         isLoading = false
                     )
                 }

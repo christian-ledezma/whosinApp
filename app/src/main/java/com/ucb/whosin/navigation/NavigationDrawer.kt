@@ -2,10 +2,12 @@ package com.ucb.whosin.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -37,6 +39,13 @@ sealed class NavigationDrawer(
         route = Screen.Guest.route
     )
 
+    object AcceptInvitation : NavigationDrawer(
+        label = "Aceptar Invitación",
+        selectedIcon = Icons.Filled.CheckCircle,
+        unselectedIcon = Icons.Outlined.CheckCircle,
+        route = Screen.AcceptInvitation.route
+    )
+
     object Guard : NavigationDrawer(
         label = "Guardia",
         selectedIcon = Icons.Filled.Person,
@@ -56,6 +65,7 @@ sealed class NavigationDrawer(
             Home,
             Events,
             Guests,
+            AcceptInvitation,
             Guard,
             Staff
         )
