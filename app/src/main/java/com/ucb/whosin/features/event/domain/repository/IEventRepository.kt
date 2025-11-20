@@ -18,4 +18,6 @@ interface IEventRepository {
         totalCheckedIn: Int,
         totalInvited: Int
                              ): EventResult
+
+    suspend fun getEventById(eventId: String): EventResult
 }

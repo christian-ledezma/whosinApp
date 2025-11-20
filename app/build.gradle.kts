@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.material3)
     //implementation(libs.firebase.database)
     //implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
@@ -88,6 +89,7 @@ dependencies {
     implementation(libs.coil.network)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.sentry)
+    implementation(libs.androidx.material.icons.extended)
 
     //local bundle room
     implementation(libs.bundles.local)

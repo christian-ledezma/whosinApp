@@ -11,6 +11,20 @@ class FirebaseEventDataSource(
     private val firestore: FirebaseFirestore,
     private val firebaseAuth: FirebaseAuth
 ) {
+    suspend fun getEventById(eventId: String): EventResult {
+        return try {
+            val doc = firestore.collection("events").document(eventId).get().await()
+            if (doc.exists()) {
+                val event = doc.toObject(EventModel::class.java)?.copy(eventId = doc.id)
+                if (event != null) EventResult.Success(event)
+                else EventResult.Error("Error al mapear el evento")
+            } else {
+                EventResult.Error("Evento no encontrado")
+            }
+        } catch (e: Exception) {
+            EventResult.Error(e.message ?: "Error desconocido")
+        }
+    }
 
     suspend fun register(event: EventModel): EventResult {
         return try {
