@@ -76,4 +76,7 @@ class AddGuestViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
+    fun clearSuccess() {
+        _uiState.value = _uiState.value.copy(isSuccess = false)
+    }
 }

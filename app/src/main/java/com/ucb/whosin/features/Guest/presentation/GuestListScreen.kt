@@ -50,6 +50,7 @@ fun GuestListScreen(
                 delay(500)
                 listViewModel.loadGuests()
                 showAddDialog = false
+                addViewModel.clearSuccess()
             }
         }
     }

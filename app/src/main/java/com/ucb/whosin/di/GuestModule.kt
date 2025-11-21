@@ -12,6 +12,8 @@ import com.ucb.whosin.features.Guest.domain.usecase.UpdateGuestUseCase
 import com.ucb.whosin.features.Guest.presentation.AcceptInvitationViewModel
 import com.ucb.whosin.features.Guest.presentation.AddGuestViewModel
 import com.ucb.whosin.features.Guest.presentation.GuestListViewModel
+import com.ucb.whosin.features.event.data.repository.EventRepository
+import com.ucb.whosin.features.event.domain.repository.IEventRepository
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -21,9 +23,10 @@ val guestModule = module {
 
     // Repository
     single<IGuestRepository> { GuestRepository(get()) }
+    single<IEventRepository> { EventRepository(get()) }
 
     // UseCases
-    factory { AddGuestUseCase(get()) }
+    factory { AddGuestUseCase(get(),get()) }
     factory { GetGuestsUseCase(get()) }
     factory { UpdateGuestUseCase(get()) }
     factory { DeleteGuestUseCase(get()) }
