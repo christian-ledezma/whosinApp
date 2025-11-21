@@ -19,6 +19,7 @@ import com.ucb.whosin.features.login.presentation.RegisterScreen
 import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.ui.guard.GuardScreen
+//import com.ucb.whosin.features.QrScanner.ui.QrScannerScreen
 
 @Composable
 fun AppNavigation(
@@ -95,7 +96,7 @@ fun AppNavigation(
             route = Screen.Guard.route,
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) {
-            GuardScreen()
+            GuardScreen(navController)
         }
 
         // Pantalla "Mis Eventos"
@@ -153,5 +154,8 @@ fun AppNavigation(
                 }
             )
         }
+
+
     }
+
 }

@@ -24,7 +24,7 @@ class GuardRepositoryFirebase(private val firestore: FirebaseFirestore) : GuardR
                     return@addSnapshotListener
                 }
                 if (snapshot != null) {
-                    // Mapeo manual para incluir el ID del documento en el objeto Guest
+
                     val guests = snapshot.documents.mapNotNull { doc ->
                         doc.toObject(Guest::class.java)?.copy(guestId = doc.id)
                     }

@@ -11,4 +11,5 @@ sealed class Screen (val route: String) {
     object Guest : Screen("guest")
     object Event : Screen("event")
     object AcceptInvitation : Screen("accept_invitation")
+    object QrScanner : Screen("qr_scanner")
 }

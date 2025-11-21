@@ -6,29 +6,52 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.ucb.whosin.navigation.Screen
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GuardScreen(viewModel: GuardViewModel = koinViewModel()) {
+fun GuardScreen(navController: NavController, viewModel: GuardViewModel = koinViewModel()) {
     val filteredGuests by viewModel.filteredGuests.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val stats by viewModel.stats.collectAsState()
 
+    val qrCodeResult = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<String>("qr_code_result")
+
+    LaunchedEffect(qrCodeResult) {
+        if (qrCodeResult != null) {
+            viewModel.checkIn(qrCodeResult)
+            navController.currentBackStackEntry?.savedStateHandle?.remove<String>("qr_code_result")
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Modo Guardia") })
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate(Screen.QrScanner.route) }) {
+                Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan QR Code")
+            }
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {

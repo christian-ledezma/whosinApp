@@ -105,4 +105,9 @@ dependencies {
     //google fonts material
     implementation(libs.androidx.ui.text.google.fonts)
 
+    // CameraX
+    implementation(libs.bundles.camerax)
+    implementation(libs.google.mlkit.barcode.scanning)
+    implementation("com.google.guava:guava:33.0.0-android")
+
 }
