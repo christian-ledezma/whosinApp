@@ -7,6 +7,7 @@ import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.data.repository.EventRepository
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
 import com.ucb.whosin.features.event.domain.usecase.FindByNameUseCase
+import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
 import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
 import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -56,6 +57,7 @@ val appModule = module {
     // Use Cases
     single { FindByNameUseCase(get()) }
     single { RegisterEventUseCase(get()) }
+    single { GetEventByIdUseCase(get()) }
 
     // ViewModels
     viewModel { RegisterEventViewModel(get()) }

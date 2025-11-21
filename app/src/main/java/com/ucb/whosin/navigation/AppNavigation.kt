@@ -10,6 +10,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.ucb.whosin.features.Guest.presentation.AcceptInvitationScreen
 import com.ucb.whosin.features.Guest.presentation.EventSelectorScreen
 import com.ucb.whosin.features.Guest.presentation.GuestListScreen
 import com.ucb.whosin.features.login.presentation.HomeScreen
@@ -90,48 +91,15 @@ fun AppNavigation(
             )
         }
 
-        composable(
-            route = Screen.Guard.route,
-            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
+        composable(Screen.Guard.route) {
             GuardScreen()
         }
 
-        // Pantalla "Mis Eventos"
-        composable(Screen.Event.route) {
+        // Pantalla para seleccionar evento owner
+        composable(Screen.Guest.route) {
             EventSelectorScreen(
                 onEventSelected = { eventId ->
-                    // Al hacer clic en la tarjeta, vas a la lista de invitados
                     navController.navigate("guest/$eventId")
-                },
-                onManageEventClicked = { eventId ->
-                    // Al hacer clic en "Modo Guardia", navegas a la pantalla del guardia
-                    navController.navigate(Screen.Guard.createRoute(eventId))
-                },
-                onNavigateToCreateEvent = {
-                    // Al hacer clic en el FAB, vas a la pantalla de creación
-                    navController.navigate("create_event")
-                }
-            )
-        }
-
-        // Pantalla para crear un evento
-        composable("create_event") {
-            RegisterEventScreen()
-        }
-        
-        // TODO: La ruta "Guest" también lleva a la lista de eventos del creador.
-        // Esto debería ser una pantalla diferente para un invitado real.
-        composable(Screen.Guest.route) {
-             EventSelectorScreen(
-                onEventSelected = { eventId ->
-                    navController.navigate("guest/$eventId")
-                },
-                onManageEventClicked = { eventId ->
-                    navController.navigate(Screen.Guard.createRoute(eventId))
-                },
-                onNavigateToCreateEvent = {
-                    navController.navigate("create_event")
                 }
             )
         }
@@ -144,8 +112,21 @@ fun AppNavigation(
             GuestListScreen()
         }
 
+        composable(Screen.Event.route) {
+            RegisterEventScreen()
+        }
+
         composable(Screen.Staff.route) {
             // StaffScreen()
+        }
+
+        // Pantalla para aceptar invitación
+        composable(Screen.AcceptInvitation.route) {
+            AcceptInvitationScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

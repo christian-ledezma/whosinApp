@@ -43,4 +43,8 @@ class EventRepository(
         // Se puede dejar vacío o implementarlo en tu DataSource luego.
         return EventResult.Error("Función findByName() no implementada aún")
     }
+
+    override suspend fun getEventById(eventId: String): EventResult {
+        return dataSource.getEventById(eventId)
+    }
 }

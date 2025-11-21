@@ -2,10 +2,12 @@ package com.ucb.whosin.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
@@ -27,7 +29,7 @@ sealed class NavigationDrawer(
         label = "Eventos",
         selectedIcon = Icons.Filled.DateRange,
         unselectedIcon = Icons.Outlined.DateRange,
-        route = Screen.Event.route // <- Esta es la ruta que corregimos
+        route = Screen.Event.route
     )
 
     object Guests : NavigationDrawer(
@@ -35,6 +37,13 @@ sealed class NavigationDrawer(
         selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person,
         route = Screen.Guest.route
+    )
+
+    object AcceptInvitation : NavigationDrawer(
+        label = "Aceptar Invitación",
+        selectedIcon = Icons.Filled.CheckCircle,
+        unselectedIcon = Icons.Outlined.CheckCircle,
+        route = Screen.AcceptInvitation.route
     )
 
     object Guard : NavigationDrawer(
@@ -56,9 +65,9 @@ sealed class NavigationDrawer(
             Home,
             Events,
             Guests,
-            // Ocultamos Guardia y Staff del menú principal por ahora
-            // Guard,
-            // Staff
+            AcceptInvitation,
+            Guard,
+            Staff
         )
     }
 }

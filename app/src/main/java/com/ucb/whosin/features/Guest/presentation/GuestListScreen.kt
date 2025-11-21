@@ -6,6 +6,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +35,9 @@ fun GuestListScreen(
     val scope = rememberCoroutineScope()
 
     var showAddDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var selectedGuest by remember { mutableStateOf<Guest?>(null) }
 
     // Recargar lista cuando se agrega un invitado exitosamente
     LaunchedEffect(addUiState.isSuccess) {
@@ -44,6 +50,38 @@ fun GuestListScreen(
                 delay(500)
                 listViewModel.loadGuests()
                 showAddDialog = false
+            }
+        }
+    }
+
+    // Recargar lista cuando se edita exitosamente
+    LaunchedEffect(listUiState.updateSuccess) {
+        if (listUiState.updateSuccess) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "¡Invitado actualizado exitosamente!",
+                    duration = SnackbarDuration.Short
+                )
+                delay(500)
+                listViewModel.loadGuests()
+                showEditDialog = false
+                selectedGuest = null
+            }
+        }
+    }
+
+    // Recargar lista cuando se elimina exitosamente
+    LaunchedEffect(listUiState.deleteSuccess) {
+        if (listUiState.deleteSuccess) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = "Invitado eliminado",
+                    duration = SnackbarDuration.Short
+                )
+                delay(500)
+                listViewModel.loadGuests()
+                showDeleteDialog = false
+                selectedGuest = null
             }
         }
     }
@@ -174,7 +212,17 @@ fun GuestListScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(listUiState.filteredGuests) { guest ->
-                        GuestCard(guest = guest)
+                        GuestCardWithActions(
+                            guest = guest,
+                            onEdit = {
+                                selectedGuest = guest
+                                showEditDialog = true
+                            },
+                            onDelete = {
+                                selectedGuest = guest
+                                showDeleteDialog = true
+                            }
+                        )
                     }
                 }
             }
@@ -187,6 +235,73 @@ fun GuestListScreen(
                 onDismiss = { showAddDialog = false },
                 onConfirm = { name, plusOnes, status, note ->
                     addViewModel.addGuest(name, plusOnes, status, note)
+                }
+            )
+        }
+
+        // Diálogo para editar invitado
+        if (showEditDialog && selectedGuest != null) {
+            EditGuestDialog(
+                guest = selectedGuest!!,
+                isLoading = listUiState.isLoading,
+                onDismiss = {
+                    showEditDialog = false
+                    selectedGuest = null
+                },
+                onConfirm = { companions ->
+                    listViewModel.updateGuestCompanions(selectedGuest!!.guestId, companions)
+                }
+            )
+        }
+
+        // Diálogo para confirmar eliminación
+        if (showDeleteDialog && selectedGuest != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    selectedGuest = null
+                },
+                title = {
+                    Text(
+                        "Eliminar Invitado",
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFD32F2F)
+                    )
+                },
+                text = {
+                    Text("¿Estás seguro de que deseas eliminar a ${selectedGuest!!.name}? Esta acción no se puede deshacer.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            listViewModel.deleteGuest(selectedGuest!!.guestId)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFD32F2F)
+                        ),
+                        enabled = !listUiState.isLoading
+                    ) {
+                        if (listUiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Eliminar")
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            selectedGuest = null
+                        },
+                        enabled = !listUiState.isLoading
+                    ) {
+                        Text("Cancelar", color = Color(0xFF5E6FA3))
+                    }
                 }
             )
         }
@@ -229,7 +344,11 @@ fun StatCard(
 }
 
 @Composable
-fun GuestCard(guest: Guest) {
+fun GuestCardWithActions(
+    guest: Guest,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -330,6 +449,36 @@ fun GuestCard(guest: Guest) {
                     }
                 }
             }
+
+            // Botones de acción
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = Color(0xFF5E6FA3),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = Color(0xFFD32F2F),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
         }
     }
 }
@@ -351,6 +500,128 @@ fun StatusChip(
             fontWeight = FontWeight.SemiBold
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditGuestDialog(
+    guest: Guest,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: (Int) -> Unit
+) {
+    var companions by remember { mutableStateOf(guest.plusOnesAllowed) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Editar Invitado",
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF5E6FA3)
+            )
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Invitado: ${guest.name}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Ajustar acompañantes:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF666666)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { if (companions > 0) companions-- },
+                        enabled = companions > 0 && !isLoading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Remove,
+                            contentDescription = "Reducir",
+                            tint = Color(0xFF5E6FA3)
+                        )
+                    }
+
+                    Surface(
+                        modifier = Modifier.size(60.dp),
+                        shape = RoundedCornerShape(30.dp),
+                        color = Color(0xFF5E6FA3).copy(alpha = 0.1f)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = companions.toString(),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF5E6FA3)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = { companions++ },
+                        enabled = !isLoading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Aumentar",
+                            tint = Color(0xFF5E6FA3)
+                        )
+                    }
+                }
+
+                Text(
+                    text = if (companions == 0) "Sin acompañantes"
+                    else if (companions == 1) "1 acompañante"
+                    else "$companions acompañantes",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(companions) },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF5E6FA3)
+                ),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Guardar")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isLoading
+            ) {
+                Text("Cancelar", color = Color(0xFF5E6FA3))
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

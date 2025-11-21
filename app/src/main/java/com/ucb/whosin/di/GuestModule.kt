@@ -6,7 +6,10 @@ import com.ucb.whosin.features.Guest.data.datasource.FirebaseGuestDataSource
 import com.ucb.whosin.features.Guest.data.repository.GuestRepository
 import com.ucb.whosin.features.Guest.domain.repository.IGuestRepository
 import com.ucb.whosin.features.Guest.domain.usecase.AddGuestUseCase
+import com.ucb.whosin.features.Guest.domain.usecase.DeleteGuestUseCase
 import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
+import com.ucb.whosin.features.Guest.domain.usecase.UpdateGuestUseCase
+import com.ucb.whosin.features.Guest.presentation.AcceptInvitationViewModel
 import com.ucb.whosin.features.Guest.presentation.AddGuestViewModel
 import com.ucb.whosin.features.Guest.presentation.GuestListViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -22,8 +25,11 @@ val guestModule = module {
     // UseCases
     factory { AddGuestUseCase(get()) }
     factory { GetGuestsUseCase(get()) }
+    factory { UpdateGuestUseCase(get()) }
+    factory { DeleteGuestUseCase(get()) }
 
     // ViewModels - Ahora reciben FirebaseAuth y SavedStateHandle
-    viewModel { GuestListViewModel(get(), get<FirebaseAuth>(), get()) }
+    viewModel { GuestListViewModel(get(), get(), get(), get<FirebaseAuth>(), get()) }
     viewModel { AddGuestViewModel(get(), get<FirebaseAuth>(), get()) }
+    viewModel { AcceptInvitationViewModel(get(), get(), get<FirebaseAuth>()) }
 }
