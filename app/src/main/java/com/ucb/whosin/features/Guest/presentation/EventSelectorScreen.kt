@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,7 +32,9 @@ data class EventSummary(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventSelectorScreen(
-    onEventSelected: (String) -> Unit
+    onEventSelected: (String) -> Unit,
+    onManageEventClicked: (String) -> Unit,
+    onNavigateToCreateEvent: () -> Unit
 ) {
     var events by remember { mutableStateOf<List<EventSummary>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -77,12 +81,20 @@ fun EventSelectorScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Selecciona un Evento") },
+                title = { Text("Mis Eventos") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF5E6FA3),
                     titleContentColor = Color.White
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToCreateEvent,
+                containerColor = Color(0xFF5E6FA3)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Crear Evento", tint = Color.White)
+            }
         }
     ) { paddingValues ->
         Box(
@@ -108,7 +120,7 @@ fun EventSelectorScreen(
                 }
                 events.isEmpty() -> {
                     Text(
-                        text = "No tienes eventos creados.\nCrea uno primero desde la sección Eventos.",
+                        text = "No tienes eventos creados.\nUsa el botón ‘+’ para crear uno.",
                         modifier = Modifier
                             .align(Alignment.Center)
                             .padding(16.dp),
@@ -125,7 +137,8 @@ fun EventSelectorScreen(
                         items(events) { event ->
                             EventCard(
                                 event = event,
-                                onClick = { onEventSelected(event.eventId) }
+                                onCardClick = { onEventSelected(event.eventId) },
+                                onManageClick = { onManageEventClicked(event.eventId) }
                             )
                         }
                     }
@@ -138,7 +151,8 @@ fun EventSelectorScreen(
 @Composable
 fun EventCard(
     event: EventSummary,
-    onClick: () -> Unit
+    onCardClick: () -> Unit,
+    onManageClick: () -> Unit
 ) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val dateStr = dateFormatter.format(event.date.toDate())
@@ -146,7 +160,7 @@ fun EventCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = onCardClick),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF5F5F5)
         ),
@@ -196,6 +210,16 @@ fun EventCard(
                         fontWeight = FontWeight.SemiBold
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onManageClick,
+                modifier = Modifier.align(Alignment.End),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E6FA3))
+            ) {
+                Text("Modo Guardia")
             }
         }
     }

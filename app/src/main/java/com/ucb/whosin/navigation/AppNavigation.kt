@@ -90,15 +90,48 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Guard.route) {
+        composable(
+            route = Screen.Guard.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
             GuardScreen()
         }
 
-        // Pantalla para seleccionar evento
-        composable(Screen.Guest.route) {
+        // Pantalla "Mis Eventos"
+        composable(Screen.Event.route) {
             EventSelectorScreen(
                 onEventSelected = { eventId ->
+                    // Al hacer clic en la tarjeta, vas a la lista de invitados
                     navController.navigate("guest/$eventId")
+                },
+                onManageEventClicked = { eventId ->
+                    // Al hacer clic en "Modo Guardia", navegas a la pantalla del guardia
+                    navController.navigate(Screen.Guard.createRoute(eventId))
+                },
+                onNavigateToCreateEvent = {
+                    // Al hacer clic en el FAB, vas a la pantalla de creación
+                    navController.navigate("create_event")
+                }
+            )
+        }
+
+        // Pantalla para crear un evento
+        composable("create_event") {
+            RegisterEventScreen()
+        }
+        
+        // TODO: La ruta "Guest" también lleva a la lista de eventos del creador.
+        // Esto debería ser una pantalla diferente para un invitado real.
+        composable(Screen.Guest.route) {
+             EventSelectorScreen(
+                onEventSelected = { eventId ->
+                    navController.navigate("guest/$eventId")
+                },
+                onManageEventClicked = { eventId ->
+                    navController.navigate(Screen.Guard.createRoute(eventId))
+                },
+                onNavigateToCreateEvent = {
+                    navController.navigate("create_event")
                 }
             )
         }
@@ -109,10 +142,6 @@ fun AppNavigation(
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) {
             GuestListScreen()
-        }
-
-        composable(Screen.Event.route) {
-            RegisterEventScreen()
         }
 
         composable(Screen.Staff.route) {

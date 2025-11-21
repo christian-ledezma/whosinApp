@@ -1,35 +1,71 @@
 package com.ucb.whosin.ui.guard
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.Guard.data.model.Guest
 import com.ucb.whosin.features.Guard.data.repository.GuardRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class GuardViewModel(private val guardRepository: GuardRepository) : ViewModel() {
+data class GuardStats(val checkedIn: Int = 0, val total: Int = 0)
 
+class GuardViewModel(
+    private val guardRepository: GuardRepository,
+    private val firebaseAuth: FirebaseAuth,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+
+    private val eventId: String = savedStateHandle.get<String>("eventId") ?: ""
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    // Flujo de datos original desde Firebase
     private val _guests = MutableStateFlow<List<Guest>>(emptyList())
-    val guests: StateFlow<List<Guest>> = _guests.asStateFlow()
 
-    // TODO: Replace with dynamic event ID
-    private val eventId = "your_event_id"
+    // Flujo de datos que combina la búsqueda y la lista original
+    val filteredGuests: StateFlow<List<Guest>> = combine(_guests, _searchQuery) { guests, query ->
+        if (query.isBlank()) {
+            guests
+        } else {
+            guests.filter { it.name.contains(query, ignoreCase = true) }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Flujo de datos para las estadísticas
+    val stats: StateFlow<GuardStats> = _guests.combine(filteredGuests) { allGuests, _ ->
+        GuardStats(
+            checkedIn = allGuests.count { it.checkedIn },
+            total = allGuests.size
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GuardStats())
 
     init {
-        viewModelScope.launch {
-            guardRepository.getGuests(eventId).collectLatest {
-                _guests.value = it
+        if (eventId.isNotEmpty()) {
+            viewModelScope.launch {
+                // El colector se mantiene vivo mientras el ViewModel está activo
+                guardRepository.getGuests(eventId).collect { guestsList ->
+                    _guests.value = guestsList
+                }
             }
         }
     }
 
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+    }
+
     fun checkIn(guestId: String) {
+        val guardId = firebaseAuth.currentUser?.uid ?: return
+
         viewModelScope.launch {
-            // TODO: Replace with dynamic guard ID
-            val guardId = "your_guard_id"
             guardRepository.checkInGuest(eventId, guestId, guardId)
         }
     }

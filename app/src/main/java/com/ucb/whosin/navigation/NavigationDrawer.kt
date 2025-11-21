@@ -27,7 +27,7 @@ sealed class NavigationDrawer(
         label = "Eventos",
         selectedIcon = Icons.Filled.DateRange,
         unselectedIcon = Icons.Outlined.DateRange,
-        route = Screen.Event.route
+        route = Screen.Event.route // <- Esta es la ruta que corregimos
     )
 
     object Guests : NavigationDrawer(
@@ -56,8 +56,9 @@ sealed class NavigationDrawer(
             Home,
             Events,
             Guests,
-            Guard,
-            Staff
+            // Ocultamos Guardia y Staff del menú principal por ahora
+            // Guard,
+            // Staff
         )
     }
 }
