@@ -33,12 +33,12 @@ fun RegisterEventScreen(
     var locationName by remember { mutableStateOf("") }
     var capacity by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("upcoming") }
-    var totalInvited by remember { mutableStateOf("0") }
 
     // Campos automáticos
     val eventId = remember { UUID.randomUUID().toString() }
     val createdAt = remember { Timestamp.now() }
     val totalCheckedIn = 0
+    val totalInvited = 0
     val guardModeEnabled = true
 
     // Éxito → mostrar snackbar y volver
@@ -138,16 +138,6 @@ fun RegisterEventScreen(
                 enabled = !uiState.isLoading
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TextField(
-                value = totalInvited,
-                onValueChange = { totalInvited = it },
-                label = { Text("Invitados totales") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !uiState.isLoading
-            )
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
@@ -162,7 +152,6 @@ fun RegisterEventScreen(
                     }
 
                     val capacityInt = capacity.toIntOrNull() ?: 0
-                    val totalInvitedInt = totalInvited.toIntOrNull() ?: 0
 
                     viewModel.registerEvent(
                         eventId = eventId,
@@ -174,7 +163,7 @@ fun RegisterEventScreen(
                         guardModeEnabled = guardModeEnabled,
                         createdAt = createdAt,
                         totalCheckedIn = totalCheckedIn,
-                        totalInvited = totalInvitedInt
+                        totalInvited = totalInvited
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
