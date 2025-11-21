@@ -131,7 +131,14 @@ fun AppNavigation(
 
         // Pantalla para crear un evento
         composable("create_event") {
-            RegisterEventScreen()
+            RegisterEventScreen(
+                onRegisterSuccess = {
+                    navController.popBackStack()
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         // Pantalla de invitados con eventId
