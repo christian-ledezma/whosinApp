@@ -24,7 +24,10 @@ class GuardRepositoryFirebase(private val firestore: FirebaseFirestore) : GuardR
                     return@addSnapshotListener
                 }
                 if (snapshot != null) {
-                    val guests = snapshot.toObjects(Guest::class.java)
+                    // Mapeo manual para incluir el ID del documento en el objeto Guest
+                    val guests = snapshot.documents.mapNotNull { doc ->
+                        doc.toObject(Guest::class.java)?.copy(guestId = doc.id)
+                    }
                     trySend(guests).isSuccess
                 }
             }
@@ -33,44 +36,13 @@ class GuardRepositoryFirebase(private val firestore: FirebaseFirestore) : GuardR
 
     override suspend fun checkInGuest(eventId: String, guestId: String, guardId: String) {
         firestore.collection("events").document(eventId)
-            .collection("guests").document(guestId)
+            .collection("guests").document(guestId) // <-- AHORA USAMOS EL ID CORRECTO
             .update(
                 mapOf(
-                    "checkedIn" to true,
+                    "checkedIn" to true, // <-- CAMPO BOOLEANO CORRECTO
                     "checkedInAt" to FieldValue.serverTimestamp(),
                     "checkedInBy" to guardId
                 )
             ).await()
     }
 }
-
-
-// Using a local implementation with hardcoded data for testing
-/*
-class GuardRepositoryImpl : GuardRepository {
-
-    private val guests = MutableStateFlow<List<Guest>>(listOf(
-        Guest(userId = "1", name = "John Doe", checkedIn = false),
-        Guest(userId = "2", name = "Jane Smith", checkedIn = true, checkedInAt = System.currentTimeMillis()),
-        Guest(userId = "3", name = "Peter Jones", checkedIn = false)
-    ))
-
-    override fun getGuests(eventId: String): Flow<List<Guest>> {
-        return guests.asStateFlow()
-    }
-
-    override suspend fun checkInGuest(eventId: String, guestId: String, guardId: String) {
-        val currentGuests = guests.value.toMutableList()
-        val guestIndex = currentGuests.indexOfFirst { it.userId == guestId }
-        if (guestIndex != -1) {
-            val updatedGuest = currentGuests[guestIndex].copy(
-                checkedIn = true,
-                checkedInAt = System.currentTimeMillis(),
-                checkedInBy = guardId
-            )
-            currentGuests[guestIndex] = updatedGuest
-            guests.value = currentGuests
-        }
-    }
-}
-*/

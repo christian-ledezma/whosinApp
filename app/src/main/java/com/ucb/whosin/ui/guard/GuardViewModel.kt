@@ -27,10 +27,8 @@ class GuardViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
-    // Flujo de datos original desde Firebase
     private val _guests = MutableStateFlow<List<Guest>>(emptyList())
 
-    // Flujo de datos que combina la búsqueda y la lista original
     val filteredGuests: StateFlow<List<Guest>> = combine(_guests, _searchQuery) { guests, query ->
         if (query.isBlank()) {
             guests
@@ -42,7 +40,7 @@ class GuardViewModel(
     // Flujo de datos para las estadísticas
     val stats: StateFlow<GuardStats> = _guests.combine(filteredGuests) { allGuests, _ ->
         GuardStats(
-            checkedIn = allGuests.count { it.checkedIn },
+            checkedIn = allGuests.count { it.checkedIn }, // <-- CORREGIDO: Contar por el campo booleano
             total = allGuests.size
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GuardStats())
@@ -50,7 +48,6 @@ class GuardViewModel(
     init {
         if (eventId.isNotEmpty()) {
             viewModelScope.launch {
-                // El colector se mantiene vivo mientras el ViewModel está activo
                 guardRepository.getGuests(eventId).collect { guestsList ->
                     _guests.value = guestsList
                 }

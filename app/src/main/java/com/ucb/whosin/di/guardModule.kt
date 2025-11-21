@@ -9,9 +9,8 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val guardModule = module {
-    // Repositorio que depende de Firestore
+
     single<GuardRepository> { GuardRepositoryFirebase(get<FirebaseFirestore>()) }
 
-    // ViewModel que depende del repositorio, FirebaseAuth y SavedStateHandle
     viewModel { GuardViewModel(get(), get<FirebaseAuth>(), get()) }
 }

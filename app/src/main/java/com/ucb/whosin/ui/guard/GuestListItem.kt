@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +27,8 @@ fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -35,18 +37,40 @@ fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(text = guest.name, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
+
+                // Lógica de estado corregida
+                val statusText: String
+                val statusColor: Color
+
+                if (guest.checkedIn) {
+                    statusText = "Checked In"
+                    statusColor = Color(0xFF34A853) // Verde
+                } else {
+                    statusText = (guest.inviteStatus ?: "Pending").replaceFirstChar { it.uppercase() }
+                    statusColor = Color.Gray
+                }
+
                 Text(
-                    text = if (guest.checkedIn) "Checked In" else "Pending",
-                    color = if (guest.checkedIn) Color.Green else Color.Gray,
-                    style = MaterialTheme.typography.bodySmall
+                    text = statusText,
+                    color = statusColor,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
-            if (!guest.checkedIn) {
-                Button(onClick = { guest.userId?.let { onCheckIn(it) } }) {
-                    Text(text = "Check-in")
+
+            // Usar el guestId (ID del documento) que ahora obtenemos del repositorio
+            guest.guestId?.let {
+                Button(
+                    onClick = { onCheckIn(it) },
+                    enabled = !guest.checkedIn, // El botón se deshabilita si ya se hizo check-in
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (guest.checkedIn) Color.LightGray else MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text(text = if (guest.checkedIn) "Hecho" else "Check-in")
                 }
             }
         }

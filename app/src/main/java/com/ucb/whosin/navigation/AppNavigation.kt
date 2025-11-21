@@ -91,17 +91,46 @@ fun AppNavigation(
             )
         }
 
-        composable(Screen.Guard.route) {
+        composable(
+            route = Screen.Guard.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
             GuardScreen()
         }
 
-        // Pantalla para seleccionar evento owner
+        // Pantalla "Mis Eventos"
+        composable(Screen.Event.route) {
+            EventSelectorScreen(
+                onEventSelected = { eventId ->
+                    navController.navigate("guest/$eventId")
+                },
+                onManageEventClicked = { eventId ->
+                    navController.navigate(Screen.Guard.createRoute(eventId))
+                },
+                onNavigateToCreateEvent = {
+                    navController.navigate("create_event")
+                }
+            )
+        }
+
+        // Ruta para que el invitado vea a qué evento puede unirse
         composable(Screen.Guest.route) {
             EventSelectorScreen(
                 onEventSelected = { eventId ->
                     navController.navigate("guest/$eventId")
+                },
+                onManageEventClicked = { eventId ->
+                    navController.navigate(Screen.Guard.createRoute(eventId))
+                },
+                onNavigateToCreateEvent = {
+                    navController.navigate("create_event")
                 }
             )
+        }
+
+        // Pantalla para crear un evento
+        composable("create_event") {
+            RegisterEventScreen()
         }
 
         // Pantalla de invitados con eventId
@@ -112,14 +141,10 @@ fun AppNavigation(
             GuestListScreen()
         }
 
-        composable(Screen.Event.route) {
-            RegisterEventScreen()
-        }
-
         composable(Screen.Staff.route) {
             // StaffScreen()
         }
-
+        
         // Pantalla para aceptar invitación
         composable(Screen.AcceptInvitation.route) {
             AcceptInvitationScreen(
