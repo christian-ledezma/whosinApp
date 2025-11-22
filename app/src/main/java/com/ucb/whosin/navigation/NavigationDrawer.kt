@@ -6,11 +6,13 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class NavigationDrawer(
@@ -60,6 +62,13 @@ sealed class NavigationDrawer(
         route = Screen.Staff.route
     )
 
+    object Profile : NavigationDrawer(
+        label = "Mi Perfil",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings,
+        route = Screen.Profile.route
+    )
+
     companion object {
         fun getAllItems() = listOf(
             Home,
@@ -67,7 +76,8 @@ sealed class NavigationDrawer(
             Guests,
             AcceptInvitation,
             Guard,
-            Staff
+            Staff,
+            Profile
         )
     }
 }

@@ -18,6 +18,7 @@ import com.ucb.whosin.features.login.presentation.LoginScreen
 import com.ucb.whosin.features.login.presentation.RegisterScreen
 import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
+import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.ui.guard.GuardScreen
 //import com.ucb.whosin.features.QrScanner.ui.QrScannerScreen
 
@@ -89,6 +90,14 @@ fun AppNavigation(
             HomeScreen(
                 navigationViewModel = navigationViewModel,
                 navController = navController
+            )
+        }
+
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
 
