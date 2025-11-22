@@ -1,4 +1,4 @@
-package com.ucb.whosin.ui.guard
+package com.ucb.whosin.features.Guard.data.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.ucb.whosin.ui.guard
+package com.ucb.whosin.features.Guard.data.presentation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -79,8 +79,8 @@ fun GuardScreen(navController: NavController, viewModel: GuardViewModel = koinVi
             }
 
             // --- Guest List ---
-            GuestList(guests = filteredGuests, onCheckIn = {
-                guestId -> viewModel.checkIn(guestId)
+            GuestList(guests = filteredGuests, onCheckIn = { guestId ->
+                viewModel.checkIn(guestId)
             })
         }
     }

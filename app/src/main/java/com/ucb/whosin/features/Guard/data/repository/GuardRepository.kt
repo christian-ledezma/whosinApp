@@ -35,14 +35,20 @@ class GuardRepositoryFirebase(private val firestore: FirebaseFirestore) : GuardR
     }
 
     override suspend fun checkInGuest(eventId: String, guestId: String, guardId: String) {
-        firestore.collection("events").document(eventId)
-            .collection("guests").document(guestId) // <-- AHORA USAMOS EL ID CORRECTO
-            .update(
-                mapOf(
-                    "checkedIn" to true, // <-- CAMPO BOOLEANO CORRECTO
-                    "checkedInAt" to FieldValue.serverTimestamp(),
-                    "checkedInBy" to guardId
-                )
-            ).await()
+        val eventRef = firestore.collection("events").document(eventId)
+        val guestRef = eventRef.collection("guests").document(guestId)
+
+        firestore.runBatch {
+            batch ->
+            // 1. Actualiza el estado del invitado
+            batch.update(guestRef, mapOf(
+                "checkedIn" to true,
+                "checkedInAt" to FieldValue.serverTimestamp(),
+                "checkedInBy" to guardId
+            ))
+
+            // 2. Incrementa el contador de check-ins en el evento
+            batch.update(eventRef, "totalCheckedIn", FieldValue.increment(1))
+        }.await()
     }
 }
