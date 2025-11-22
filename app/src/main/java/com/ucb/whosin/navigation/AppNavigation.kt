@@ -20,7 +20,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.ui.guard.GuardScreen
-//import com.ucb.whosin.features.QrScanner.ui.QrScannerScreen
+import com.ucb.whosin.features.qrscanner.ui.QrScannerScreen
 
 @Composable
 fun AppNavigation(
@@ -161,7 +161,7 @@ fun AppNavigation(
         composable(Screen.Staff.route) {
             // StaffScreen()
         }
-        
+
         // Pantalla para aceptar invitación
         composable(Screen.AcceptInvitation.route) {
             AcceptInvitationScreen(
@@ -171,7 +171,9 @@ fun AppNavigation(
             )
         }
 
-
+        composable(Screen.QrScanner.route) {
+            QrScannerScreen(navController)
+        }
     }
 
 }
