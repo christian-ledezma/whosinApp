@@ -6,9 +6,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.data.repository.EventRepository
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
+import com.ucb.whosin.features.event.domain.usecase.DeleteEventUseCase
 import com.ucb.whosin.features.event.domain.usecase.FindByNameUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
 import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
+import com.ucb.whosin.features.event.presentation.EventSelectorViewModel
 import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import com.ucb.whosin.features.login.data.AuthRepositoryImpl
@@ -58,7 +60,9 @@ val appModule = module {
     single { FindByNameUseCase(get()) }
     single { RegisterEventUseCase(get()) }
     single { GetEventByIdUseCase(get()) }
+    factory { DeleteEventUseCase(get()) }
 
     // ViewModels
     viewModel { RegisterEventViewModel(get()) }
+    viewModel { EventSelectorViewModel(get()) }
 }

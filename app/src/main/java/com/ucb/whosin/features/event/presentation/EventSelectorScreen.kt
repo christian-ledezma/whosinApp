@@ -1,5 +1,8 @@
-package com.ucb.whosin.features.Guest.presentation
+package com.ucb.whosin.features.event.presentation
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,10 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,6 +48,33 @@ fun EventSelectorScreen(
     val firestore = FirebaseFirestore.getInstance()
     val firebaseAuth = FirebaseAuth.getInstance()
 
+    var showDeleteDialog by remember { mutableStateOf<String?>(null) }
+    var lastDeletedEventId by remember { mutableStateOf<String?>(null) }
+
+    val viewModel: EventSelectorViewModel = koinViewModel()
+    val deleteResult by viewModel.deleteResult.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // 🔥 Cuando termina de eliminar
+    LaunchedEffect(deleteResult) {
+        deleteResult?.let { success ->
+            if (success) {
+                snackbarHostState.showSnackbar("Evento eliminado")
+
+                // ❗ Eliminar de la lista sin recargar la pantalla completa
+                lastDeletedEventId?.let { deletedId ->
+                    events = events.filter { it.eventId != deletedId }
+                    lastDeletedEventId = null
+                }
+
+            } else {
+                snackbarHostState.showSnackbar("Error al eliminar evento")
+            }
+            viewModel.clearDeleteStatus()
+        }
+    }
+
+    // 🔥 Cargar eventos al abrir pantalla
     LaunchedEffect(Unit) {
         try {
             val currentUser = firebaseAuth.currentUser
@@ -70,9 +98,7 @@ fun EventSelectorScreen(
                         locationName = doc.getString("locationName") ?: "Sin ubicación",
                         totalInvited = doc.getLong("totalInvited")?.toInt() ?: 0
                     )
-                } catch (e: Exception) {
-                    null
-                }
+                } catch (e: Exception) { null }
             }
 
             isLoading = false
@@ -92,6 +118,7 @@ fun EventSelectorScreen(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToCreateEvent,
@@ -142,7 +169,11 @@ fun EventSelectorScreen(
                             EventCard(
                                 event = event,
                                 onCardClick = { onEventSelected(event.eventId) },
-                                onManageClick = { onManageEventClicked(event.eventId) }
+                                onManageClick = { onManageEventClicked(event.eventId) },
+                                onDeleteClick = { eventId ->
+                                    lastDeletedEventId = eventId
+                                    showDeleteDialog = eventId
+                                }
                             )
                         }
                     }
@@ -150,32 +181,42 @@ fun EventSelectorScreen(
             }
         }
     }
+
+    // 🔥 Modal de confirmación de eliminación
+    if (showDeleteDialog != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = null },
+            title = { Text("Eliminar evento") },
+            text = { Text("¿Seguro que deseas eliminar este evento y todos sus invitados?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteEvent(showDeleteDialog!!)
+                        showDeleteDialog = null
+                    }
+                ) { Text("Eliminar", color = Color.Red) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = null }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun EventCard(
     event: EventSummary,
     onCardClick: () -> Unit,
-    onManageClick: () -> Unit
+    onManageClick: () -> Unit,
+    onDeleteClick: (String) -> Unit
 ) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val dateStr = dateFormatter.format(event.date.toDate())
 
-    val clipboard = LocalContext.current.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
-            as android.content.ClipboardManager
-
-    var showCopiedSnackbar by remember { mutableStateOf(false) }
-
-    if (showCopiedSnackbar) {
-        SnackbarHost(
-            hostState = remember { SnackbarHostState() }.apply {
-                CoroutineScope(Dispatchers.Main).launch {
-                    showSnackbar("ID copiado al portapapeles")
-                    showCopiedSnackbar = false
-                }
-            }
-        )
-    }
+    val clipboard = LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE)
+            as ClipboardManager
 
     Card(
         modifier = Modifier
@@ -206,16 +247,8 @@ fun EventCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(
-                        text = "📅 $dateStr",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF666666)
-                    )
-                    Text(
-                        text = "📍 ${event.locationName}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF666666)
-                    )
+                    Text("📅 $dateStr", color = Color(0xFF666666))
+                    Text("📍 ${event.locationName}", color = Color(0xFF666666))
                 }
 
                 Surface(
@@ -225,7 +258,6 @@ fun EventCard(
                     Text(
                         text = "${event.totalInvited} invitados",
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelMedium,
                         color = Color(0xFF5E6FA3),
                         fontWeight = FontWeight.SemiBold
                     )
@@ -239,27 +271,25 @@ fun EventCard(
                 horizontalArrangement = Arrangement.End
             ) {
 
-                // 🔹 Botón Copiar ID
                 TextButton(
                     onClick = {
-                        val clip = android.content.ClipData.newPlainText("Event ID", event.eventId)
+                        val clip = ClipData.newPlainText("Event ID", event.eventId)
                         clipboard.setPrimaryClip(clip)
-                        showCopiedSnackbar = true
                     }
-                ) {
-                    Text("Copiar ID")
-                }
+                ) { Text("Copiar ID") }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // 🔹 Botón Modo Guardia
                 Button(
                     onClick = onManageClick,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E6FA3))
-                ) {
-                    Text("Modo Guardia")
-                }
+                ) { Text("Modo Guardia") }
+
+                TextButton(
+                    onClick = { onDeleteClick(event.eventId) }
+                ) { Text("Eliminar", color = Color.Red) }
             }
         }
     }
 }
+
