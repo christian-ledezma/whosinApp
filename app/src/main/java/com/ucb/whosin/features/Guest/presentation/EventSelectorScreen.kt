@@ -12,11 +12,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
@@ -157,6 +161,22 @@ fun EventCard(
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val dateStr = dateFormatter.format(event.date.toDate())
 
+    val clipboard = LocalContext.current.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+            as android.content.ClipboardManager
+
+    var showCopiedSnackbar by remember { mutableStateOf(false) }
+
+    if (showCopiedSnackbar) {
+        SnackbarHost(
+            hostState = remember { SnackbarHostState() }.apply {
+                CoroutineScope(Dispatchers.Main).launch {
+                    showSnackbar("ID copiado al portapapeles")
+                    showCopiedSnackbar = false
+                }
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -214,12 +234,31 @@ fun EventCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onManageClick,
-                modifier = Modifier.align(Alignment.End),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E6FA3))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
-                Text("Modo Guardia")
+
+                // 🔹 Botón Copiar ID
+                TextButton(
+                    onClick = {
+                        val clip = android.content.ClipData.newPlainText("Event ID", event.eventId)
+                        clipboard.setPrimaryClip(clip)
+                        showCopiedSnackbar = true
+                    }
+                ) {
+                    Text("Copiar ID")
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // 🔹 Botón Modo Guardia
+                Button(
+                    onClick = onManageClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E6FA3))
+                ) {
+                    Text("Modo Guardia")
+                }
             }
         }
     }

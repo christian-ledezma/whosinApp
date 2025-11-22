@@ -40,6 +40,7 @@ fun RegisterEventScreen(
     val totalCheckedIn = 0
     val totalInvited = 0
     val guardModeEnabled = true
+    var showSuccessDialog by remember { mutableStateOf(false) }
 
     // Éxito → mostrar snackbar y volver
     LaunchedEffect(uiState.isSuccess) {
@@ -49,8 +50,7 @@ fun RegisterEventScreen(
                     message = "¡Evento registrado exitosamente!",
                     duration = SnackbarDuration.Short
                 )
-                delay(1000)
-                onRegisterSuccess()
+                showSuccessDialog = true
             }
         }
     }
@@ -187,6 +187,39 @@ fun RegisterEventScreen(
             ) {
                 Text("Volver atrás")
             }
+            if (showSuccessDialog) {
+                val clipboard = LocalContext.current.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                        as android.content.ClipboardManager
+
+                AlertDialog(
+                    onDismissRequest = { showSuccessDialog = false },
+                    title = { Text("Evento creado") },
+                    text = { Text("¿Deseas copiar el ID del evento al portapapeles?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                val clip = android.content.ClipData.newPlainText("Event ID", eventId)
+                                clipboard.setPrimaryClip(clip)
+                                showSuccessDialog = false
+                                onRegisterSuccess()
+                            }
+                        ) {
+                            Text("Copiar ID")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showSuccessDialog = false
+                                onRegisterSuccess()
+                            }
+                        ) {
+                            Text("Cerrar")
+                        }
+                    }
+                )
+            }
+
         }
     }
 }
