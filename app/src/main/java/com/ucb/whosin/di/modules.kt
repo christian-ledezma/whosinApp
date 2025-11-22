@@ -15,11 +15,15 @@ import com.ucb.whosin.features.login.data.AuthRepositoryImpl
 import com.ucb.whosin.features.login.data.SessionManager
 import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
+import com.ucb.whosin.features.login.domain.usecase.ChangePasswordUseCase
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
+import com.ucb.whosin.features.login.domain.usecase.GetUserProfileUseCase
 import com.ucb.whosin.features.login.domain.usecase.LoginUserUseCase
 import com.ucb.whosin.features.login.domain.usecase.LogoutUseCase
 import com.ucb.whosin.features.login.domain.usecase.RegisterUserUseCase
+import com.ucb.whosin.features.login.domain.usecase.UpdateUserProfileUseCase
 import com.ucb.whosin.features.login.presentation.LoginViewModel
+import com.ucb.whosin.features.login.presentation.ProfileViewModel
 import com.ucb.whosin.features.login.presentation.RegisterViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -44,21 +48,29 @@ val appModule = module {
     single { CheckSessionUseCase(get()) }
     single { LogoutUseCase(get(), get()) }
 
-    // ViewModels
+    // Use Cases - Perfil
+    single { GetUserProfileUseCase(get()) }
+    single { UpdateUserProfileUseCase(get()) }
+    single { ChangePasswordUseCase(get()) }
+
+    // ViewModels - Autenticación
     viewModel { RegisterViewModel(get(), get()) }
     viewModel { LoginViewModel(get(), get()) }
 
     // DataSource
     single { FirebaseEventDataSource(get(), get()) }
 
-    // Repository
+    // ViewModel - Perfil
+    viewModel { ProfileViewModel(get(), get(), get(), get()) }
+
+    // Repository - Eventos
     single<IEventRepository> { EventRepository(get()) }
 
-    // Use Cases
+    // Use Cases - Eventos
     single { FindByNameUseCase(get()) }
     single { RegisterEventUseCase(get()) }
     single { GetEventByIdUseCase(get()) }
 
-    // ViewModels
+    // ViewModels - Eventos
     viewModel { RegisterEventViewModel(get()) }
 }
