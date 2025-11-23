@@ -16,6 +16,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
 import com.ucb.whosin.features.Guest.presentation.AcceptInvitationScreen
 import com.ucb.whosin.features.Guest.presentation.GuestListScreen
 import com.ucb.whosin.features.event.presentation.EventSelectorScreen
@@ -28,7 +29,7 @@ import com.ucb.whosin.features.login.presentation.RegisterScreen
 import com.ucb.whosin.navigation.NavigationOptions
 import com.ucb.whosin.navigation.NavigationViewModel
 import com.ucb.whosin.navigation.Screen
-import com.ucb.whosin.ui.guard.GuardScreen
+
 
 /**
  * Transiciones de navegación personalizadas
