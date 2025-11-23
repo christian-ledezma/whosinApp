@@ -175,7 +175,7 @@ private fun RegisterScreenContent(
                 )
             }
         },
-        containerColor = WhosInColors.LightGray
+        containerColor = WhosInColors.DarkTeal
     ) { paddingValues ->
         Box(
             modifier = Modifier
