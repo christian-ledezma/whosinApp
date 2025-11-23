@@ -34,6 +34,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,9 +52,74 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.ucb.whosin.features.login.domain.model.CountryCode
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.collections.component1
+import kotlin.collections.component2
 
+@Composable
+fun CountryPickerDialog(
+    onDismiss: () -> Unit,
+    onCountrySelected: (CountryCode) -> Unit,
+    selectedCountry: CountryCode
+) {
+    val countriesGrouped = CountryCode.getAllGrouped()
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Seleccionar país") },
+        text = {
+            LazyColumn {
+                countriesGrouped.forEach { (region, countries) ->
+                    item {
+                        Text(
+                            text = region,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
+                        )
+                    }
+                    items(countries) { country ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onCountrySelected(country)
+                                    onDismiss()
+                                }
+                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = country.flag,
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = country.country,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                Text(
+                                    text = country.code,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cerrar")
+            }
+        }
+    )
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
