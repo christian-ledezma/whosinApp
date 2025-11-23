@@ -1,58 +1,126 @@
 package com.ucb.whosin.ui.theme
 
 import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+// Esquema de colores claro (basado en la imagen de referencia)
+private val WhosInLightColorScheme = lightColorScheme(
+    // Colores primarios
+    primary = WhosInColors.DarkTeal,
+    onPrimary = WhosInColors.LightGray,
+    primaryContainer = WhosInColors.PetrolBlue,
+    onPrimaryContainer = WhosInColors.LightGray,
+
+    // Colores secundarios (Lime para acentos)
+    secondary = WhosInColors.LimeGreen,
+    onSecondary = WhosInColors.DarkTeal,
+    secondaryContainer = WhosInColors.MintGreen,
+    onSecondaryContainer = WhosInColors.DarkTeal,
+
+    // Colores terciarios
+    tertiary = WhosInColors.OliveGreen,
+    onTertiary = WhosInColors.White,
+    tertiaryContainer = WhosInColors.ForestGreen,
+    onTertiaryContainer = WhosInColors.LightGray,
+
+    // Fondos y superficies
+    background = WhosInColors.LightGray,
+    onBackground = WhosInColors.DarkTeal,
+    surface = WhosInColors.White,
+    onSurface = WhosInColors.DarkTeal,
+    surfaceVariant = Color(0xFFF5F7F7),
+    onSurfaceVariant = WhosInColors.GrayBlue,
+
+    // Contornos
+    outline = WhosInColors.GrayBlue,
+    outlineVariant = Color(0xFFD0D5D5),
+
+    // Estados de error
+    error = WhosInColors.Error,
+    onError = WhosInColors.White,
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
+
+    // Inversos
+    inverseSurface = WhosInColors.DarkTeal,
+    inverseOnSurface = WhosInColors.LightGray,
+    inversePrimary = WhosInColors.LimeGreen,
+
+    // Scrim
+    scrim = WhosInColors.Black,
+    surfaceTint = WhosInColors.DarkTeal
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+// Esquema de colores oscuro (para futuro uso)
+private val WhosInDarkColorScheme = darkColorScheme(
+    primary = WhosInColors.LimeGreen,
+    onPrimary = WhosInColors.DarkTeal,
+    primaryContainer = WhosInColors.ForestGreen,
+    onPrimaryContainer = WhosInColors.MintGreen,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    secondary = WhosInColors.MintGreen,
+    onSecondary = WhosInColors.DarkTeal,
+    secondaryContainer = WhosInColors.OliveGreen,
+    onSecondaryContainer = WhosInColors.LightGray,
+
+    tertiary = WhosInColors.LimeGreen,
+    onTertiary = WhosInColors.DarkTeal,
+    tertiaryContainer = WhosInColors.PetrolBlue,
+    onTertiaryContainer = WhosInColors.LightGray,
+
+    background = WhosInColors.DarkTeal,
+    onBackground = WhosInColors.LightGray,
+    surface = WhosInColors.DarkTealLight,
+    onSurface = WhosInColors.LightGray,
+    surfaceVariant = WhosInColors.PetrolBlue,
+    onSurfaceVariant = WhosInColors.GrayBlue,
+
+    outline = WhosInColors.GrayBlue,
+    outlineVariant = WhosInColors.PetrolBlue,
+
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+
+    inverseSurface = WhosInColors.LightGray,
+    inverseOnSurface = WhosInColors.DarkTeal,
+    inversePrimary = WhosInColors.PetrolBlue,
+
+    scrim = WhosInColors.Black,
+    surfaceTint = WhosInColors.LimeGreen
 )
 
 @Composable
 fun WhosinTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    darkTheme: Boolean = false, // Por defecto modo claro como la imagen
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    val colorScheme = if (darkTheme) WhosInDarkColorScheme else WhosInLightColorScheme
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            // Status bar con el color del fondo
+            window.statusBarColor = colorScheme.background.toArgb()
+            // Iconos oscuros en modo claro, claros en modo oscuro
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = WhosInTypography,
         content = content
     )
 }
