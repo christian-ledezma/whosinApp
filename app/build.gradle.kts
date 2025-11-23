@@ -111,4 +111,6 @@ dependencies {
     implementation(libs.google.mlkit.barcode.scanning)
     implementation("com.google.guava:guava:33.0.0-android")
 
+    // Google Maps
+    implementation(libs.bundles.googlemaps)
 }

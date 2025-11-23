@@ -28,7 +28,6 @@ import com.ucb.whosin.features.login.presentation.RegisterScreen
 import com.ucb.whosin.navigation.NavigationOptions
 import com.ucb.whosin.navigation.NavigationViewModel
 import com.ucb.whosin.navigation.Screen
-import com.ucb.whosin.ui.guard.GuardScreen
 
 /**
  * Transiciones de navegación personalizadas
@@ -199,13 +198,6 @@ fun AppNavigation(
                     navController.popBackStack()
                 }
             )
-        }
-
-        composable(
-            route = Screen.Guard.route,
-            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
-            GuardScreen(navController)
         }
 
         composable(Screen.Event.route) {

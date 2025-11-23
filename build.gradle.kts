@@ -1,6 +1,12 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
+buildscript {
+    dependencies {
+        classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
+    }
+}
+
 plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     alias(libs.plugins.android.application) apply false
