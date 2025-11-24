@@ -243,14 +243,50 @@ fun AppNavigation(
                     animationSpec = tween(ANIMATION_DURATION)
                 ) + fadeOut(tween(ANIMATION_DURATION))
             }
-        ) {
+        ) { backStackEntry ->
+            // AÑADIR: Obtener ViewModel desde este NavBackStackEntry
+            val locationViewModel = org.koin.androidx.compose.koinViewModel<com.ucb.whosin.features.event.presentation.LocationViewModel>(
+                viewModelStoreOwner = backStackEntry
+            )
             RegisterEventScreen(
+                locationViewModel = locationViewModel,  // AÑADIR este parámetro
+                onNavigateToMapPicker = { navController.navigate("map_picker") },  // AÑADIR este parámetro
                 onRegisterSuccess = {
                     navController.popBackStack()
                 },
                 onNavigateBack = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(
+            route = "map_picker",
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(ANIMATION_DURATION)
+                ) + fadeIn(tween(ANIMATION_DURATION))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(ANIMATION_DURATION)
+                ) + fadeOut(tween(ANIMATION_DURATION))
+            }
+        ) { backStackEntry ->
+            // Obtener el MISMO ViewModel desde el parent (create_event)
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("create_event")
+            }
+            val locationViewModel = org.koin.androidx.compose.koinViewModel<com.ucb.whosin.features.event.presentation.LocationViewModel>(
+                viewModelStoreOwner = parentEntry
+            )
+
+            com.ucb.whosin.features.event.presentation.MapPickerScreen(
+                locationViewModel = locationViewModel,
+                onBackPressed = { navController.popBackStack() },
+                onLocationSelected = { navController.popBackStack() }
             )
         }
 

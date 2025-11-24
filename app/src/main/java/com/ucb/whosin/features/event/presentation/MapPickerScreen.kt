@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,10 +52,10 @@ fun MapPickerScreen(
     onLocationSelected: () -> Unit = {},
     onBackPressed: () -> Unit
 ) {
-    // Ubicación por defecto (La Paz, Bolivia)
-    val defaultLocation = LatLng(-16.5000, -68.1500)
+    // Ubicación por defecto (Cochabamba)
+    val defaultLocation = LatLng(-17.38950, -66.15680)
 
-    var selectedLocation by remember { mutableStateOf(LatLng(0.0, 0.0))}
+    var selectedLocation by remember { mutableStateOf(defaultLocation)}
 
     val context = LocalContext.current
 
@@ -66,6 +67,8 @@ fun MapPickerScreen(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+
+    val savedLocation by locationViewModel.selectedLocation.collectAsState()
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(selectedLocation, 15f)
@@ -83,9 +86,11 @@ fun MapPickerScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        locationViewModel.selectedLocation.value?.let { (lat, lng) ->
-            selectedLocation = LatLng(lat, lng)
+    LaunchedEffect(savedLocation) {
+        savedLocation?.let { (lat, lng) ->
+            val location = LatLng(lat, lng)
+            selectedLocation = location
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
         }
     }
 

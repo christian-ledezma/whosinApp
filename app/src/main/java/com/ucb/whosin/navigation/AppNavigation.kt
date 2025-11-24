@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -20,8 +21,10 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
+import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.MapPickerScreen
 import com.ucb.whosin.features.qrscanner.ui.QrScannerScreen
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AppNavigation(
@@ -141,16 +144,29 @@ fun AppNavigation(
 
         // Pantalla para crear un evento
         composable("create_event") {
+            val locationViewModel = koinViewModel<LocationViewModel>(
+                viewModelStoreOwner = it
+            )
+
             RegisterEventScreen(
+                locationViewModel = locationViewModel,
                 onNavigateToMapPicker = { navController.navigate("map_picker") }
             )
         }
 
         // Pantalla del selector de mapa
         composable("map_picker") {
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry("create_event")
+            }
+            val locationViewModel = koinViewModel<LocationViewModel>(
+                viewModelStoreOwner = parentEntry
+            )
+
             MapPickerScreen(
+                locationViewModel = locationViewModel,
                 onBackPressed = { navController.popBackStack() },
-                onLocationSelected = { navController.popBackStack() },
+                onLocationSelected = { navController.popBackStack() }
             )
         }
 

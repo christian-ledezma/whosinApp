@@ -22,7 +22,7 @@ import java.util.Calendar
 @Composable
 fun RegisterEventScreen(
     viewModel: RegisterEventViewModel = koinViewModel(),
-    locationViewModel: LocationViewModel = koinViewModel(),
+    locationViewModel: LocationViewModel,
     onRegisterSuccess: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onNavigateToMapPicker: () -> Unit = {}
