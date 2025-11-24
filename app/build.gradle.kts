@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.androidx.datastore.core)
     implementation(libs.material3)
     implementation(libs.ui)
+    implementation(libs.ui.graphics)
     //implementation(libs.firebase.database)
     //implementation(libs.firebase.messaging)
     testImplementation(libs.junit)

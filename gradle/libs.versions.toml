@@ -38,6 +38,7 @@ ui = "1.9.5"
 googleMaps = "19.0.0"
 mapsCompose = "6.2.1"
 playServicesLocation = "21.3.0"
+uiGraphics = "1.9.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -95,6 +96,7 @@ ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 google-maps-android = { module = "com.google.android.gms:play-services-maps", version.ref = "googleMaps" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
