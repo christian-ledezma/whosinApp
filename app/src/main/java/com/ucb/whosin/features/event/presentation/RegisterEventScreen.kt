@@ -15,6 +15,7 @@ import android.app.DatePickerDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
@@ -32,13 +33,13 @@ fun RegisterEventScreen(
     val scope = rememberCoroutineScope()
 
     // Campos del formulario
-    var name by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") } // Podrías usar un DatePicker más adelante
-    var locationName by remember { mutableStateOf("") }
-    var latitude by remember { mutableStateOf<Double?>(null) }
-    var longitude by remember { mutableStateOf<Double?>(null) }
-    var capacity by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("upcoming") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var date by rememberSaveable { mutableStateOf("") } // Podrías usar un DatePicker más adelante
+    var locationName by rememberSaveable { mutableStateOf("") }
+    var latitude by rememberSaveable { mutableStateOf<Double?>(null) }
+    var longitude by rememberSaveable { mutableStateOf<Double?>(null) }
+    var capacity by rememberSaveable { mutableStateOf("") }
+    var status by rememberSaveable { mutableStateOf("upcoming") }
 
     // Campos automáticos
     val eventId = remember { UUID.randomUUID().toString() }
@@ -47,6 +48,18 @@ fun RegisterEventScreen(
     val totalInvited = 0
     val guardModeEnabled = true
     var showSuccessDialog by remember { mutableStateOf(false) }
+
+    fun clearForm() {
+        name = ""
+        date = ""
+        locationName = ""
+        latitude = null
+        longitude = null
+        capacity = ""
+        status = "upcoming"
+        locationViewModel.clearLocation()
+        viewModel.resetState()
+    }
 
     // Éxito → mostrar snackbar y volver
     LaunchedEffect(uiState.isSuccess) {
@@ -149,7 +162,6 @@ fun RegisterEventScreen(
             // Botón para seleccionar ubicación en el mapa
             OutlinedButton(
                 onClick = {
-                    locationViewModel.setLocation(latitude ?: 0.0, longitude ?: 0.0)
                     onNavigateToMapPicker()
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -253,6 +265,7 @@ fun RegisterEventScreen(
                                 val clip = android.content.ClipData.newPlainText("Event ID", eventId)
                                 clipboard.setPrimaryClip(clip)
                                 showSuccessDialog = false
+                                clearForm()
                                 onRegisterSuccess()
                             }
                         ) {
@@ -263,6 +276,7 @@ fun RegisterEventScreen(
                         TextButton(
                             onClick = {
                                 showSuccessDialog = false
+                                clearForm()
                                 onRegisterSuccess()
                             }
                         ) {

@@ -56,6 +56,7 @@ fun MapPickerScreen(
     val defaultLocation = LatLng(-17.38950, -66.15680)
 
     var selectedLocation by remember { mutableStateOf(defaultLocation)}
+    var isInitialized by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -86,11 +87,39 @@ fun MapPickerScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (!isInitialized) {
+            savedLocation?.let { (lat, lng) ->
+                // Si hay ubicación guardada, usarla
+                val location = LatLng(lat, lng)
+                selectedLocation = location
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+                isInitialized = true
+            } ?: run {
+                // Si no hay ubicación guardada, intentar obtener ubicación actual
+                if (hasLocationPermission) {
+                    getCurrentLocation(context) { location ->
+                        selectedLocation = location
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+                        isInitialized = true
+                    }
+                } else {
+                    // Si no hay permisos, usar Cochabamba
+                    selectedLocation = defaultLocation
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(defaultLocation, 15f)
+                    isInitialized = true
+                }
+            }
+        }
+    }
+
     LaunchedEffect(savedLocation) {
-        savedLocation?.let { (lat, lng) ->
-            val location = LatLng(lat, lng)
-            selectedLocation = location
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+        if (isInitialized) {
+            savedLocation?.let { (lat, lng) ->
+                val location = LatLng(lat, lng)
+                selectedLocation = location
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(location, 15f)
+            }
         }
     }
 
