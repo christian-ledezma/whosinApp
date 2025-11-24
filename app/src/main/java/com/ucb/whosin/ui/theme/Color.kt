@@ -25,6 +25,11 @@ object WhosInColors {
     val Success = Color(0xFF81C784)
     val Warning = Color(0xFFFFB74D)
 
+    // Colores para estados de invitados
+    val MossGreen = Color(0xFF8A9A5B)      // Verde musgo para 'Total'
+    val Confirmed = Color(0xFF4E8AF5)      // Azul para 'Confirmado'
+    val CheckedIn = Color(0xFF34D17D)      // Verde brillante para 'Check-in'
+
     // Transparencias
     val DarkTealAlpha80 = Color(0xCC0C1517)
     val LimeGreenAlpha20 = Color(0x33D1F36F)

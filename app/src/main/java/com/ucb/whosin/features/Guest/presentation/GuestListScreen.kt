@@ -1,23 +1,32 @@
 package com.ucb.whosin.features.Guest.presentation
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ucb.whosin.features.Guest.domain.model.Guest
+import com.ucb.whosin.ui.components.WhosInCard
+import com.ucb.whosin.ui.components.WhosInPrimaryButton
+import com.ucb.whosin.ui.components.WhosInTextField
+import com.ucb.whosin.ui.theme.WhosInColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -26,8 +35,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun GuestListScreen(
     listViewModel: GuestListViewModel = koinViewModel(),
-    addViewModel: AddGuestViewModel = koinViewModel(),
-    onNavigateToAddGuest: () -> Unit = {}
+    addViewModel: AddGuestViewModel = koinViewModel()
 ) {
     val listUiState by listViewModel.uiState.collectAsState()
     val addUiState by addViewModel.uiState.collectAsState()
@@ -35,7 +43,6 @@ fun GuestListScreen(
     val scope = rememberCoroutineScope()
 
     var showAddDialog by remember { mutableStateOf(false) }
-    var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedGuest by remember { mutableStateOf<Guest?>(null) }
 
@@ -44,29 +51,13 @@ fun GuestListScreen(
         if (addUiState.isSuccess) {
             scope.launch {
                 snackbarHostState.showSnackbar(
-                    message = "¡Invitado agregado exitosamente!",
+                    message = "✓ Invitado agregado",
                     duration = SnackbarDuration.Short
                 )
                 delay(500)
                 listViewModel.loadGuests()
                 showAddDialog = false
                 addViewModel.clearSuccess()
-            }
-        }
-    }
-
-    // Recargar lista cuando se edita exitosamente
-    LaunchedEffect(listUiState.updateSuccess) {
-        if (listUiState.updateSuccess) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = "¡Invitado actualizado exitosamente!",
-                    duration = SnackbarDuration.Short
-                )
-                delay(500)
-                listViewModel.loadGuests()
-                showEditDialog = false
-                selectedGuest = null
             }
         }
     }
@@ -115,24 +106,31 @@ fun GuestListScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Invitados") },
+                title = {
+                    Text(
+                        "Invitados",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF5E6FA3),
-                    titleContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = Color(0xFF5E6FA3)
+                containerColor = MaterialTheme.colorScheme.secondary,
+                shape = CircleShape
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar invitado",
-                    tint = Color.White
+                    contentDescription = "Agregar",
+                    tint = MaterialTheme.colorScheme.onSecondary
                 )
             }
         }
@@ -141,50 +139,48 @@ fun GuestListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 20.dp)
         ) {
-            // Barra de búsqueda
-            OutlinedTextField(
-                value = listUiState.searchQuery,
-                onValueChange = { listViewModel.onSearchQueryChange(it) },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Buscar invitados...") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar")
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF5E6FA3),
-                    focusedLabelColor = Color(0xFF5E6FA3)
-                )
-            )
-
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Estadísticas rápidas
+            // Barra de búsqueda moderna
+            WhosInTextField(
+                value = listUiState.searchQuery,
+                onValueChange = { listViewModel.onSearchQueryChange(it) },
+                placeholder = "Buscar invitados...",
+                leadingIcon = Icons.Default.Search,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Stats Cards modernas
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatCard(
+                ModernStatCard(
                     title = "Total",
                     value = listUiState.guests.size.toString(),
-                    color = Color(0xFF5E6FA3)
+                    color = WhosInColors.MossGreen,
+                    modifier = Modifier.weight(1f)
                 )
-                StatCard(
+                ModernStatCard(
                     title = "Confirmados",
                     value = listUiState.guests.count { it.inviteStatus == "confirmed" }.toString(),
-                    color = Color(0xFF4CAF50)
+                    color = WhosInColors.ForestGreen,
+                    modifier = Modifier.weight(1f)
                 )
-                StatCard(
+                ModernStatCard(
                     title = "Check-in",
                     value = listUiState.guests.count { it.checkedIn }.toString(),
-                    color = Color(0xFF2196F3)
+                    color = WhosInColors.CheckedIn,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Lista de invitados
             if (listUiState.isLoading) {
@@ -192,117 +188,66 @@ fun GuestListScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color(0xFF5E6FA3))
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                 }
             } else if (listUiState.filteredGuests.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (listUiState.searchQuery.isNotEmpty())
-                            "No se encontraron invitados"
-                        else
-                            "No hay invitados aún.\nToca + para agregar uno.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Gray
-                    )
-                }
+                EmptyState()
             } else {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    items(listUiState.filteredGuests) { guest ->
-                        GuestCardWithActions(
-                            guest = guest,
-                            onEdit = {
-                                selectedGuest = guest
-                                showEditDialog = true
-                            },
-                            onDelete = {
-                                selectedGuest = guest
-                                showDeleteDialog = true
-                            }
-                        )
+                    items(
+                        items = listUiState.filteredGuests,
+                        key = { it.guestId }
+                    ) { guest ->
+                        AnimatedVisibility(
+                            visible = true,
+                            enter = fadeIn(animationSpec = tween(300)) +
+                                    slideInVertically(initialOffsetY = { it / 4 }),
+                            exit = fadeOut() + slideOutVertically()
+                        ) {
+                            ModernGuestCard(
+                                guest = guest,
+                                onDelete = {
+                                    selectedGuest = guest
+                                    showDeleteDialog = true
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // Diálogo para agregar invitado
+        // Diálogo agregar (SIN acompañantes, SIN estado)
         if (showAddDialog) {
-            AddGuestDialog(
+            ModernAddGuestDialog(
                 isLoading = addUiState.isLoading,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, plusOnes, status, note ->
-                    addViewModel.addGuest(name, plusOnes, status, note)
+                onConfirm = { name, note ->
+                    // SIEMPRE confirmed, plusOnesAllowed = 0
+                    addViewModel.addGuest(
+                        name = name,
+                        plusOnesAllowed = 0,  // No se pregunta en UI
+                        inviteStatus = "confirmed",  // Siempre confirmed
+                        note = note
+                    )
                 }
             )
         }
 
-        // Diálogo para editar invitado
-        if (showEditDialog && selectedGuest != null) {
-            EditGuestDialog(
-                guest = selectedGuest!!,
-                isLoading = listUiState.isLoading,
-                onDismiss = {
-                    showEditDialog = false
-                    selectedGuest = null
-                },
-                onConfirm = { companions ->
-                    listViewModel.updateGuestCompanions(selectedGuest!!.guestId, companions)
-                }
-            )
-        }
-
-        // Diálogo para confirmar eliminación
+        // Diálogo eliminar
         if (showDeleteDialog && selectedGuest != null) {
-            AlertDialog(
-                onDismissRequest = {
+            ModernDeleteDialog(
+                guestName = selectedGuest!!.name,
+                isLoading = listUiState.isLoading,
+                onConfirm = {
+                    listViewModel.deleteGuest(selectedGuest!!.guestId)
+                },
+                onDismiss = {
                     showDeleteDialog = false
                     selectedGuest = null
-                },
-                title = {
-                    Text(
-                        "Eliminar Invitado",
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFD32F2F)
-                    )
-                },
-                text = {
-                    Text("¿Estás seguro de que deseas eliminar a ${selectedGuest!!.name}? Esta acción no se puede deshacer.")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            listViewModel.deleteGuest(selectedGuest!!.guestId)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD32F2F)
-                        ),
-                        enabled = !listUiState.isLoading
-                    ) {
-                        if (listUiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Eliminar")
-                        }
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            selectedGuest = null
-                        },
-                        enabled = !listUiState.isLoading
-                    ) {
-                        Text("Cancelar", color = Color(0xFF5E6FA3))
-                    }
                 }
             )
         }
@@ -310,24 +255,19 @@ fun GuestListScreen(
 }
 
 @Composable
-fun StatCard(
+fun ModernStatCard(
     title: String,
     value: String,
-    color: Color
+    color: Color,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = Modifier
-            .width(110.dp)
-            .height(80.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f)),
-        shape = RoundedCornerShape(12.dp)
+    WhosInCard(
+        modifier = modifier.height(90.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
             Text(
                 text = value,
@@ -335,33 +275,39 @@ fun StatCard(
                 fontWeight = FontWeight.Bold,
                 color = color
             )
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodySmall,
-                color = color.copy(alpha = 0.7f)
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
 
 @Composable
-fun GuestCardWithActions(
+fun ModernGuestCard(
     guest: Guest,
-    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF5F5F5)
-        ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    var scale by remember { mutableStateOf(0.8f) }
+
+    LaunchedEffect(Unit) {
+        animate(
+            initialValue = 0.8f,
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        ) { value, _ -> scale = value }
+    }
+
+    WhosInCard(
+        modifier = Modifier.scale(scale)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -369,123 +315,74 @@ fun GuestCardWithActions(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                // Avatar con inicial
-                Surface(
-                    modifier = Modifier.size(48.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    color = Color(0xFF5E6FA3).copy(alpha = 0.2f)
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondary),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = guest.name.firstOrNull()?.toString()?.uppercase() ?: "?",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF5E6FA3)
-                        )
-                    }
+                    Text(
+                        text = guest.name.firstOrNull()?.toString()?.uppercase() ?: "?",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
                 Column {
                     Text(
                         text = guest.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A1A1A)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Estado de invitación
-                        StatusChip(
-                            text = when (guest.inviteStatus) {
-                                "confirmed" -> "Confirmado"
-                                "pending" -> "Pendiente"
-                                "declined" -> "Rechazado"
-                                else -> "Sin estado"
-                            },
-                            color = when (guest.inviteStatus) {
-                                "confirmed" -> Color(0xFF4CAF50)
-                                "pending" -> Color(0xFFFFA726)
-                                "declined" -> Color(0xFFE57373)
-                                else -> Color.Gray
-                            }
+                    // Solo mostrar check-in, NO acompañantes, NO estado
+                    if (guest.checkedIn) {
+                        MinimalChip(
+                            text = "✓ Check-in",
+                            color = WhosInColors.CheckedIn
                         )
-
-                        // Check-in status
-                        if (guest.checkedIn) {
-                            StatusChip(
-                                text = "✓ Check-in",
-                                color = Color(0xFF2196F3)
-                            )
-                        }
-                    }
-
-                    // Información adicional
-                    if (guest.plusOnesAllowed > 0) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "+${guest.plusOnesAllowed} acompañante${if (guest.plusOnesAllowed > 1) "s" else ""}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF666666)
+                    } else {
+                        MinimalChip(
+                            text = "Confirmado",
+                            color = WhosInColors.Confirmed
                         )
                     }
 
-                    // Nota
+                    // Nota si existe
                     if (!guest.note.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "📝 ${guest.note}",
+                            text = guest.note,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF888888),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                         )
                     }
                 }
             }
 
-            // Botones de acción
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                IconButton(
-                    onClick = onEdit,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar",
-                        tint = Color(0xFF5E6FA3),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar",
-                        tint = Color(0xFFD32F2F),
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+            // Botón eliminar
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar",
+                    tint = MaterialTheme.colorScheme.error
+                )
             }
         }
     }
 }
 
 @Composable
-fun StatusChip(
+fun MinimalChip(
     text: String,
     color: Color
 ) {
@@ -495,7 +392,7 @@ fun StatusChip(
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             color = color,
             fontWeight = FontWeight.SemiBold
@@ -503,264 +400,147 @@ fun StatusChip(
     }
 }
 
+@Composable
+fun EmptyState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                modifier = Modifier.size(80.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No hay invitados",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Toca + para agregar uno",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditGuestDialog(
-    guest: Guest,
+fun ModernAddGuestDialog(
     isLoading: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
+    onConfirm: (String, String?) -> Unit  // Solo nombre y nota (NO acompañantes, NO estado)
 ) {
-    var companions by remember { mutableStateOf(guest.plusOnesAllowed) }
+    var name by remember { mutableStateOf("") }
+    var note by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
-                "Editar Invitado",
+                "Agregar Invitado",
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF5E6FA3)
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Invitado: ${guest.name}",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
+                // Solo nombre (SIN acompañantes, SIN estado)
+                WhosInTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = "Nombre completo",
+                    placeholder = "Ej: Juan Pérez",
+                    enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Ajustar acompañantes:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF666666)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = { if (companions > 0) companions-- },
-                        enabled = companions > 0 && !isLoading
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Remove,
-                            contentDescription = "Reducir",
-                            tint = Color(0xFF5E6FA3)
-                        )
-                    }
-
-                    Surface(
-                        modifier = Modifier.size(60.dp),
-                        shape = RoundedCornerShape(30.dp),
-                        color = Color(0xFF5E6FA3).copy(alpha = 0.1f)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = companions.toString(),
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF5E6FA3)
-                            )
-                        }
-                    }
-
-                    IconButton(
-                        onClick = { companions++ },
-                        enabled = !isLoading
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Aumentar",
-                            tint = Color(0xFF5E6FA3)
-                        )
-                    }
-                }
-
-                Text(
-                    text = if (companions == 0) "Sin acompañantes"
-                    else if (companions == 1) "1 acompañante"
-                    else "$companions acompañantes",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF666666),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                // Solo nota opcional
+                WhosInTextField(
+                    value = note,
+                    onValueChange = { note = it },
+                    label = "Nota (opcional)",
+                    placeholder = "Añade una nota...",
+                    enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },
         confirmButton = {
-            Button(
-                onClick = { onConfirm(companions) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E6FA3)
-                ),
-                enabled = !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Guardar")
-                }
-            }
+            WhosInPrimaryButton(
+                text = "Agregar",
+                onClick = {
+                    if (name.isNotBlank()) {
+                        onConfirm(name, note.ifBlank { null })
+                    }
+                },
+                enabled = !isLoading && name.isNotBlank(),
+                isLoading = isLoading,
+                modifier = Modifier.fillMaxWidth()
+            )
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
                 enabled = !isLoading
             ) {
-                Text("Cancelar", color = Color(0xFF5E6FA3))
+                Text(
+                    "Cancelar",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddGuestDialog(
+fun ModernDeleteDialog(
+    guestName: String,
     isLoading: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: (String, Int, String, String?) -> Unit
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var plusOnes by remember { mutableStateOf("0") }
-    var note by remember { mutableStateOf("") }
-    var inviteStatus by remember { mutableStateOf("pending") }
-    var expanded by remember { mutableStateOf(false) }
-
     AlertDialog(
         onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(48.dp)
+            )
+        },
         title = {
             Text(
-                "Agregar Invitado",
+                "¿Eliminar invitado?",
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF5E6FA3)
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre completo") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = !isLoading,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF5E6FA3),
-                        focusedLabelColor = Color(0xFF5E6FA3)
-                    )
-                )
-
-                OutlinedTextField(
-                    value = plusOnes,
-                    onValueChange = { if (it.all { char -> char.isDigit() }) plusOnes = it },
-                    label = { Text("Acompañantes permitidos") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = !isLoading,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF5E6FA3),
-                        focusedLabelColor = Color(0xFF5E6FA3)
-                    )
-                )
-
-                // Dropdown para estado de invitación
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { if (!isLoading) expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = when (inviteStatus) {
-                            "pending" -> "Pendiente"
-                            "confirmed" -> "Confirmado"
-                            "declined" -> "Rechazado"
-                            else -> "Pendiente"
-                        },
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Estado") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        enabled = !isLoading,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFF5E6FA3),
-                            focusedLabelColor = Color(0xFF5E6FA3)
-                        )
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Pendiente") },
-                            onClick = {
-                                inviteStatus = "pending"
-                                expanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Confirmado") },
-                            onClick = {
-                                inviteStatus = "confirmed"
-                                expanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Rechazado") },
-                            onClick = {
-                                inviteStatus = "declined"
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    label = { Text("Nota (opcional)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    maxLines = 3,
-                    enabled = !isLoading,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF5E6FA3),
-                        focusedLabelColor = Color(0xFF5E6FA3)
-                    )
-                )
-            }
+            Text(
+                "¿Estás seguro de eliminar a $guestName? Esta acción no se puede deshacer.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         },
         confirmButton = {
             Button(
-                onClick = {
-                    if (name.isNotBlank()) {
-                        onConfirm(
-                            name,
-                            plusOnes.toIntOrNull() ?: 0,
-                            inviteStatus,
-                            note.ifBlank { null }
-                        )
-                    }
-                },
+                onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF5E6FA3)
+                    containerColor = MaterialTheme.colorScheme.error
                 ),
-                enabled = !isLoading && name.isNotBlank()
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -769,16 +549,20 @@ fun AddGuestDialog(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Agregar")
+                    Text("Eliminar")
                 }
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                enabled = !isLoading
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cancelar", color = Color(0xFF5E6FA3))
+                Text(
+                    "Cancelar",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     )
