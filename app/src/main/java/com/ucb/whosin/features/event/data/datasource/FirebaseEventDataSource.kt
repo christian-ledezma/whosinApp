@@ -52,6 +52,8 @@ class FirebaseEventDataSource(
                 "name" to event.name,
                 "date" to event.date,
                 "locationName" to event.locationName,
+                "latitude" to event.latitude,
+                "longitude" to event.longitude,
                 "capacity" to event.capacity,
                 "status" to event.status,
                 "guardModeEnabled" to event.guardModeEnabled,

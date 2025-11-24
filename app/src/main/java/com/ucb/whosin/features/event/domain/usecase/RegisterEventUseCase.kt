@@ -6,26 +6,28 @@ import com.ucb.whosin.features.event.domain.repository.IEventRepository
 
 class RegisterEventUseCase (private val repository: IEventRepository) {
     suspend operator fun invoke(
-                                        eventId: String,
-                                        name: String,
-                                        date: Timestamp,
-                                        locationName: String,
-                                        capacity: Int,
-                                        status: String,
-                                        guardModeEnabled: Boolean,
-                                        createdAt: Timestamp,
-                                        totalCheckedIn: Int,
-                                        totalInvited: Int
+            eventId: String,
+            name: String,
+            date: Timestamp,
+            locationName: String,
+            latitude: Double,
+            longitude: Double,
+            capacity: Int,
+            status: String,
+            guardModeEnabled: Boolean,
+            createdAt: Timestamp,
+            totalCheckedIn: Int,
+            totalInvited: Int
 
-                                ) : EventResult {
+    ) : EventResult {
 
         if (
-                eventId.isBlank() ||
-                name.isBlank() ||
-                locationName.isBlank() ||
-                capacity <= 0 ||
-                status.isBlank()
-            ) {
+            eventId.isBlank() ||
+            name.isBlank() ||
+            locationName.isBlank() ||
+            capacity <= 0 ||
+            status.isBlank()
+        ) {
 
             return EventResult.Error("Ninguno de los campos eventId,userId,name,locationName,capacity o estatus al registrar un evento puede estar vacío")
         }
@@ -35,6 +37,8 @@ class RegisterEventUseCase (private val repository: IEventRepository) {
             name,
             date,
             locationName,
+            latitude,
+            longitude,
             capacity,
             status,
             guardModeEnabled,

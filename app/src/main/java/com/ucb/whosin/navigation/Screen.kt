@@ -13,4 +13,13 @@ sealed class Screen (val route: String) {
     object AcceptInvitation : Screen("accept_invitation")
     object QrScanner : Screen("qr_scanner")
     object Profile : Screen("profile")
+    object MapPicker : Screen("map_picker/{latitude}/{longitude}") {
+        fun createRoute(latitude: Double?, longitude: Double?): String {
+            return if (latitude != null && longitude != null) {
+                "map_picker/$latitude/$longitude"
+            } else {
+                "map_picker/null/null"
+            }
+        }
+    }
 }

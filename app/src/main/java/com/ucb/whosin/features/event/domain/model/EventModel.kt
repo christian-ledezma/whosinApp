@@ -8,6 +8,8 @@ data class EventModel(
     val name: String = "",
     val date: Timestamp = Timestamp.now(),
     val locationName: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
     val capacity: Int = 0,
     val status: String = "",
     val guardModeEnabled: Boolean = false,

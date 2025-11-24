@@ -14,14 +14,18 @@ import java.util.UUID
 import android.app.DatePickerDialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 
 @Composable
 fun RegisterEventScreen(
     viewModel: RegisterEventViewModel = koinViewModel(),
+    locationViewModel: LocationViewModel = koinViewModel(),
     onRegisterSuccess: () -> Unit = {},
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    onNavigateToMapPicker: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -31,6 +35,8 @@ fun RegisterEventScreen(
     var name by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") } // Podrías usar un DatePicker más adelante
     var locationName by remember { mutableStateOf("") }
+    var latitude by remember { mutableStateOf<Double?>(null) }
+    var longitude by remember { mutableStateOf<Double?>(null) }
     var capacity by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("upcoming") }
 
@@ -64,6 +70,16 @@ fun RegisterEventScreen(
                     duration = SnackbarDuration.Long
                 )
                 viewModel.clearError()
+            }
+        }
+    }
+
+    // Observar cambios en la ubicación seleccionada
+    LaunchedEffect(Unit) {
+        locationViewModel.selectedLocation.collect { location ->
+            location?.let { (lat, lng) ->
+                latitude = lat
+                longitude = lng
             }
         }
     }
@@ -130,6 +146,40 @@ fun RegisterEventScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Botón para seleccionar ubicación en el mapa
+            OutlinedButton(
+                onClick = {
+                    locationViewModel.setLocation(latitude ?: 0.0, longitude ?: 0.0)
+                    onNavigateToMapPicker()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isLoading
+            ) {
+                Icon(
+                    Icons.Default.LocationOn,
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    if (latitude != null && longitude != null)
+                        "Ubicación seleccionada ✓"
+                    else
+                        "Seleccionar ubicación en el mapa"
+                )
+            }
+
+            if (latitude != null && longitude != null) {
+                Text(
+                    text = "Lat: ${"%.6f".format(latitude)}, Lng: ${"%.6f".format(longitude)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+
             TextField(
                 value = capacity,
                 onValueChange = { capacity = it },
@@ -156,8 +206,10 @@ fun RegisterEventScreen(
                     viewModel.registerEvent(
                         eventId = eventId,
                         name = name,
-                        date = eventDate, // 👈 ahora se envía correctamente
+                        date = eventDate,
                         locationName = locationName,
+                        latitude = latitude!!,
+                        longitude = longitude!!,
                         capacity = capacityInt,
                         status = status,
                         guardModeEnabled = guardModeEnabled,

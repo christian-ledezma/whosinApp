@@ -20,6 +20,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
+import com.ucb.whosin.features.event.presentation.MapPickerScreen
 import com.ucb.whosin.features.qrscanner.ui.QrScannerScreen
 
 @Composable
@@ -141,12 +142,15 @@ fun AppNavigation(
         // Pantalla para crear un evento
         composable("create_event") {
             RegisterEventScreen(
-                onRegisterSuccess = {
-                    navController.popBackStack()
-                },
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateToMapPicker = { navController.navigate("map_picker") }
+            )
+        }
+
+        // Pantalla del selector de mapa
+        composable("map_picker") {
+            MapPickerScreen(
+                onBackPressed = { navController.popBackStack() },
+                onLocationSelected = { navController.popBackStack() },
             )
         }
 

@@ -11,6 +11,7 @@ import com.ucb.whosin.features.event.domain.usecase.FindByNameUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
 import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
 import com.ucb.whosin.features.event.presentation.EventSelectorViewModel
+import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import com.ucb.whosin.features.login.data.AuthRepositoryImpl
@@ -77,4 +78,5 @@ val appModule = module {
     // ViewModels - Eventos
     viewModel { RegisterEventViewModel(get()) }
     viewModel { EventSelectorViewModel(get()) }
+    viewModel { LocationViewModel() }
 }

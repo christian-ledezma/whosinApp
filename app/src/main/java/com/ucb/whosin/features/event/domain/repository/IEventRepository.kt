@@ -11,6 +11,8 @@ interface IEventRepository {
         name: String,
         date: Timestamp,
         locationName: String,
+        latitude: Double,
+        longitude: Double,
         capacity: Int,
         status: String,
         guardModeEnabled: Boolean,
