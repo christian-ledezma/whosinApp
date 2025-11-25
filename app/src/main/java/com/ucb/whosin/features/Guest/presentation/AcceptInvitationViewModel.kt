@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.Guest.domain.model.Guest
 import com.ucb.whosin.features.Guest.domain.model.GuestResult
 import com.ucb.whosin.features.Guest.domain.usecase.AddGuestUseCase
+import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
@@ -20,13 +21,15 @@ data class AcceptInvitationUiState(
     val isSearching: Boolean = false,
     val errorMessage: String? = null,
     val isSuccess: Boolean = false,
-    val event: EventModel? = null
+    val event: EventModel? = null,
+    val isUserAlreadyInvited: Boolean = false
 )
 
 class AcceptInvitationViewModel(
     private val getEventByIdUseCase: GetEventByIdUseCase,
     private val addGuestUseCase: AddGuestUseCase,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val getGuestsUseCase: GetGuestsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AcceptInvitationUiState())
@@ -51,12 +54,16 @@ class AcceptInvitationViewModel(
                         isSearching = false,
                         errorMessage = null
                     )
+
+                    checkIfUserIsInvited(eventId)
                 }
+
                 is EventResult.Error -> {
                     _uiState.value = _uiState.value.copy(
                         event = null,
                         isSearching = false,
-                        errorMessage = result.message
+                        errorMessage = result.message,
+                        isUserAlreadyInvited = false
                     )
                 }
             }
@@ -125,5 +132,38 @@ class AcceptInvitationViewModel(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    private fun checkIfUserIsInvited(eventId: String) {
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser == null) {
+            _uiState.value = _uiState.value.copy(isUserAlreadyInvited = false)
+            return
+        }
+
+        viewModelScope.launch {
+            when (val result = getGuestsUseCase(eventId)) {
+                is GuestResult.SuccessList -> {
+                    // Validar si el userId actual ya está en la lista
+                    val isInvited = result.guests.any { guest ->
+                        guest.userId == currentUser.uid
+                    }
+
+                    _uiState.value = _uiState.value.copy(
+                        isUserAlreadyInvited = isInvited
+                    )
+
+                    Log.d("AcceptInvitation", "Usuario ${currentUser.uid} ya invitado: $isInvited")
+                }
+                is GuestResult.Error -> {
+                    // Si falla la consulta, asumimos que no está invitado (permite continuar)
+                    _uiState.value = _uiState.value.copy(isUserAlreadyInvited = false)
+                    Log.e("AcceptInvitation", "Error al validar invitado: ${result.message}")
+                }
+                else -> {
+                    _uiState.value = _uiState.value.copy(isUserAlreadyInvited = false)
+                }
+            }
+        }
     }
 }

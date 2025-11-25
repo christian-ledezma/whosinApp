@@ -325,44 +325,56 @@ private fun AcceptInvitationScreenContent(
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            // Selector de acompañantes
-                            CompanionsSelector(
-                                companions = companions,
-                                onCompanionsChange = { companions = it },
-                                enabled = !uiState.isLoading
-                            )
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            if (uiState.isUserAlreadyInvited) {
+                                // Usuario YA invitado - mostrar banner
+                                AlreadyInvitedBanner()
 
-                            // Banner de advertencia
-                            WarningBanner()
+                                Spacer(modifier = Modifier.height(24.dp))
 
-                            Spacer(modifier = Modifier.height(32.dp))
-
-                            // Botón confirmar
-                            WhosInPrimaryButton(
-                                text = "Confirmar Asistencia",
-                                onClick = {
-                                    viewModel.confirmAttendance(
-                                        eventId = eventId,
-                                        companions = companions
-                                    )
-                                },
-                                enabled = !uiState.isLoading,
-                                isLoading = uiState.isLoading
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            TextButton(
-                                onClick = onNavigateBack,
-                                enabled = !uiState.isLoading,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "Cancelar",
-                                    color = WhosInColors.GrayBlue
+                                // Botón para regresar
+                                WhosInPrimaryButton(
+                                    text = "Entendido",
+                                    onClick = onNavigateBack
                                 )
+                            } else {
+                                // Usuario NO invitado - flujo normal
+                                CompanionsSelector(
+                                    companions = companions,
+                                    onCompanionsChange = { companions = it },
+                                    enabled = !uiState.isLoading
+                                )
+
+                                Spacer(modifier = Modifier.height(24.dp))
+
+                                WarningBanner()
+
+                                Spacer(modifier = Modifier.height(32.dp))
+
+                                WhosInPrimaryButton(
+                                    text = "Confirmar Asistencia",
+                                    onClick = {
+                                        viewModel.confirmAttendance(
+                                            eventId = eventId,
+                                            companions = companions
+                                        )
+                                    },
+                                    enabled = !uiState.isLoading,
+                                    isLoading = uiState.isLoading
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                TextButton(
+                                    onClick = onNavigateBack,
+                                    enabled = !uiState.isLoading,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "Cancelar",
+                                        color = WhosInColors.GrayBlue
+                                    )
+                                }
                             }
                         }
                     }
@@ -786,6 +798,53 @@ private fun WarningBanner() {
                     text = "El organizador del evento puede modificar o eliminar tu asistencia en cualquier momento.",
                     style = MaterialTheme.typography.bodySmall,
                     color = WhosInColors.Warning
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlreadyInvitedBanner() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = WhosInColors.LimeGreen.copy(alpha = 0.2f),
+        shadowElevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(WhosInColors.Success),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircle,
+                    contentDescription = null,
+                    tint = WhosInColors.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Ya confirmaste tu asistencia",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = WhosInColors.OliveGreen
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Tu asistencia a este evento ya fue registrada anteriormente.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WhosInColors.GrayBlue
                 )
             }
         }
