@@ -11,6 +11,7 @@ import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
+import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +30,7 @@ class AcceptInvitationViewModel(
     private val getEventByIdUseCase: GetEventByIdUseCase,
     private val addGuestUseCase: AddGuestUseCase,
     private val firebaseAuth: FirebaseAuth,
+    private val firebaseAuthDataSource: FirebaseAuthDataSource,
     private val getGuestsUseCase: GetGuestsUseCase
 ) : ViewModel() {
 
@@ -89,9 +91,33 @@ class AcceptInvitationViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
+            val userProfile = firebaseAuthDataSource.getUserProfile(currentUser.uid)
+
+            if (userProfile == null) {
+                Log.e("AcceptInvitation", "❌ No se pudo obtener el perfil del usuario")
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "No se pudo obtener tu perfil. Por favor, intenta más tarde.",
+                    isLoading = false
+                )
+                return@launch
+            }
+
+            if (userProfile.name.isBlank() || userProfile.lastname.isBlank()) {
+                Log.e("AcceptInvitation", "❌ Perfil incompleto: name='${userProfile.name}', lastname='${userProfile.lastname}'")
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Tu perfil está incompleto. Por favor, completa tus datos personales en la configuración de tu cuenta antes de aceptar invitaciones.",
+                    isLoading = false
+                )
+                return@launch
+            }
+
+            val fullName = userProfile.fullName()
+            Log.d("AcceptInvitation", "✅ Perfil completo obtenido: $fullName")
+
+
             val guest = Guest(
                 userId = currentUser.uid,
-                name = currentUser.email ?: "Usuario sin nombre",
+                name = fullName,
                 plusOnesAllowed = companions,
                 groupSize = companions + 1, // El invitado + acompañantes
                 checkedIn = false,
