@@ -34,5 +34,5 @@ val guestModule = module {
     // ViewModels - Ahora reciben FirebaseAuth y SavedStateHandle
     viewModel { GuestListViewModel(get(), get(), get(), get<FirebaseAuth>(), get()) }
     viewModel { AddGuestViewModel(get(), get<FirebaseAuth>(), get()) }
-    viewModel { AcceptInvitationViewModel(get(), get(), get<FirebaseAuth>(), get()) }
+    viewModel { AcceptInvitationViewModel(get(), get(), get<FirebaseAuth>(), get(), get()) }
 }
