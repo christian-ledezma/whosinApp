@@ -71,6 +71,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.ucb.whosin.features.login.presentation.AnimatedEntrance
 import com.ucb.whosin.features.login.presentation.WhosInModernTheme
 import com.ucb.whosin.ui.components.WhosInPrimaryButton
+import com.ucb.whosin.ui.components.WhosInPrimaryButton2
 import com.ucb.whosin.ui.theme.WhosInColors
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
@@ -349,7 +350,7 @@ private fun MapPickerScreenContent(
                 .navigationBarsPadding()
         ) {
             AnimatedEntrance(visible = startAnimation, delayMillis = 200) {
-                WhosInPrimaryButton(
+                WhosInPrimaryButton2(
                     text = "Confirmar Ubicación",
                     onClick = {
                         locationViewModel.setLocation(
@@ -404,7 +405,7 @@ private fun PulsingLocationIndicator(modifier: Modifier = Modifier) {
                 .scale(scale)
                 .alpha(alpha)
                 .clip(CircleShape)
-                .background(WhosInColors.LimeGreen.copy(alpha = 0.3f))
+                .background(WhosInColors.DarkTealLight.copy(alpha = 0.3f))
         )
 
         // Círculo interior fijo
@@ -412,7 +413,7 @@ private fun PulsingLocationIndicator(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(30.dp)
                 .clip(CircleShape)
-                .background(WhosInColors.LimeGreen)
+                .background(WhosInColors.DarkTealLight)
                 .padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -420,7 +421,7 @@ private fun PulsingLocationIndicator(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(WhosInColors.DarkTeal)
+                    .background(WhosInColors.LimeGreen)
             )
         }
     }

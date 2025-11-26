@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -82,6 +83,11 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -574,12 +580,44 @@ private fun EventLocationMap(
                         mapToolbarEnabled = false
                     )
                 ) {
+                    val customIcon = remember {
+                        val bitmap = Bitmap.createBitmap(48, 72, Bitmap.Config.ARGB_8888)
+                        val canvas = Canvas(bitmap)
+
+                        // Configurar el paint con el color DarkTeal
+                        val paint = Paint().apply {
+                            color = WhosInColors.DarkTeal.toArgb()
+                            style = Paint.Style.FILL
+                            isAntiAlias = true
+                        }
+
+                        // Dibujar el pin del marcador
+                        val path = Path().apply {
+                            // Forma de lágrima/gota para el marcador
+                            moveTo(24f, 72f) // Punta inferior
+                            cubicTo(12f, 60f, 0f, 40f, 0f, 24f) // Curva izquierda
+                            cubicTo(0f, 10.75f, 10.75f, 0f, 24f, 0f) // Curva superior izquierda
+                            cubicTo(37.25f, 0f, 48f, 10.75f, 48f, 24f) // Curva superior derecha
+                            cubicTo(48f, 40f, 36f, 60f, 24f, 72f) // Curva derecha a punta
+                            close()
+                        }
+                        canvas.drawPath(path, paint)
+
+                        // Círculo blanco en el centro
+                        val paintWhite = Paint().apply {
+                            color = android.graphics.Color.WHITE
+                            style = Paint.Style.FILL
+                            isAntiAlias = true
+                        }
+                        canvas.drawCircle(24f, 24f, 10f, paintWhite)
+
+                        BitmapDescriptorFactory.fromBitmap(bitmap)
+                    }
+
                     Marker(
                         state = markerState,
                         title = locationName,
-                        icon = BitmapDescriptorFactory.defaultMarker(
-                            BitmapDescriptorFactory.HUE_GREEN
-                        )
+                        icon = customIcon
                     )
                 }
 
@@ -590,13 +628,13 @@ private fun EventLocationMap(
                         .padding(12.dp)
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(WhosInColors.LimeGreen),
+                        .background(WhosInColors.DarkTeal),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.LocationOn,
                         contentDescription = null,
-                        tint = WhosInColors.DarkTeal,
+                        tint = WhosInColors.LimeGreen,
                         modifier = Modifier.size(24.dp)
                     )
                 }
