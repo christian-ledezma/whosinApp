@@ -1,6 +1,6 @@
 package com.ucb.whosin.features.event.domain.usecase
 
-import com.ucb.whosin.features.event.domain.model.EventResult
+/*import com.ucb.whosin.features.event.domain.model.EventResult
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
 
 class FindByNameUseCase(private val repository: IEventRepository) {
@@ -12,4 +12,4 @@ class FindByNameUseCase(private val repository: IEventRepository) {
 
         return repository.findByName(searchEvent)
     }
-}
+}*/

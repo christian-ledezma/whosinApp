@@ -5,7 +5,7 @@ import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
 
 interface IEventRepository {
-    suspend fun findByName(value: String): EventResult
+    suspend fun findEventsByName(name: String): List<EventModel>
 
     suspend fun registerEvent(
         eventId: String,

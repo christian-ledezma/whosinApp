@@ -26,6 +26,23 @@ class FirebaseEventDataSource(
         }
     }
 
+    suspend fun findEventsByName(name: String): List<EventModel> {
+        return try {
+            val snapshot = firestore.collection("events")
+                .whereGreaterThanOrEqualTo("name", name)
+                .whereLessThanOrEqualTo("name", name + "\uf8ff")
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(EventModel::class.java)?.copy(eventId = doc.id)
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+
     suspend fun register(event: EventModel): EventResult {
         return try {
 

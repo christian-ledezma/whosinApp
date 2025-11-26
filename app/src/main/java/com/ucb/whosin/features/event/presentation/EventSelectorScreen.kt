@@ -43,6 +43,7 @@ fun EventSelectorScreen(
 ) {
     var showDeleteDialog by remember { mutableStateOf<String?>(null) }
     var lastDeletedEventId by remember { mutableStateOf<String?>(null) }
+    var searchText by remember { mutableStateOf("") }
 
     val viewModel: EventSelectorViewModel = koinViewModel()
     val deleteResult by viewModel.deleteResult.collectAsState()
@@ -66,11 +67,9 @@ fun EventSelectorScreen(
                 snackbarHostState.showSnackbar("Evento eliminado")
 
                 val uid = FirebaseAuth.getInstance().currentUser?.uid
-                if (uid != null) {
-                    viewModel.loadEvents(uid)   // 🔥 vuelve a pedir los eventos renovados
-                }
-                lastDeletedEventId = null
+                if (uid != null) viewModel.loadEvents(uid)
 
+                lastDeletedEventId = null
             } else {
                 snackbarHostState.showSnackbar("Error al eliminar evento")
             }
@@ -98,11 +97,33 @@ fun EventSelectorScreen(
             }
         }
     ) { paddingValues ->
-        Box(
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+
+            // 🔍 Buscador
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { value ->
+                    searchText = value
+
+                    if (value.isBlank()) {
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid != null) viewModel.loadEvents(uid)
+                    } else {
+                        viewModel.searchEvents(value)
+                    }
+                },
+                label = { Text("Buscar evento por nombre") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+
+            // 📌 Lista de eventos
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -127,7 +148,6 @@ fun EventSelectorScreen(
                     )
                 }
             }
-
         }
     }
 

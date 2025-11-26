@@ -42,11 +42,10 @@ class EventRepository(
         return dataSource.register(event)
     }
 
-    override suspend fun findByName(value: String): EventResult {
-        // 🔍 Ejemplo de búsqueda simple por nombre (por si quieres implementarlo después)
-        // Se puede dejar vacío o implementarlo en tu DataSource luego.
-        return EventResult.Error("Función findByName() no implementada aún")
+    override suspend fun findEventsByName(name: String): List<EventModel> {
+        return dataSource.findEventsByName(name)
     }
+
 
     override suspend fun getEventById(eventId: String): EventResult {
         return dataSource.getEventById(eventId)

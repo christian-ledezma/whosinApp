@@ -7,7 +7,7 @@ import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.data.repository.EventRepository
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
 import com.ucb.whosin.features.event.domain.usecase.DeleteEventUseCase
-import com.ucb.whosin.features.event.domain.usecase.FindByNameUseCase
+import com.ucb.whosin.features.event.domain.usecase.FindEventsByNameUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetAllEventsUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
 import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
@@ -71,7 +71,7 @@ val appModule = module {
     single<IEventRepository> { EventRepository(get()) }
 
     // Use Cases - Eventos
-    single { FindByNameUseCase(get()) }
+    factory { FindEventsByNameUseCase(get()) }
     single { RegisterEventUseCase(get()) }
     single { GetEventByIdUseCase(get()) }
     factory { DeleteEventUseCase(get()) }
@@ -79,6 +79,6 @@ val appModule = module {
 
     // ViewModels - Eventos
     viewModel { RegisterEventViewModel(get()) }
-    viewModel { EventSelectorViewModel(get(), get()) }
+    viewModel { EventSelectorViewModel(get(), get(),get()) }
     viewModel { LocationViewModel() }
 }
