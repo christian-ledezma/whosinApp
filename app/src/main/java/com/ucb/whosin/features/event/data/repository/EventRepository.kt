@@ -51,4 +51,10 @@ class EventRepository(
     override suspend fun getEventById(eventId: String): EventResult {
         return dataSource.getEventById(eventId)
     }
+
+    override suspend fun getAllEventsByUser(userId: String): List<EventModel> {
+        return dataSource.getAllEventsByUser(userId)
+    }
+
+
 }

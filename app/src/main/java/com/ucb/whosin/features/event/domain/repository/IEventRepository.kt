@@ -1,6 +1,7 @@
 package com.ucb.whosin.features.event.domain.repository
 
 import com.google.firebase.Timestamp
+import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
 
 interface IEventRepository {
@@ -22,4 +23,6 @@ interface IEventRepository {
                              ): EventResult
 
     suspend fun getEventById(eventId: String): EventResult
+
+    suspend fun getAllEventsByUser(userId: String): List<EventModel>
 }

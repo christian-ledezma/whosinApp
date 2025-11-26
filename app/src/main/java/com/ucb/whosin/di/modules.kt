@@ -8,6 +8,7 @@ import com.ucb.whosin.features.event.data.repository.EventRepository
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
 import com.ucb.whosin.features.event.domain.usecase.DeleteEventUseCase
 import com.ucb.whosin.features.event.domain.usecase.FindByNameUseCase
+import com.ucb.whosin.features.event.domain.usecase.GetAllEventsUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
 import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
 import com.ucb.whosin.features.event.presentation.EventSelectorViewModel
@@ -74,9 +75,10 @@ val appModule = module {
     single { RegisterEventUseCase(get()) }
     single { GetEventByIdUseCase(get()) }
     factory { DeleteEventUseCase(get()) }
+    single { GetAllEventsUseCase(get()) }
 
     // ViewModels - Eventos
     viewModel { RegisterEventViewModel(get()) }
-    viewModel { EventSelectorViewModel(get()) }
+    viewModel { EventSelectorViewModel(get(), get()) }
     viewModel { LocationViewModel() }
 }

@@ -41,13 +41,6 @@ fun EventSelectorScreen(
     onManageEventClicked: (String) -> Unit,
     onNavigateToCreateEvent: () -> Unit
 ) {
-    var events by remember { mutableStateOf<List<EventSummary>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    val firestore = FirebaseFirestore.getInstance()
-    val firebaseAuth = FirebaseAuth.getInstance()
-
     var showDeleteDialog by remember { mutableStateOf<String?>(null) }
     var lastDeletedEventId by remember { mutableStateOf<String?>(null) }
 
@@ -55,56 +48,33 @@ fun EventSelectorScreen(
     val deleteResult by viewModel.deleteResult.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // lista de eventos desde el ViewModel
+    val events by viewModel.events.collectAsState()
+
+    // Al abrir la pantalla cargamos los eventos desde el UseCase
+    LaunchedEffect(Unit) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            viewModel.loadEvents(uid)
+        }
+    }
+
     // 🔥 Cuando termina de eliminar
     LaunchedEffect(deleteResult) {
         deleteResult?.let { success ->
             if (success) {
                 snackbarHostState.showSnackbar("Evento eliminado")
 
-                // ❗ Eliminar de la lista sin recargar la pantalla completa
-                lastDeletedEventId?.let { deletedId ->
-                    events = events.filter { it.eventId != deletedId }
-                    lastDeletedEventId = null
+                val uid = FirebaseAuth.getInstance().currentUser?.uid
+                if (uid != null) {
+                    viewModel.loadEvents(uid)   // 🔥 vuelve a pedir los eventos renovados
                 }
+                lastDeletedEventId = null
 
             } else {
                 snackbarHostState.showSnackbar("Error al eliminar evento")
             }
             viewModel.clearDeleteStatus()
-        }
-    }
-
-    // 🔥 Cargar eventos al abrir pantalla
-    LaunchedEffect(Unit) {
-        try {
-            val currentUser = firebaseAuth.currentUser
-            if (currentUser == null) {
-                errorMessage = "No hay usuario autenticado"
-                isLoading = false
-                return@LaunchedEffect
-            }
-
-            val snapshot = firestore.collection("events")
-                .whereEqualTo("userId", currentUser.uid)
-                .get()
-                .await()
-
-            events = snapshot.documents.mapNotNull { doc ->
-                try {
-                    EventSummary(
-                        eventId = doc.id,
-                        name = doc.getString("name") ?: "Sin nombre",
-                        date = doc.getTimestamp("date") ?: Timestamp.now(),
-                        locationName = doc.getString("locationName") ?: "Sin ubicación",
-                        totalInvited = doc.getLong("totalInvited")?.toInt() ?: 0
-                    )
-                } catch (e: Exception) { null }
-            }
-
-            isLoading = false
-        } catch (e: Exception) {
-            errorMessage = "Error al cargar eventos: ${e.message}"
-            isLoading = false
         }
     }
 
@@ -133,52 +103,31 @@ fun EventSelectorScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = Color(0xFF5E6FA3)
-                    )
-                }
-                errorMessage != null -> {
-                    Text(
-                        text = errorMessage ?: "",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-                events.isEmpty() -> {
-                    Text(
-                        text = "No tienes eventos creados.\nUsa el botón ‘+’ para crear uno.",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(16.dp),
-                        color = Color.Gray
-                    )
-                }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(events) { event ->
-                            EventCard(
-                                event = event,
-                                onCardClick = { onEventSelected(event.eventId) },
-                                onManageClick = { onManageEventClicked(event.eventId) },
-                                onDeleteClick = { eventId ->
-                                    lastDeletedEventId = eventId
-                                    showDeleteDialog = eventId
-                                }
-                            )
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(events) { event ->
+                    EventCard(
+                        event = EventSummary(
+                            eventId = event.eventId,
+                            name = event.name,
+                            date = event.date,
+                            locationName = event.locationName,
+                            totalInvited = event.totalInvited
+                        ),
+                        onCardClick = { onEventSelected(event.eventId) },
+                        onManageClick = { onManageEventClicked(event.eventId) },
+                        onDeleteClick = { eventId ->
+                            lastDeletedEventId = eventId
+                            showDeleteDialog = eventId
                         }
-                    }
+                    )
                 }
             }
+
         }
     }
 

@@ -73,4 +73,21 @@ class FirebaseEventDataSource(
             EventResult.Error(e.message ?: "Error desconocido al registrar evento")
         }
     }
+
+    suspend fun getAllEventsByUser(userId: String): List<EventModel> {
+        return try {
+            val snapshot = firestore.collection("events")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(EventModel::class.java)?.copy(eventId = doc.id)
+            }
+
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
 }
