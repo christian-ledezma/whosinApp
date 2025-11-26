@@ -87,6 +87,67 @@ fun WhosInPrimaryButton(
 }
 
 /**
+ * Botón primario estilo Lime (como "Find Flights" en la imagen)
+ */
+@Composable
+fun WhosInPrimaryButton2(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isLoading: Boolean = false
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "scale"
+    )
+
+    val bgColor by animateColorAsState(
+        targetValue = when {
+            !enabled -> WhosInColors.GrayBlue.copy(alpha = 0.5f)
+            isPressed -> WhosInColors.DarkTeal
+            else -> WhosInColors.DarkTealLight
+        },
+        animationSpec = tween(150),
+        label = "bgColor"
+    )
+
+    Box(
+        modifier = modifier
+            .scale(scale)
+            .height(56.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(bgColor)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled && !isLoading,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = WhosInColors.DarkTeal,
+                strokeWidth = 2.5.dp
+            )
+        } else {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = WhosInColors.LimeGreenDark
+            )
+        }
+    }
+}
+
+/**
  * Botón secundario con borde (estilo outlined)
  */
 @Composable
