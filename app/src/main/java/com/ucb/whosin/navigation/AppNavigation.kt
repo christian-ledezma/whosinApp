@@ -125,6 +125,9 @@ fun AppNavigation(
                 onNavigateBack = { navController.popBackStack() },
                 onManageEventClicked = { eventId ->  // ← Agregar
                     navController.navigate("guard/$eventId")
+                },
+                onEditEventClicked = { eventId ->  // ← Agregar esta línea
+                    navController.navigate("edit_event/$eventId")
                 }
             )
         }
@@ -141,6 +144,9 @@ fun AppNavigation(
                 onNavigateBack = { navController.popBackStack() },
                 onManageEventClicked = { eventId ->  // ← Agregar
                     navController.navigate("guard/$eventId")
+                },
+                onEditEventClicked = { eventId ->  // ← Agregar esta línea
+                    navController.navigate("edit_event/$eventId")
                 }
             )
         }
@@ -174,7 +180,44 @@ fun AppNavigation(
             EventEditScreen(
                 locationViewModel = locationViewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToMapPicker = { navController.navigate("map_picker") }
+                onNavigateToMapPicker = { eventId ->
+                    navController.navigate("map_picker/edit_event/$eventId") }
+            )
+        }
+
+        // Pantalla del selector de mapa desde create_event
+        composable("map_picker/create_event") {
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry("create_event")
+            }
+            val locationViewModel = koinViewModel<LocationViewModel>(
+                viewModelStoreOwner = parentEntry
+            )
+
+            MapPickerScreen(
+                locationViewModel = locationViewModel,
+                onBackPressed = { navController.popBackStack() },
+                onLocationSelected = { navController.popBackStack() }
+            )
+        }
+
+        // Pantalla del selector de mapa desde edit_event
+        composable(
+            route = "map_picker/edit_event/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val eventId = backStackEntry.arguments?.getString("eventId") ?: return@composable
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry("edit_event/$eventId")
+            }
+            val locationViewModel = koinViewModel<LocationViewModel>(
+                viewModelStoreOwner = parentEntry
+            )
+
+            MapPickerScreen(
+                locationViewModel = locationViewModel,
+                onBackPressed = { navController.popBackStack() },
+                onLocationSelected = { navController.popBackStack() }
             )
         }
 

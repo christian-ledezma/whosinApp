@@ -40,7 +40,7 @@ class EventEditViewModel(
     private val firebaseAuth: FirebaseAuth,
     savedStateHandle: SavedStateHandle
 ) : ViewModel()  {
-    private val eventId: String = savedStateHandle.get<String>("eventId") ?: ""
+    val eventId: String = savedStateHandle.get<String>("eventId") ?: ""
 
     private val _uiState = MutableStateFlow(EventEditUiState())
     val uiState: StateFlow<EventEditUiState> = _uiState.asStateFlow()

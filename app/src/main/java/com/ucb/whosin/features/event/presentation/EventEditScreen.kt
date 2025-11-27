@@ -52,7 +52,7 @@ fun EventEditScreen(
     viewModel: EventEditViewModel = koinViewModel(),
     locationViewModel: LocationViewModel,
     onNavigateBack: () -> Unit = {},
-    onNavigateToMapPicker: () -> Unit = {}
+    onNavigateToMapPicker: (String) -> Unit = {}
 ) {
     WhosInModernTheme {
         EventEditScreenContent(
@@ -70,7 +70,7 @@ private fun EventEditScreenContent(
     viewModel: EventEditViewModel,
     locationViewModel: LocationViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToMapPicker: () -> Unit
+    onNavigateToMapPicker: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -284,7 +284,7 @@ private fun EventDataTab(
     event: com.ucb.whosin.features.event.domain.model.EventModel?,
     viewModel: EventEditViewModel,
     locationViewModel: LocationViewModel,
-    onNavigateToMapPicker: () -> Unit,
+    onNavigateToMapPicker: (String) -> Unit,
     isSaving: Boolean,
     startAnimation: Boolean
 ) {
@@ -373,7 +373,11 @@ private fun EventDataTab(
                         hasLocation = latitude != null && longitude != null,
                         latitude = latitude,
                         longitude = longitude,
-                        onClick = onNavigateToMapPicker,
+                        onClick = {
+                            viewModel.uiState.value.event?.let {
+                                onNavigateToMapPicker(viewModel.eventId)
+                            }
+                        },
                         enabled = !isSaving
                     )
 
