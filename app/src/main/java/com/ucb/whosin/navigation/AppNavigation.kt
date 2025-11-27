@@ -144,13 +144,16 @@ fun AppNavigation(
 
         // Pantalla para crear un evento
         composable("create_event") {
-            val locationViewModel = koinViewModel<LocationViewModel>(
-                viewModelStoreOwner = it
-            )
+            val locationViewModel = koinViewModel<LocationViewModel>(viewModelStoreOwner = it)
 
             RegisterEventScreen(
                 locationViewModel = locationViewModel,
-                onNavigateToMapPicker = { navController.navigate("map_picker") }
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToMapPicker = {
+                    navController.navigate("map_picker")
+                }
             )
         }
 
