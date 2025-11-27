@@ -154,7 +154,13 @@ fun AppNavigation(
 
             RegisterEventScreen(
                 locationViewModel = locationViewModel,
-                onNavigateToMapPicker = { navController.navigate("map_picker") }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToMapPicker = { navController.navigate("map_picker") },
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
             )
         }
 
