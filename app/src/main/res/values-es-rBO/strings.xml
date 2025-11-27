@@ -7,7 +7,7 @@
  Exported at: Sat, 15 Nov 2025 08:42:06 -0400
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name">whosin</string>
+    <string name="app_name">Whos In</string>
     <string name="correo">Correo electrónico</string>
     <string name="pass">contraseña</string>
 </resources>

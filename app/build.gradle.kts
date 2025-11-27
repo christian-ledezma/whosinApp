@@ -124,4 +124,11 @@ dependencies {
 
     // Google Maps
     implementation(libs.bundles.googlemaps)
+
+    //splash
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Compose BOM
+    implementation(libs.androidx.compose.foundation)
+
 }
