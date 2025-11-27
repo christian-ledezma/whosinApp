@@ -181,10 +181,6 @@ fun AppNavigation(
             GuestListScreen()
         }
 
-        composable(Screen.Staff.route) {
-            // StaffScreen()
-        }
-
         // Pantalla para aceptar invitación
         composable(Screen.AcceptInvitation.route) {
             AcceptInvitationScreen(
