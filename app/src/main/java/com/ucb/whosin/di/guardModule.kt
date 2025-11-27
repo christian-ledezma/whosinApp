@@ -5,6 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.ucb.whosin.features.Guard.data.repository.GuardRepository
 import com.ucb.whosin.features.Guard.data.repository.GuardRepositoryFirebase
 import com.ucb.whosin.features.Guard.data.presentation.GuardViewModel
+import com.ucb.whosin.features.event.domain.usecase.GetEventsWhereUserIsGuardUseCase
+import com.ucb.whosin.features.event.presentation.GuardEventsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -12,5 +14,9 @@ val guardModule = module {
 
     single<GuardRepository> { GuardRepositoryFirebase(get<FirebaseFirestore>()) }
 
+    factory { GetEventsWhereUserIsGuardUseCase(get()) }
+
+
     viewModel { GuardViewModel(get(), get<FirebaseAuth>(), get()) }
+    viewModel { GuardEventsViewModel(get(), get<FirebaseAuth>()) }
 }

@@ -44,4 +44,6 @@ interface IEventRepository {
     suspend fun removeGuard(eventId: String, guardId: String): GuardResult
 
     suspend fun getEventGuards(eventId: String): GuardResult
+
+    suspend fun getEventsWhereUserIsGuard(guardId: String): List<EventModel>
 }

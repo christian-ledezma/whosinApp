@@ -6,12 +6,14 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -49,10 +51,10 @@ sealed class NavigationDrawer(
     )
 
     object Guard : NavigationDrawer(
-        label = "Guardia",
-        selectedIcon = Icons.Filled.Person,
-        unselectedIcon = Icons.Outlined.Person,
-        route = Screen.Guard.route
+        label = "Modo Guardia",
+        selectedIcon = Icons.Filled.Security,
+        unselectedIcon = Icons.Outlined.Security,
+        route = Screen.GuardEvents.route
     )
 
     object Profile : NavigationDrawer(

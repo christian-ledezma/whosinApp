@@ -1,6 +1,7 @@
 package com.ucb.whosin.features.event.data.datasource
 
 import android.util.Log
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -276,5 +277,53 @@ class FirebaseEventDataSource(
             GuardResult.Error(e.message ?: "Error al obtener guardias")
         }
     }
+
+    suspend fun getEventsWhereUserIsGuard(guardId: String): List<EventModel> {
+        return try {
+            Log.d("FirebaseEvent", "🔹 Buscando eventos donde el usuario es guardia: $guardId")
+
+            // 1) Buscar en todas las subcolecciones "guards" por document id (no por campo)
+            val guardsSnapshot = firestore.collectionGroup("guards")
+                .whereEqualTo(FieldPath.documentId(), guardId)
+                .get()
+                .await()
+
+            Log.d("TEST", "collectionGroup size: ${guardsSnapshot.size()}")
+            Log.d("GUARDS_TEST", "GuardID recibido = $guardId")
+
+            if (guardsSnapshot.isEmpty) {
+                Log.d("FirebaseEvent", "⚠️ No es guardia en ningún evento (collectionGroup vacío)")
+                return emptyList()
+            }
+
+            val events = mutableListOf<EventModel>()
+
+            // 2) Por cada guardDoc encontrado, obtener el evento padre
+            for (guardDoc in guardsSnapshot.documents) {
+                // guardDoc.reference -> .../events/{eventId}/guards/{guardId}
+                val eventRef = guardDoc.reference.parent.parent
+                if (eventRef != null) {
+                    val eventSnapshot = eventRef.get().await()
+                    if (eventSnapshot.exists()) {
+                        val event = eventSnapshot.toObject(EventModel::class.java)
+                            ?.copy(eventId = eventSnapshot.id)
+                        if (event != null) events.add(event)
+                    } else {
+                        Log.w("FirebaseEvent", "Advertencia: evento padre no existe para ${guardDoc.reference.path}")
+                    }
+                } else {
+                    Log.w("FirebaseEvent", "Advertencia: referencia al padre nula para ${guardDoc.reference.path}")
+                }
+            }
+
+            Log.d("FirebaseEvent", "✅ ${events.size} eventos encontrados donde es guardia")
+            events
+
+        } catch (e: Exception) {
+            Log.e("FirebaseEvent", "❌ Error al obtener eventos donde es guardia", e)
+            emptyList()
+        }
+    }
+
 
 }

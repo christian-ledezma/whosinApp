@@ -21,6 +21,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
+import com.ucb.whosin.features.event.presentation.GuardEventsScreen
 import com.ucb.whosin.features.event.presentation.EventEditScreen
 import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.MapPickerScreen
@@ -252,6 +253,16 @@ fun AppNavigation(
             AcceptInvitationScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // Pantalla de eventos donde el usuario es guardia
+        composable(Screen.GuardEvents.route) {
+            GuardEventsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onEventSelected = { eventId ->
+                    navController.navigate(Screen.Guard.createRoute(eventId))
                 }
             )
         }

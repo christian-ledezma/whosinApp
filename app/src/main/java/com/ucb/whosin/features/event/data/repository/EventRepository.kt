@@ -96,4 +96,8 @@ class EventRepository(
         return dataSource.getEventGuards(eventId)
     }
 
+    override suspend fun getEventsWhereUserIsGuard(guardId: String): List<EventModel> {
+        return dataSource.getEventsWhereUserIsGuard(guardId)
+    }
+
 }

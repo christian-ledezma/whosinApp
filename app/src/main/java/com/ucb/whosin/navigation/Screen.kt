@@ -7,6 +7,7 @@ sealed class Screen (val route: String) {
     object Guard : Screen("guard/{eventId}") {
         fun createRoute(eventId: String) = "guard/$eventId"
     }
+    object GuardEvents : Screen("guard_events")
     object Guest : Screen("guest")
     object Event : Screen("event")
     object EditEvent : Screen("edit_event/{eventId}") {
