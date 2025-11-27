@@ -119,12 +119,10 @@ fun AppNavigation(
                 onEventSelected = { eventId ->
                     navController.navigate("guest/$eventId")
                 },
-                onManageEventClicked = { eventId ->
-                    navController.navigate(Screen.Guard.createRoute(eventId))
-                },
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
-                }
+                },
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -134,12 +132,10 @@ fun AppNavigation(
                 onEventSelected = { eventId ->
                     navController.navigate("guest/$eventId")
                 },
-                onManageEventClicked = { eventId ->
-                    navController.navigate(Screen.Guard.createRoute(eventId))
-                },
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
-                }
+                },
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
