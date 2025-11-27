@@ -191,4 +191,68 @@ class GuestListViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
+    fun addGuest(name: String, companions: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null
+            )
+
+            val newGuest = Guest(
+                userId = null,
+                name = name,
+                plusOnesAllowed = companions,
+                groupSize = companions + 1,
+                checkedIn = false,
+                inviteStatus = "pending"
+            )
+
+            // Aquí necesitarás inyectar AddGuestUseCase en el constructor
+            // Por ahora, solo actualizo el estado
+            _uiState.value = _uiState.value.copy(isLoading = false)
+            loadGuests()
+        }
+    }
+
+    fun updateGuestName(guestId: String, newName: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                errorMessage = null,
+                updateSuccess = false
+            )
+
+            val currentGuest = _uiState.value.guests.find { it.guestId == guestId }
+            if (currentGuest == null) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "No se encontró el invitado",
+                    isLoading = false
+                )
+                return@launch
+            }
+
+            val updatedGuest = currentGuest.copy(name = newName)
+
+            when (val result = updateGuestUseCase(eventId, guestId, updatedGuest)) {
+                is GuestResult.Success -> {
+                    _uiState.value = _uiState.value.copy(
+                        updateSuccess= true,
+                        isLoading = false
+                    )
+                }
+                is GuestResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = result.message,
+                        isLoading = false
+                    )
+                }
+                else -> {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Error inesperado al actualizar",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
 }
