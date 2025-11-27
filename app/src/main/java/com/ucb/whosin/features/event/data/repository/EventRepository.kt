@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
+import com.ucb.whosin.features.event.domain.model.GuardResult
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
 
 class EventRepository(
@@ -55,5 +56,44 @@ class EventRepository(
         return dataSource.getAllEventsByUser(userId)
     }
 
+    override suspend fun updateEvent(
+        eventId: String,
+        name: String,
+        date: Timestamp,
+        locationName: String,
+        latitude: Double,
+        longitude: Double,
+        capacity: Int
+    ): EventResult {
+        return dataSource.updateEvent(
+            eventId = eventId,
+            name = name,
+            date = date,
+            locationName = locationName,
+            latitude = latitude,
+            longitude = longitude,
+            capacity = capacity
+        )
+    }
+
+    override suspend fun cancelEvent(eventId: String): EventResult {
+        return dataSource.cancelEvent(eventId)
+    }
+
+    override suspend fun addGuard(
+        eventId: String,
+        guardEmail: String,
+        addedBy: String
+    ): GuardResult {
+        return dataSource.addGuard(eventId, guardEmail, addedBy)
+    }
+
+    override suspend fun removeGuard(eventId: String, guardId: String): GuardResult {
+        return dataSource.removeGuard(eventId, guardId)
+    }
+
+    override suspend fun getEventGuards(eventId: String): GuardResult {
+        return dataSource.getEventGuards(eventId)
+    }
 
 }

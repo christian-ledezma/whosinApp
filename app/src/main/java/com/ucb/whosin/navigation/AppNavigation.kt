@@ -21,6 +21,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
+import com.ucb.whosin.features.event.presentation.EventEditScreen
 import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.MapPickerScreen
 import com.ucb.whosin.features.qrscanner.ui.QrScannerScreen
@@ -123,6 +124,9 @@ fun AppNavigation(
                 },
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
+                },
+                onEditEventClicked = { eventId ->
+                    navController.navigate(Screen.EditEvent.createRoute(eventId))
                 }
             )
         }
@@ -150,6 +154,21 @@ fun AppNavigation(
 
             RegisterEventScreen(
                 locationViewModel = locationViewModel,
+                onNavigateToMapPicker = { navController.navigate("map_picker") }
+            )
+        }
+
+        composable(
+            route = Screen.EditEvent.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
+            val locationViewModel = koinViewModel<LocationViewModel>(
+                viewModelStoreOwner = it
+            )
+
+            EventEditScreen(
+                locationViewModel = locationViewModel,
+                onNavigateBack = { navController.popBackStack() },
                 onNavigateToMapPicker = { navController.navigate("map_picker") }
             )
         }

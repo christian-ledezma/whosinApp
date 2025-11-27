@@ -8,8 +8,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +45,8 @@ data class EventSummary(
 fun EventSelectorScreen(
     onEventSelected: (String) -> Unit,
     onManageEventClicked: (String) -> Unit,
-    onNavigateToCreateEvent: () -> Unit
+    onNavigateToCreateEvent: () -> Unit,
+    onEditEventClicked: (String) -> Unit = {}
 ) {
     var showDeleteDialog by remember { mutableStateOf<String?>(null) }
     var lastDeletedEventId by remember { mutableStateOf<String?>(null) }
@@ -144,6 +151,9 @@ fun EventSelectorScreen(
                         onDeleteClick = { eventId ->
                             lastDeletedEventId = eventId
                             showDeleteDialog = eventId
+                        },
+                        onEditClick = { eventId ->
+                            onEditEventClicked(eventId)
                         }
                     )
                 }
@@ -151,7 +161,7 @@ fun EventSelectorScreen(
         }
     }
 
-    // 🔥 Modal de confirmación de eliminación
+    // Modal de confirmación de eliminación
     if (showDeleteDialog != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = null },
@@ -179,13 +189,17 @@ fun EventCard(
     event: EventSummary,
     onCardClick: () -> Unit,
     onManageClick: () -> Unit,
-    onDeleteClick: (String) -> Unit
+    onDeleteClick: (String) -> Unit,
+    onEditClick: (String) -> Unit // NUEVO parámetro
 ) {
     val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     val dateStr = dateFormatter.format(event.date.toDate())
 
     val clipboard = LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE)
             as ClipboardManager
+
+    var showMenu by remember { mutableStateOf(false) }
+    var showCopySuccess by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -202,12 +216,70 @@ fun EventCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = event.name,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A1A1A)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = event.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1A1A),
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Menú de tres puntos
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Más opciones",
+                            tint = Color(0xFF5E6FA3)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Editar") },
+                            onClick = {
+                                showMenu = false
+                                onEditClick(event.eventId)
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Edit, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Ver invitados") },
+                            onClick = {
+                                showMenu = false
+                                onCardClick()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Person, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Eliminar") },
+                            onClick = {
+                                showMenu = false
+                                onDeleteClick(event.eventId)
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = Color.Red
+                                )
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -237,26 +309,50 @@ fun EventCard(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-
-                TextButton(
+                // Botón copiar ID con feedback
+                OutlinedButton(
                     onClick = {
                         val clip = ClipData.newPlainText("Event ID", event.eventId)
                         clipboard.setPrimaryClip(clip)
-                    }
-                ) { Text("Copiar ID") }
+                        showCopySuccess = true
+                    },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (showCopySuccess)
+                            Color(0xFF4CAF50).copy(alpha = 0.1f)
+                        else
+                            Color.Transparent
+                    )
+                ) {
+                    Icon(
+                        imageVector = if (showCopySuccess) Icons.Default.Check else Icons.Default.ContentCopy,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (showCopySuccess) Color(0xFF4CAF50) else Color(0xFF5E6FA3)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        if (showCopySuccess) "Copiado" else "Copiar ID",
+                        color = if (showCopySuccess) Color(0xFF4CAF50) else Color(0xFF5E6FA3)
+                    )
+                }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                // Reset del estado de copiado
+                LaunchedEffect(showCopySuccess) {
+                    if (showCopySuccess) {
+                        kotlinx.coroutines.delay(2000)
+                        showCopySuccess = false
+                    }
+                }
 
                 Button(
                     onClick = onManageClick,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E6FA3))
-                ) { Text("Modo Guardia") }
-
-                TextButton(
-                    onClick = { onDeleteClick(event.eventId) }
-                ) { Text("Eliminar", color = Color.Red) }
+                ) {
+                    Text("Modo Guardia")
+                }
             }
         }
     }
