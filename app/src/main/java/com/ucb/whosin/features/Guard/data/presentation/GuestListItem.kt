@@ -7,28 +7,29 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.ucb.whosin.features.Guard.data.model.Guest
+import com.ucb.whosin.ui.theme.WhosInColors
 
 @Composable
 fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = WhosInColors.White,
+        shadowElevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -38,19 +39,21 @@ fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = guest.name, fontWeight = FontWeight.Bold)
+                Text(
+                    text = guest.name,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = WhosInColors.DarkTeal
+                )
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Lógica de estado corregida
                 val statusText: String
-                val statusColor: Color
-
-                if (guest.checkedIn) {
-                    statusText = "Checked In"
-                    statusColor = Color(0xFF34A853) // Verde
+                val statusColor = if (guest.checkedIn) {
+                    statusText = "Verificado"
+                    WhosInColors.Success
                 } else {
-                    statusText = (guest.inviteStatus ?: "Pending").replaceFirstChar { it.uppercase() }
-                    statusColor = Color.Gray
+                    statusText = (guest.inviteStatus ?: "Pendiente").replaceFirstChar { it.uppercase() }
+                    WhosInColors.GrayBlue
                 }
 
                 Text(
@@ -61,16 +64,23 @@ fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {
                 )
             }
 
-            // Usar el guestId (ID del documento) que ahora obtenemos del repositorio
             guest.guestId?.let {
                 Button(
                     onClick = { onCheckIn(it) },
-                    enabled = !guest.checkedIn, // El botón se deshabilita si ya se hizo check-in
+                    enabled = !guest.checkedIn,
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (guest.checkedIn) Color.LightGray else MaterialTheme.colorScheme.primary
-                    )
+                        containerColor = WhosInColors.LimeGreen,
+                        contentColor = WhosInColors.DarkTeal,
+                        disabledContainerColor = WhosInColors.LightGray,
+                        disabledContentColor = WhosInColors.GrayBlue
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
-                    Text(text = if (guest.checkedIn) "Hecho" else "Check-in")
+                    Text(
+                        text = if (guest.checkedIn) "Hecho" else "Verificar",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
