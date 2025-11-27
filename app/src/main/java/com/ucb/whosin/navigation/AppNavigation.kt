@@ -199,7 +199,9 @@ fun AppNavigation(
             route = "guest/{eventId}",
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) {
-            GuestListScreen()
+            GuestListScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         // Pantalla para aceptar invitación
