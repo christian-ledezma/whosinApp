@@ -1,5 +1,6 @@
 package com.ucb.whosin.features.event.presentation
 
+import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -74,11 +75,18 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuardEventsScreen(
+    viewModel: GuardEventsViewModel = koinViewModel(), // ← MOVIDO AQUÍ
     onNavigateBack: () -> Unit = {},
     onEventSelected: (String) -> Unit = {}
 ) {
+    Log.d("SCREEN_TEST", "========================================")
+    Log.d("SCREEN_TEST", "GuardEventsScreen composable llamado")
+    Log.d("SCREEN_TEST", "ViewModel: $viewModel")
+    Log.d("SCREEN_TEST", "========================================")
+
     WhosInModernTheme {
         GuardEventsScreenContent(
+            viewModel = viewModel, // ← PASADO COMO PARÁMETRO
             onNavigateBack = onNavigateBack,
             onEventSelected = onEventSelected
         )
@@ -88,15 +96,18 @@ fun GuardEventsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun GuardEventsScreenContent(
+    viewModel: GuardEventsViewModel, // ← RECIBIDO COMO PARÁMETRO
     onNavigateBack: () -> Unit,
     onEventSelected: (String) -> Unit
 ) {
-    val viewModel: GuardEventsViewModel = koinViewModel()
+    Log.d("SCREEN_TEST", "GuardEventsScreenContent renderizado")
+
     val uiState = viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(viewModel) {
+        Log.d("SCREEN_TEST", "LaunchedEffect ejecutado")
         viewModel.loadGuardEvents()
     }
 
@@ -109,6 +120,7 @@ private fun GuardEventsScreenContent(
 
     LaunchedEffect(uiState.value.errorMessage) {
         uiState.value.errorMessage?.let { error ->
+            Log.e("SCREEN_TEST", "Error mostrado: $error")
             scope.launch {
                 snackbarHostState.showSnackbar(
                     message = error,
@@ -133,30 +145,29 @@ private fun GuardEventsScreenContent(
         containerColor = WhosInColors.DarkTeal
     ) { paddingValues ->
         Box(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Decoraciones de fondo
             GuardEventsDecorationCircles()
 
             Column(
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp)
                     .statusBarsPadding()
             ) {
-                Spacer(modifier = Modifier.Companion.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Header
                 AnimatedEntrance(visible = startAnimation.value, delayMillis = 0) {
                     Row(
-                        modifier = Modifier.Companion.fillMaxWidth(),
-                        verticalAlignment = Alignment.Companion.CenterVertically
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
                             onClick = onNavigateBack,
-                            modifier = Modifier.Companion
+                            modifier = Modifier
                                 .size(48.dp)
                                 .clip(CircleShape)
                                 .background(WhosInColors.White)
@@ -168,14 +179,14 @@ private fun GuardEventsScreenContent(
                             )
                         }
 
-                        Spacer(modifier = Modifier.Companion.width(16.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
 
                         Column {
                             Text(
                                 text = "Modo Guardia",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = WhosInColors.LightGray,
-                                fontWeight = FontWeight.Companion.Bold
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = "${uiState.value.events.size} evento${if (uiState.value.events.size != 1) "s" else ""} asignado${if (uiState.value.events.size != 1) "s" else ""}",
@@ -186,13 +197,14 @@ private fun GuardEventsScreenContent(
                     }
                 }
 
-                Spacer(modifier = Modifier.Companion.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Contenido
                 if (uiState.value.isLoading) {
+                    Log.d("SCREEN_TEST", "Mostrando loading...")
                     Box(
-                        modifier = Modifier.Companion.fillMaxSize(),
-                        contentAlignment = Alignment.Companion.Center
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
                             color = WhosInColors.LimeGreen,
@@ -200,12 +212,14 @@ private fun GuardEventsScreenContent(
                         )
                     }
                 } else if (uiState.value.events.isEmpty()) {
+                    Log.d("SCREEN_TEST", "Mostrando estado vacío...")
                     AnimatedEntrance(visible = startAnimation.value, delayMillis = 100) {
                         EmptyGuardEventsState()
                     }
                 } else {
+                    Log.d("SCREEN_TEST", "Mostrando ${uiState.value.events.size} eventos...")
                     LazyColumn(
-                        modifier = Modifier.Companion.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
@@ -221,7 +235,6 @@ private fun GuardEventsScreenContent(
         }
     }
 }
-
 @Composable
 private fun GuardEventCard(
     event: EventModel,

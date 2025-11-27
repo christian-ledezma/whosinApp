@@ -280,16 +280,28 @@ class FirebaseEventDataSource(
 
     suspend fun getEventsWhereUserIsGuard(guardId: String): List<EventModel> {
         return try {
-            Log.d("FirebaseEvent", "🔹 Buscando eventos donde el usuario es guardia: $guardId")
+            Log.d("FirebaseEvent", "========================================")
+            Log.d("FirebaseEvent", "🔹 INICIO - Buscando eventos para guardId: $guardId")
+            Log.d("FirebaseEvent", "========================================")
 
-            // 1) Buscar en todas las subcolecciones "guards" por document id (no por campo)
+            // 1) Buscar en todas las subcolecciones "guards"
+            Log.d("FirebaseEvent", "Paso 1: Ejecutando collectionGroup query...")
+
             val guardsSnapshot = firestore.collectionGroup("guards")
                 .whereEqualTo(FieldPath.documentId(), guardId)
                 .get()
                 .await()
 
-            Log.d("TEST", "collectionGroup size: ${guardsSnapshot.size()}")
-            Log.d("GUARDS_TEST", "GuardID recibido = $guardId")
+            Log.d("FirebaseEvent", "Paso 2: Query completado")
+            Log.d("FirebaseEvent", "collectionGroup size: ${guardsSnapshot.size()}")
+            Log.d("FirebaseEvent", "isEmpty: ${guardsSnapshot.isEmpty}")
+
+            // Log de todos los documentos encontrados
+            guardsSnapshot.documents.forEachIndexed { index, doc ->
+                Log.d("FirebaseEvent", "Documento [$index]: ${doc.reference.path}")
+                Log.d("FirebaseEvent", "  - ID: ${doc.id}")
+                Log.d("FirebaseEvent", "  - Existe: ${doc.exists()}")
+            }
 
             if (guardsSnapshot.isEmpty) {
                 Log.d("FirebaseEvent", "⚠️ No es guardia en ningún evento (collectionGroup vacío)")
@@ -300,27 +312,50 @@ class FirebaseEventDataSource(
 
             // 2) Por cada guardDoc encontrado, obtener el evento padre
             for (guardDoc in guardsSnapshot.documents) {
+                Log.d("FirebaseEvent", "---")
+                Log.d("FirebaseEvent", "Procesando guard doc: ${guardDoc.reference.path}")
+
                 // guardDoc.reference -> .../events/{eventId}/guards/{guardId}
                 val eventRef = guardDoc.reference.parent.parent
-                if (eventRef != null) {
-                    val eventSnapshot = eventRef.get().await()
-                    if (eventSnapshot.exists()) {
-                        val event = eventSnapshot.toObject(EventModel::class.java)
-                            ?.copy(eventId = eventSnapshot.id)
-                        if (event != null) events.add(event)
+
+                if (eventRef == null) {
+                    Log.e("FirebaseEvent", "ERROR: eventRef es null para ${guardDoc.reference.path}")
+                    continue
+                }
+
+                Log.d("FirebaseEvent", "Event ref path: ${eventRef.path}")
+                Log.d("FirebaseEvent", "Event ID: ${eventRef.id}")
+
+                val eventSnapshot = eventRef.get().await()
+                Log.d("FirebaseEvent", "Event snapshot existe: ${eventSnapshot.exists()}")
+
+                if (eventSnapshot.exists()) {
+                    val event = eventSnapshot.toObject(EventModel::class.java)
+                    Log.d("FirebaseEvent", "Event parseado: ${event?.name ?: "null"}")
+
+                    if (event != null) {
+                        val eventWithId = event.copy(eventId = eventSnapshot.id)
+                        Log.d("FirebaseEvent", "✅ Evento agregado: ${eventWithId.name} (${eventWithId.eventId})")
+                        events.add(eventWithId)
                     } else {
-                        Log.w("FirebaseEvent", "Advertencia: evento padre no existe para ${guardDoc.reference.path}")
+                        Log.e("FirebaseEvent", "ERROR: No se pudo parsear el evento")
                     }
                 } else {
-                    Log.w("FirebaseEvent", "Advertencia: referencia al padre nula para ${guardDoc.reference.path}")
+                    Log.w("FirebaseEvent", "Advertencia: evento padre no existe")
                 }
             }
 
-            Log.d("FirebaseEvent", "✅ ${events.size} eventos encontrados donde es guardia")
+            Log.d("FirebaseEvent", "========================================")
+            Log.d("FirebaseEvent", "✅ RESULTADO FINAL: ${events.size} eventos encontrados")
+            Log.d("FirebaseEvent", "========================================")
             events
 
         } catch (e: Exception) {
-            Log.e("FirebaseEvent", "❌ Error al obtener eventos donde es guardia", e)
+            Log.e("FirebaseEvent", "========================================")
+            Log.e("FirebaseEvent", "❌ EXCEPCIÓN CAPTURADA", e)
+            Log.e("FirebaseEvent", "Mensaje: ${e.message}")
+            Log.e("FirebaseEvent", "Stack trace: ${e.stackTraceToString()}")
+            Log.e("FirebaseEvent", "========================================")
             emptyList()
         }
     }

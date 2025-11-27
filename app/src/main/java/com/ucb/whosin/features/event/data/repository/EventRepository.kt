@@ -1,5 +1,6 @@
 package com.ucb.whosin.features.event.data.repository
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.domain.model.EventModel
@@ -97,7 +98,15 @@ class EventRepository(
     }
 
     override suspend fun getEventsWhereUserIsGuard(guardId: String): List<EventModel> {
-        return dataSource.getEventsWhereUserIsGuard(guardId)
+        Log.d("REPOSITORY_TEST", "========================================")
+        Log.d("REPOSITORY_TEST", "Repository llamado con guardId: $guardId")
+        Log.d("REPOSITORY_TEST", "DataSource: $dataSource")
+        Log.d("REPOSITORY_TEST", "========================================")
+
+        val result = dataSource.getEventsWhereUserIsGuard(guardId)
+
+        Log.d("REPOSITORY_TEST", "Repository resultado: ${result.size} eventos")
+        return result
     }
 
 }
