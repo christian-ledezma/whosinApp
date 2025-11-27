@@ -122,7 +122,10 @@ fun AppNavigation(
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
                 },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onManageEventClicked = { eventId ->  // ← Agregar
+                    navController.navigate("guard/$eventId")
+                }
             )
         }
 
@@ -135,7 +138,10 @@ fun AppNavigation(
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
                 },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onManageEventClicked = { eventId ->  // ← Agregar
+                    navController.navigate("guard/$eventId")
+                }
             )
         }
 
