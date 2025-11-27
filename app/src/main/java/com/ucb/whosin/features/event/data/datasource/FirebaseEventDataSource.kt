@@ -288,7 +288,7 @@ class FirebaseEventDataSource(
             Log.d("FirebaseEvent", "Paso 1: Ejecutando collectionGroup query...")
 
             val guardsSnapshot = firestore.collectionGroup("guards")
-                .whereEqualTo(FieldPath.documentId(), guardId)
+                .whereEqualTo("guardId", guardId)
                 .get()
                 .await()
 
