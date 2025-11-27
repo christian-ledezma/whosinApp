@@ -122,7 +122,10 @@ fun AppNavigation(
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
                 },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onManageEventClicked = { eventId ->  // ← Agregar
+                    navController.navigate("guard/$eventId")
+                }
             )
         }
 
@@ -135,7 +138,10 @@ fun AppNavigation(
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
                 },
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onManageEventClicked = { eventId ->  // ← Agregar
+                    navController.navigate("guard/$eventId")
+                }
             )
         }
 
@@ -193,7 +199,9 @@ fun AppNavigation(
             route = "guest/{eventId}",
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) {
-            GuestListScreen()
+            GuestListScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         // Pantalla para aceptar invitación
