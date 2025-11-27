@@ -124,9 +124,6 @@ fun AppNavigation(
                 },
                 onNavigateToCreateEvent = {
                     navController.navigate("create_event")
-                },
-                onEditEventClicked = { eventId ->
-                    navController.navigate(Screen.EditEvent.createRoute(eventId))
                 }
             )
         }
@@ -201,10 +198,6 @@ fun AppNavigation(
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) {
             GuestListScreen()
-        }
-
-        composable(Screen.Staff.route) {
-            // StaffScreen()
         }
 
         // Pantalla para aceptar invitación

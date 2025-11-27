@@ -1,29 +1,48 @@
 package com.ucb.whosin.features.Guest.presentation
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Groups
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.ucb.whosin.features.Guest.domain.model.Guest
-import com.ucb.whosin.ui.components.WhosInCard
+import com.ucb.whosin.features.login.presentation.AnimatedEntrance
+import com.ucb.whosin.features.login.presentation.WhosInModernTheme
 import com.ucb.whosin.ui.components.WhosInPrimaryButton
 import com.ucb.whosin.ui.components.WhosInTextField
 import com.ucb.whosin.ui.theme.WhosInColors
@@ -34,536 +53,796 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuestListScreen(
-    listViewModel: GuestListViewModel = koinViewModel(),
-    addViewModel: AddGuestViewModel = koinViewModel()
+    viewModel: GuestListViewModel = koinViewModel(),
+    onNavigateBack: () -> Unit = {}
 ) {
-    val listUiState by listViewModel.uiState.collectAsState()
-    val addUiState by addViewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    var showAddDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var selectedGuest by remember { mutableStateOf<Guest?>(null) }
-
-    // Recargar lista cuando se agrega un invitado exitosamente
-    LaunchedEffect(addUiState.isSuccess) {
-        if (addUiState.isSuccess) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = "✓ Invitado agregado",
-                    duration = SnackbarDuration.Short
-                )
-                delay(500)
-                listViewModel.loadGuests()
-                showAddDialog = false
-                addViewModel.clearSuccess()
-            }
-        }
-    }
-
-    // Recargar lista cuando se elimina exitosamente
-    LaunchedEffect(listUiState.deleteSuccess) {
-        if (listUiState.deleteSuccess) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = "Invitado eliminado",
-                    duration = SnackbarDuration.Short
-                )
-                delay(500)
-                listViewModel.loadGuests()
-                showDeleteDialog = false
-                selectedGuest = null
-            }
-        }
-    }
-
-    // Mostrar errores de agregar
-    LaunchedEffect(addUiState.errorMessage) {
-        addUiState.errorMessage?.let { error ->
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = error,
-                    duration = SnackbarDuration.Long
-                )
-                addViewModel.clearError()
-            }
-        }
-    }
-
-    // Mostrar errores de lista
-    LaunchedEffect(listUiState.errorMessage) {
-        listUiState.errorMessage?.let { error ->
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = error,
-                    duration = SnackbarDuration.Long
-                )
-                listViewModel.clearError()
-            }
-        }
-    }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Invitados",
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                shape = CircleShape
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar",
-                    tint = MaterialTheme.colorScheme.onSecondary
-                )
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 20.dp)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Barra de búsqueda moderna
-            WhosInTextField(
-                value = listUiState.searchQuery,
-                onValueChange = { listViewModel.onSearchQueryChange(it) },
-                placeholder = "Buscar invitados...",
-                leadingIcon = Icons.Default.Search,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Stats Cards modernas
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ModernStatCard(
-                    title = "Total",
-                    value = listUiState.guests.size.toString(),
-                    color = WhosInColors.MossGreen,
-                    modifier = Modifier.weight(1f)
-                )
-                ModernStatCard(
-                    title = "Confirmados",
-                    value = listUiState.guests.count { it.inviteStatus == "confirmed" }.toString(),
-                    color = WhosInColors.ForestGreen,
-                    modifier = Modifier.weight(1f)
-                )
-                ModernStatCard(
-                    title = "Check-in",
-                    value = listUiState.guests.count { it.checkedIn }.toString(),
-                    color = WhosInColors.CheckedIn,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Lista de invitados
-            if (listUiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
-                }
-            } else if (listUiState.filteredGuests.isEmpty()) {
-                EmptyState()
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(
-                        items = listUiState.filteredGuests,
-                        key = { it.guestId }
-                    ) { guest ->
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn(animationSpec = tween(300)) +
-                                    slideInVertically(initialOffsetY = { it / 4 }),
-                            exit = fadeOut() + slideOutVertically()
-                        ) {
-                            ModernGuestCard(
-                                guest = guest,
-                                onDelete = {
-                                    selectedGuest = guest
-                                    showDeleteDialog = true
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // Diálogo agregar (SIN acompañantes, SIN estado)
-        if (showAddDialog) {
-            ModernAddGuestDialog(
-                isLoading = addUiState.isLoading,
-                onDismiss = { showAddDialog = false },
-                onConfirm = { name, note ->
-                    // SIEMPRE confirmed, plusOnesAllowed = 0
-                    addViewModel.addGuest(
-                        name = name,
-                        plusOnesAllowed = 0,  // No se pregunta en UI
-                        inviteStatus = "confirmed",  // Siempre confirmed
-                        note = note
-                    )
-                }
-            )
-        }
-
-        // Diálogo eliminar
-        if (showDeleteDialog && selectedGuest != null) {
-            ModernDeleteDialog(
-                guestName = selectedGuest!!.name,
-                isLoading = listUiState.isLoading,
-                onConfirm = {
-                    listViewModel.deleteGuest(selectedGuest!!.guestId)
-                },
-                onDismiss = {
-                    showDeleteDialog = false
-                    selectedGuest = null
-                }
-            )
-        }
-    }
-}
-
-@Composable
-fun ModernStatCard(
-    title: String,
-    value: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    WhosInCard(
-        modifier = modifier.height(90.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-fun ModernGuestCard(
-    guest: Guest,
-    onDelete: () -> Unit
-) {
-    var scale by remember { mutableStateOf(0.8f) }
-
-    LaunchedEffect(Unit) {
-        animate(
-            initialValue = 0.8f,
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        ) { value, _ -> scale = value }
-    }
-
-    WhosInCard(
-        modifier = Modifier.scale(scale)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                // Avatar
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = guest.name.firstOrNull()?.toString()?.uppercase() ?: "?",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSecondary
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column {
-                    Text(
-                        text = guest.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    // Solo mostrar check-in, NO acompañantes, NO estado
-                    if (guest.checkedIn) {
-                        MinimalChip(
-                            text = "✓ Check-in",
-                            color = WhosInColors.CheckedIn
-                        )
-                    } else {
-                        MinimalChip(
-                            text = "Confirmado",
-                            color = WhosInColors.Confirmed
-                        )
-                    }
-
-                    // Nota si existe
-                    if (!guest.note.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = guest.note,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                        )
-                    }
-                }
-            }
-
-            // Botón eliminar
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun MinimalChip(
-    text: String,
-    color: Color
-) {
-    Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = color.copy(alpha = 0.15f)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            style = MaterialTheme.typography.labelSmall,
-            color = color,
-            fontWeight = FontWeight.SemiBold
+    WhosInModernTheme {
+        GuestListScreenContent(
+            viewModel = viewModel,
+            onNavigateBack = onNavigateBack
         )
-    }
-}
-
-@Composable
-fun EmptyState() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "No hay invitados",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "Toca + para agregar uno",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
-        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModernAddGuestDialog(
-    isLoading: Boolean,
+private fun GuestListScreenContent(
+    viewModel: GuestListViewModel,
+    onNavigateBack: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    var showAddGuestDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf<Guest?>(null) }
+    var showDeleteDialog by remember { mutableStateOf<Guest?>(null) }
+    var startAnimation by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        startAnimation = true
+        viewModel.loadGuests()
+    }
+
+    // Mostrar snackbar para éxito en actualización
+    LaunchedEffect(uiState.updateSuccess) {
+        if (uiState.updateSuccess) {
+            scope.launch {
+                snackbarHostState.showSnackbar("Invitado actualizado correctamente")
+                viewModel.loadGuests()
+            }
+        }
+    }
+
+    // Mostrar snackbar para éxito en eliminación
+    LaunchedEffect(uiState.deleteSuccess) {
+        if (uiState.deleteSuccess) {
+            scope.launch {
+                snackbarHostState.showSnackbar("Invitado eliminado")
+                viewModel.loadGuests()
+            }
+        }
+    }
+
+    // Mostrar errores
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { error ->
+            scope.launch {
+                snackbarHostState.showSnackbar(error)
+                viewModel.clearError()
+            }
+        }
+    }
+
+    // Diálogo para agregar invitado
+    if (showAddGuestDialog) {
+        AddGuestDialog(
+            onDismiss = { showAddGuestDialog = false },
+            onConfirm = { name, companions ->
+                viewModel.addGuest(name, companions)
+                showAddGuestDialog = false
+            }
+        )
+    }
+
+    // Diálogo para editar invitado
+    showEditDialog?.let { guest ->
+        EditGuestDialog(
+            guest = guest,
+            onDismiss = { showEditDialog = null },
+            onConfirm = { newName ->
+                viewModel.updateGuestName(guest.guestId, newName)
+                showEditDialog = null
+            }
+        )
+    }
+
+    // Diálogo para confirmar eliminación
+    showDeleteDialog?.let { guest ->
+        DeleteConfirmDialog(
+            guestName = guest.name,
+            onDismiss = { showDeleteDialog = null },
+            onConfirm = {
+                viewModel.deleteGuest(guest.guestId)
+                showDeleteDialog = null
+            }
+        )
+    }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    shape = RoundedCornerShape(12.dp),
+                    containerColor = WhosInColors.DarkTeal,
+                    contentColor = WhosInColors.LightGray
+                )
+            }
+        },
+        containerColor = WhosInColors.DarkTeal,
+        floatingActionButton = {
+            AnimatedEntrance(visible = startAnimation, delayMillis = 400) {
+                FloatingActionButton(
+                    onClick = { showAddGuestDialog = true },
+                    containerColor = WhosInColors.LimeGreen,
+                    contentColor = WhosInColors.DarkTeal,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.PersonAdd,
+                        contentDescription = "Agregar invitado",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            // Decoraciones de fondo
+            GuestListDecorationCircles()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .statusBarsPadding()
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Header con botón atrás
+                AnimatedEntrance(visible = startAnimation, delayMillis = 0) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = onNavigateBack,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(WhosInColors.White)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.ArrowBack,
+                                contentDescription = "Volver",
+                                tint = WhosInColors.DarkTeal
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = "Invitados",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = WhosInColors.LightGray,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Estadísticas
+                AnimatedEntrance(visible = startAnimation, delayMillis = 100) {
+                    GuestStatsCard(
+                        totalGuests = uiState.guests.size,
+                        confirmedGuests = uiState.guests.count { it.inviteStatus == "confirmed" },
+                        checkedInGuests = uiState.guests.count { it.checkedIn }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Buscador
+                AnimatedEntrance(visible = startAnimation, delayMillis = 200) {
+                    WhosInTextField(
+                        value = uiState.searchQuery,
+                        onValueChange = { viewModel.onSearchQueryChange(it) },
+                        placeholder = "Buscar invitado...",
+                        leadingIcon = Icons.Outlined.Search,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Lista de invitados
+                AnimatedEntrance(visible = startAnimation, delayMillis = 300) {
+                    if (uiState.isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = WhosInColors.LimeGreen,
+                                strokeWidth = 3.dp
+                            )
+                        }
+                    } else if (uiState.filteredGuests.isEmpty()) {
+                        EmptyGuestsState(
+                            searchQuery = uiState.searchQuery
+                        )
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(bottom = 80.dp)
+                        ) {
+                            items(
+                                items = uiState.filteredGuests,
+                                key = { it.guestId }
+                            ) { guest ->
+                                ModernGuestCard(
+                                    guest = guest,
+                                    onEditClick = { showEditDialog = guest },
+                                    onDeleteClick = { showDeleteDialog = guest }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GuestStatsCard(
+    totalGuests: Int,
+    confirmedGuests: Int,
+    checkedInGuests: Int
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = WhosInColors.White,
+        shadowElevation = 8.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            StatItem(
+                icon = Icons.Outlined.Groups,
+                label = "Total",
+                value = totalGuests.toString(),
+                color = WhosInColors.MossGreen
+            )
+
+            Divider(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(60.dp),
+                color = WhosInColors.GrayBlue.copy(alpha = 0.3f)
+            )
+
+            StatItem(
+                icon = Icons.Outlined.People,
+                label = "Confirmados",
+                value = confirmedGuests.toString(),
+                color = WhosInColors.Confirmed
+            )
+
+            Divider(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(60.dp),
+                color = WhosInColors.GrayBlue.copy(alpha = 0.3f)
+            )
+
+            StatItem(
+                icon = Icons.Rounded.CheckCircle,
+                label = "Check-in",
+                value = checkedInGuests.toString(),
+                color = WhosInColors.CheckedIn
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    color: androidx.compose.ui.graphics.Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = WhosInColors.DarkTeal
+        )
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = WhosInColors.GrayBlue
+        )
+    }
+}
+
+@Composable
+private fun ModernGuestCard(
+    guest: Guest,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = WhosInColors.White,
+        shadowElevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Nombre del invitado
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = guest.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = WhosInColors.DarkTeal
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Estado
+                        StatusChip(
+                            status = if (guest.checkedIn) "checked_in"
+                            else guest.inviteStatus
+                        )
+
+                        // Acompañantes si tiene
+                        if (guest.plusOnesAllowed > 0) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = WhosInColors.GrayBlue.copy(alpha = 0.15f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Person,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = WhosInColors.GrayBlue
+                                    )
+                                    Text(
+                                        text = "+${guest.plusOnesAllowed}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = WhosInColors.GrayBlue
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Botones de acción
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Botón editar
+                    IconButton(
+                        onClick = onEditClick,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(WhosInColors.LimeGreen.copy(alpha = 0.2f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Edit,
+                            contentDescription = "Editar",
+                            tint = WhosInColors.OliveGreen,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Botón eliminar
+                    IconButton(
+                        onClick = onDeleteClick,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(WhosInColors.Error.copy(alpha = 0.15f))
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = "Eliminar",
+                            tint = WhosInColors.Error,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusChip(status: String) {
+    val (label, color) = when (status) {
+        "checked_in" -> "Check-in" to WhosInColors.CheckedIn
+        "confirmed" -> "Confirmado" to WhosInColors.Confirmed
+        "pending" -> "Pendiente" to WhosInColors.Warning
+        "declined" -> "Rechazado" to WhosInColors.Error
+        else -> "Desconocido" to WhosInColors.GrayBlue
+    }
+
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = color.copy(alpha = 0.15f)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = color,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
+    }
+}
+
+@Composable
+private fun EmptyGuestsState(searchQuery: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(WhosInColors.GrayBlue.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (searchQuery.isBlank()) Icons.Outlined.PersonAdd
+                else Icons.Outlined.Search,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = WhosInColors.GrayBlue
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = if (searchQuery.isBlank()) "No hay invitados aún"
+            else "No se encontraron invitados",
+            style = MaterialTheme.typography.titleMedium,
+            color = WhosInColors.GrayBlue,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = if (searchQuery.isBlank())
+                "Agrega el primer invitado usando el botón +"
+            else "Intenta con otro término de búsqueda",
+            style = MaterialTheme.typography.bodyMedium,
+            color = WhosInColors.GrayBlue.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun AddGuestDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String, String?) -> Unit  // Solo nombre y nota (NO acompañantes, NO estado)
+    onConfirm: (String, Int) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
+    var companions by remember { mutableStateOf(0) }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        title = {
-            Text(
-                "Agregar Invitado",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        text = {
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(28.dp),
+            color = WhosInColors.White
+        ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(24.dp)
             ) {
-                // Solo nombre (SIN acompañantes, SIN estado)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Agregar Invitado",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = WhosInColors.DarkTeal
+                    )
+
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Cerrar",
+                            tint = WhosInColors.GrayBlue
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
                 WhosInTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = "Nombre completo",
                     placeholder = "Ej: Juan Pérez",
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth()
+                    leadingIcon = Icons.Outlined.Person
                 )
 
-                // Solo nota opcional
-                WhosInTextField(
-                    value = note,
-                    onValueChange = { note = it },
-                    label = "Nota (opcional)",
-                    placeholder = "Añade una nota...",
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth()
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Acompañantes",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = WhosInColors.DarkTeal
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { if (companions > 0) companions-- },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (companions > 0) WhosInColors.LimeGreen
+                                else WhosInColors.GrayBlue.copy(alpha = 0.2f)
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Remove,
+                            contentDescription = "Reducir",
+                            tint = WhosInColors.DarkTeal
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(24.dp))
+
+                    Surface(
+                        modifier = Modifier.size(64.dp),
+                        shape = CircleShape,
+                        color = WhosInColors.LimeGreen.copy(alpha = 0.2f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = companions.toString(),
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = WhosInColors.OliveGreen
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(24.dp))
+
+                    IconButton(
+                        onClick = { companions++ },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(WhosInColors.LimeGreen)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Aumentar",
+                            tint = WhosInColors.DarkTeal
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                WhosInPrimaryButton(
+                    text = "Agregar",
+                    onClick = {
+                        if (name.isNotBlank()) {
+                            onConfirm(name, companions)
+                        }
+                    },
+                    enabled = name.isNotBlank()
                 )
             }
-        },
-        confirmButton = {
-            WhosInPrimaryButton(
-                text = "Agregar",
-                onClick = {
-                    if (name.isNotBlank()) {
-                        onConfirm(name, note.ifBlank { null })
+        }
+    }
+}
+
+@Composable
+private fun EditGuestDialog(
+    guest: Guest,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var name by remember { mutableStateOf(guest.name) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(28.dp),
+            color = WhosInColors.White
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Editar Invitado",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = WhosInColors.DarkTeal
+                    )
+
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Cerrar",
+                            tint = WhosInColors.GrayBlue
+                        )
                     }
-                },
-                enabled = !isLoading && name.isNotBlank(),
-                isLoading = isLoading,
-                modifier = Modifier.fillMaxWidth()
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                WhosInTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = "Nombre completo",
+                    placeholder = "Ej: Juan Pérez",
+                    leadingIcon = Icons.Outlined.Person
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                WhosInPrimaryButton(
+                    text = "Guardar",
+                    onClick = {
+                        if (name.isNotBlank()) {
+                            onConfirm(name)
+                        }
+                    },
+                    enabled = name.isNotBlank() && name != guest.name
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeleteConfirmDialog(
+    guestName: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(24.dp),
+        containerColor = WhosInColors.White,
+        title = {
+            Text(
+                text = "Eliminar Invitado",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = WhosInColors.DarkTeal
             )
         },
-        dismissButton = {
+        text = {
+            Text(
+                text = "¿Estás seguro de que deseas eliminar a $guestName de la lista de invitados?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = WhosInColors.GrayBlue
+            )
+        },
+        confirmButton = {
             TextButton(
-                onClick = onDismiss,
-                enabled = !isLoading
-            ) {
-                Text(
-                    "Cancelar",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = WhosInColors.Error
                 )
+            ) {
+                Text("Eliminar", fontWeight = FontWeight.SemiBold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", color = WhosInColors.GrayBlue)
             }
         }
     )
 }
 
 @Composable
-fun ModernDeleteDialog(
-    guestName: String,
-    isLoading: Boolean,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        icon = {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(48.dp)
-            )
-        },
-        title = {
-            Text(
-                "¿Eliminar invitado?",
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        text = {
-            Text(
-                "¿Estás seguro de eliminar a $guestName? Esta acción no se puede deshacer.",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                ),
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Eliminar")
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    "Cancelar",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+private fun GuestListDecorationCircles() {
+    val infiniteTransition = rememberInfiniteTransition(label = "guestDecor")
+    val offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "offset"
+    )
+
+    Box(
+        modifier = Modifier
+            .offset(x = (290 + offset).dp, y = (70 - offset).dp)
+            .size(130.dp)
+            .alpha(0.1f)
+            .clip(CircleShape)
+            .background(WhosInColors.LimeGreen)
+    )
+
+    Box(
+        modifier = Modifier
+            .offset(x = (-40 - offset).dp, y = (450 + offset).dp)
+            .size(110.dp)
+            .alpha(0.08f)
+            .clip(CircleShape)
+            .background(WhosInColors.MintGreen)
     )
 }
