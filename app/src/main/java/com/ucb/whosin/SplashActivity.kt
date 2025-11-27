@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -59,7 +62,7 @@ fun SplashScreen() {
     val alphaAnim = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0f,
         animationSpec = tween(
-            durationMillis = 1000,
+            durationMillis = 2000,
             easing = FastOutSlowInEasing
         ),
         label = "alpha"
@@ -69,7 +72,7 @@ fun SplashScreen() {
     val scaleAnim1 = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0.3f,
         animationSpec = tween(
-            durationMillis = 800,
+            durationMillis = 1500,
             easing = FastOutSlowInEasing
         ),
         label = "scale1"
@@ -79,8 +82,8 @@ fun SplashScreen() {
     val scaleAnim2 = animateFloatAsState(
         targetValue = if (startAnimation) 1f else 0.3f,
         animationSpec = tween(
-            durationMillis = 800,
-            delayMillis = 300, // Empieza 300ms después
+            durationMillis = 1500,
+            delayMillis = 500, // Empieza 300ms después
             easing = FastOutSlowInEasing
         ),
         label = "scale2"
@@ -94,32 +97,38 @@ fun SplashScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(WhosInColors.DarkTeal),
+        contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.graphicsLayer(alpha = alphaAnim.value)
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(alpha = alphaAnim.value)
         ) {
             // Primera imagen
             Image(
-                painter = painterResource(id = R.drawable.ic_splash_logo), // CAMBIA el nombre si es diferente
+                painter = painterResource(id = R.drawable.ic_splash_logo),
                 contentDescription = "Logo",
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .size(150.dp)
+                    .width(400.dp)
+                    .height(180.dp)
+                    .offset(y = 20.dp)
                     .graphicsLayer(
                         scaleX = scaleAnim1.value,
                         scaleY = scaleAnim1.value
                     )
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Segunda imagen
             Image(
-                painter = painterResource(id = R.drawable.ic_splash_text), // CAMBIA el nombre si es diferente
+                painter = painterResource(id = R.drawable.ic_splash_text),
                 contentDescription = "Texto",
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .size(100.dp)
+                    .width(360.dp)
+                    .height(180.dp)
+                    .offset(y = (-20).dp)
                     .graphicsLayer(
                         scaleX = scaleAnim2.value,
                         scaleY = scaleAnim2.value
