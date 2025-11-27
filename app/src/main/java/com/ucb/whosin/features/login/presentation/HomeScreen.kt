@@ -1,40 +1,32 @@
 package com.ucb.whosin.features.login.presentation
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.ucb.whosin.features.login.domain.usecase.LogoutUseCase
 import com.ucb.whosin.navigation.NavigationDrawer
 import com.ucb.whosin.navigation.NavigationViewModel
 import com.ucb.whosin.navigation.Screen
 import kotlinx.coroutines.launch
+import com.ucb.whosin.ui.theme.WhosInColors
+import com.ucb.whosin.features.login.domain.usecase.LogoutUseCase
+import org.koin.androidx.compose.get
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,142 +35,213 @@ fun HomeScreen(
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val logoutUseCase: LogoutUseCase = org.koin.androidx.compose.get()
+    val logoutUseCase: LogoutUseCase = get()
     val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntry?.destination?.route ?: ""
 
-    // Lista de items del drawer
     val navigationItems = NavigationDrawer.getAllItems()
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                Spacer(modifier = Modifier.height(16.dp))
+    WhosInModernTheme {
 
-                // Header del drawer
-                Text(
-                    text = "Who's In",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 28.dp, vertical = 16.dp)
-                )
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet(
+                    drawerContainerColor = WhosInColors.White
+                ) {
+                    Spacer(Modifier.height(16.dp))
 
-                Divider()
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Items del menú
-                navigationItems.forEach { item ->
-                    NavigationDrawerItem(
-                        icon = {
-                            Icon(
-                                imageVector = if (currentRoute == item.route) {
-                                    item.selectedIcon
-                                } else {
-                                    item.unselectedIcon
-                                },
-                                contentDescription = item.label
-                            )
-                        },
-                        label = { Text(item.label) },
-                        selected = currentRoute == item.route,
-                        onClick = {
-                            scope.launch {
-                                drawerState.close()
-                                if (currentRoute != item.route) {
-                                    navigationViewModel.navigateTo(item.route)
-                                }
-                            }
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    Text(
+                        text = "Who's In",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = WhosInColors.DarkTeal,
+                        modifier = Modifier.padding(24.dp)
                     )
+
+                    Divider()
+
+                    navigationItems.forEach { item ->
+                        NavigationDrawerItem(
+                            icon = {
+                                Icon(
+                                    imageVector = if (currentRoute == item.route)
+                                        item.selectedIcon else item.unselectedIcon,
+                                    contentDescription = item.label
+                                )
+                            },
+                            label = { Text(item.label) },
+                            selected = currentRoute == item.route,
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                    if (currentRoute != item.route) {
+                                        navigationViewModel.navigateTo(item.route)
+                                    }
+                                }
+                            },
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = WhosInColors.MintGreen.copy(alpha = 0.2f),
+                                selectedIconColor = WhosInColors.DarkTeal,
+                                selectedTextColor = WhosInColors.DarkTeal
+                            ),
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+                    }
                 }
             }
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Inicio") },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.open()
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menú"
+        ) {
+
+            Scaffold(
+                containerColor = WhosInColors.DarkTeal,
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                "Inicio",
+                                color = WhosInColors.DarkTeal
                             )
-                        }
-                    },
-                    actions = {
-                        TextButton(onClick = {
-                            scope.launch {
-                                logoutUseCase()
-                                navController.navigate(Screen.Login.route) {
-                                    popUpTo(0) { inclusive = true }
-                                }
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                scope.launch { drawerState.open() }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menú",
+                                    tint = WhosInColors.DarkTeal
+                                )
                             }
-                        }) {
-                            Text("Cerrar Sesión")
+                        },
+                        actions = {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        logoutUseCase()
+                                        navController.navigate(Screen.Login.route) {
+                                            popUpTo(0) { inclusive = true }
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text("Cerrar Sesión", color = WhosInColors.DarkTeal)
+                            }
                         }
-                    }
-                )
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Bienvenido a Who's In",
-                    style = MaterialTheme.typography.headlineLarge
-                )
+                    )
+                }
+            ) { paddingValues ->
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "Usa el menú lateral para navegar entre las diferentes secciones de la aplicación.",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Accesos rápidos
-                Card(
-                    modifier = Modifier.fillMaxWidth()
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
                 ) {
+                    HomeDecorationCircles()
+
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp)
                     ) {
+
+                        Spacer(Modifier.height(16.dp))
+
                         Text(
-                            text = "Accesos Rápidos",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "Bienvenido a Who's In",
+                            style = MaterialTheme.typography.headlineLarge,
+                            color = WhosInColors.LightGray,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(16.dp))
 
-                        Button(
-                            onClick = { navigationViewModel.navigateTo(NavigationDrawer.Events.route) },
+                        Text(
+                            text = "Usa el menú lateral para navegar entre las secciones.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = WhosInColors.GrayBlue
+                        )
+
+                        Spacer(Modifier.height(32.dp))
+
+                        // Card de accesos rápidos
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = WhosInColors.White,
+                            shadowElevation = 6.dp,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Ver Eventos")
-                        }
+                            Column(
+                                modifier = Modifier.padding(20.dp)
+                            ) {
+                                Text(
+                                    text = "Accesos Rápidos",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = WhosInColors.DarkTeal
+                                )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(Modifier.height(12.dp))
 
-                        Button(
-                            onClick = { navigationViewModel.navigateTo(NavigationDrawer.Guests.route) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Ver Invitados")
+                                Button(
+                                    onClick = {
+                                        navigationViewModel.navigateTo(NavigationDrawer.Events.route)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = WhosInColors.MintGreen,
+                                        contentColor = WhosInColors.DarkTeal
+                                    )
+                                ) { Text("Ver Eventos") }
+
+                                Spacer(Modifier.height(12.dp))
+
+                                Button(
+                                    onClick = {
+                                        navigationViewModel.navigateTo(NavigationDrawer.Guests.route)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = WhosInColors.LimeGreen,
+                                        contentColor = WhosInColors.DarkTeal
+                                    )
+                                ) { Text("Ver Invitados") }
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun HomeDecorationCircles() {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val offset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 18f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    // Circle 1
+    Box(
+        modifier = Modifier
+            .offset(x = (280 + offset).dp, y = (60 - offset).dp)
+            .size(120.dp)
+            .alpha(0.12f)
+            .clip(CircleShape)
+            .background(WhosInColors.LimeGreen)
+    )
+
+    // Circle 2
+    Box(
+        modifier = Modifier
+            .offset(x = (-30 - offset).dp, y = (450 + offset).dp)
+            .size(110.dp)
+            .alpha(0.08f)
+            .clip(CircleShape)
+            .background(WhosInColors.PetrolBlue)
+    )
 }
