@@ -26,6 +26,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,49 +48,90 @@ fun HomeScreen(
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(
-                    drawerContainerColor = WhosInColors.White
+                    modifier = Modifier
+                        .fillMaxWidth(0.78f)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    WhosInColors.DarkTeal.copy(alpha = 0.92f),
+                                    WhosInColors.PetrolBlue.copy(alpha = 0.96f)
+                                )
+                            )
+                        )
                 ) {
-                    Spacer(Modifier.height(16.dp))
 
-                    Text(
-                        text = "Who's In",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = WhosInColors.DarkTeal,
-                        modifier = Modifier.padding(24.dp)
-                    )
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                    Divider()
+                    // Header del Drawer
+                    Column(
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    ) {
+                        Text(
+                            text = "Who's In",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = WhosInColors.DarkTeal,
+                            fontWeight = FontWeight.Bold
+                        )
 
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        HorizontalDivider(
+                            color = WhosInColors.LightGray.copy(alpha = 0.2f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 🔥 Items con animación
                     navigationItems.forEach { item ->
+
+                        val selected = currentRoute == item.route
+                        val animatedAlpha by animateFloatAsState(
+                            targetValue = if (selected) 1f else 0.55f,
+                            animationSpec = tween(300),
+                            label = "alphaAnim"
+                        )
+
                         NavigationDrawerItem(
                             icon = {
                                 Icon(
-                                    imageVector = if (currentRoute == item.route)
-                                        item.selectedIcon else item.unselectedIcon,
-                                    contentDescription = item.label
+                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                    contentDescription = item.label,
+                                    tint = if (selected) WhosInColors.DarkTeal else WhosInColors.LightGray,
+                                    modifier = Modifier.size(26.dp)
                                 )
                             },
-                            label = { Text(item.label) },
-                            selected = currentRoute == item.route,
+                            label = {
+                                Text(
+                                    text = item.label,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = WhosInColors.DarkTeal,
+                                    modifier = Modifier.alpha(animatedAlpha)
+                                )
+                            },
+                            selected = selected,
                             onClick = {
                                 scope.launch {
                                     drawerState.close()
-                                    if (currentRoute != item.route) {
-                                        navigationViewModel.navigateTo(item.route)
-                                    }
+                                    if (!selected) navigationViewModel.navigateTo(item.route)
                                 }
                             },
-                            colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = WhosInColors.MintGreen.copy(alpha = 0.2f),
-                                selectedIconColor = WhosInColors.DarkTeal,
-                                selectedTextColor = WhosInColors.DarkTeal
-                            ),
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    if (selected)
+                                        WhosInColors.LimeGreen.copy(alpha = 0.15f)
+                                    else
+                                        Color.Transparent
+                                )
+                                .padding(horizontal = 8.dp)
                         )
                     }
                 }
             }
-        ) {
+        )
+         {
 
             Scaffold(
                 containerColor = WhosInColors.DarkTeal,
