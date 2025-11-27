@@ -247,6 +247,13 @@ fun EventCard(
                     }
                 ) { Text("Copiar ID") }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = onManageClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E6FA3))
+                ) { Text("Modo Guardia") }
+
                 TextButton(
                     onClick = { onDeleteClick(event.eventId) }
                 ) { Text("Eliminar", color = Color.Red) }
@@ -254,3 +261,4 @@ fun EventCard(
         }
     }
 }
+

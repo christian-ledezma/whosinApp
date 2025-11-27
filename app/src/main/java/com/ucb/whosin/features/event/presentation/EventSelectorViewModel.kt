@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.usecase.DeleteEventUseCase
+import com.ucb.whosin.features.event.domain.usecase.CancelEventUseCase
 import com.ucb.whosin.features.event.domain.usecase.FindEventsByNameUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetAllEventsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 class EventSelectorViewModel(
     private val deleteEventUseCase: DeleteEventUseCase,
     private val getAllEventsUseCase: GetAllEventsUseCase,
-    private val findEventsByNameUseCase: FindEventsByNameUseCase
+    private val findEventsByNameUseCase: FindEventsByNameUseCase,
+    private val cancelEventUseCase: CancelEventUseCase
 ) : ViewModel() {
 
     private val _events = MutableStateFlow<List<EventModel>>(emptyList())
@@ -36,8 +38,8 @@ class EventSelectorViewModel(
 
     fun deleteEvent(eventId: String) {
         viewModelScope.launch {
-            val result = deleteEventUseCase(eventId)
-            _deleteResult.value = result
+            val result = cancelEventUseCase(eventId)
+            _deleteResult.value = result is com.ucb.whosin.features.event.domain.model.EventResult.Success
         }
     }
 

@@ -21,6 +21,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
+import com.ucb.whosin.features.event.presentation.EventEditScreen
 import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.MapPickerScreen
 import com.ucb.whosin.features.qrscanner.ui.QrScannerScreen
@@ -150,6 +151,27 @@ fun AppNavigation(
 
             RegisterEventScreen(
                 locationViewModel = locationViewModel,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToMapPicker = { navController.navigate("map_picker") },
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.EditEvent.route,
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) {
+            val locationViewModel = koinViewModel<LocationViewModel>(
+                viewModelStoreOwner = it
+            )
+
+            EventEditScreen(
+                locationViewModel = locationViewModel,
+                onNavigateBack = { navController.popBackStack() },
                 onNavigateToMapPicker = { navController.navigate("map_picker") }
             )
         }
@@ -176,10 +198,6 @@ fun AppNavigation(
             arguments = listOf(navArgument("eventId") { type = NavType.StringType })
         ) {
             GuestListScreen()
-        }
-
-        composable(Screen.Staff.route) {
-            // StaffScreen()
         }
 
         // Pantalla para aceptar invitación

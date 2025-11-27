@@ -1,10 +1,13 @@
 package com.ucb.whosin.features.event.data.datasource
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.ucb.whosin.features.event.domain.model.AssignedGuard
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
+import com.ucb.whosin.features.event.domain.model.GuardResult
 import kotlinx.coroutines.tasks.await
 
 class FirebaseEventDataSource(
@@ -104,6 +107,173 @@ class FirebaseEventDataSource(
 
         } catch (e: Exception) {
             emptyList()
+        }
+    }
+
+    suspend fun updateEvent(
+        eventId: String,
+        name: String,
+        date: Timestamp,
+        locationName: String,
+        latitude: Double,
+        longitude: Double,
+        capacity: Int
+    ): EventResult {
+        return try {
+            Log.d("FirebaseEvent", "🔹 Actualizando evento: $eventId")
+
+            val updateData = hashMapOf<String, Any>(
+                "name" to name,
+                "date" to date,
+                "locationName" to locationName,
+                "latitude" to latitude,
+                "longitude" to longitude,
+                "capacity" to capacity
+            )
+
+            firestore.collection("events")
+                .document(eventId)
+                .update(updateData)
+                .await()
+
+            Log.d("FirebaseEvent", "✅ Evento actualizado correctamente")
+
+            // Obtener el evento actualizado
+            getEventById(eventId)
+        } catch (e: Exception) {
+            Log.e("FirebaseEvent", "❌ Error al actualizar evento", e)
+            EventResult.Error(e.message ?: "Error al actualizar el evento")
+        }
+    }
+
+    suspend fun cancelEvent(eventId: String): EventResult {
+        return try {
+            Log.d("FirebaseEvent", "🔹 Cancelando evento: $eventId")
+
+            firestore.collection("events")
+                .document(eventId)
+                .update("status", "cancelled")
+                .await()
+
+            Log.d("FirebaseEvent", "✅ Evento cancelado correctamente")
+            getEventById(eventId)
+        } catch (e: Exception) {
+            Log.e("FirebaseEvent", "❌ Error al cancelar evento", e)
+            EventResult.Error(e.message ?: "Error al cancelar el evento")
+        }
+    }
+
+    suspend fun addGuard(
+        eventId: String,
+        guardEmail: String,
+        addedBy: String
+    ): GuardResult {
+        return try {
+            Log.d("FirebaseEvent", "🔹 Agregando guardia: $guardEmail al evento: $eventId")
+
+            // 1. Buscar usuario por email
+            val userSnapshot = firestore.collection("users")
+                .whereEqualTo("email", guardEmail)
+                .limit(1)
+                .get()
+                .await()
+
+            if (userSnapshot.isEmpty) {
+                return GuardResult.Error("No se encontró un usuario con ese email")
+            }
+
+            val userDoc = userSnapshot.documents.first()
+            val guardId = userDoc.id
+            val fullName = "${userDoc.getString("name") ?: ""} ${userDoc.getString("lastname") ?: ""}".trim()
+
+            // 2. Verificar si ya es guardia
+            val existingGuard = firestore.collection("events")
+                .document(eventId)
+                .collection("guards")
+                .document(guardId)
+                .get()
+                .await()
+
+            if (existingGuard.exists()) {
+                return GuardResult.Error("Este usuario ya es guardia del evento")
+            }
+
+            // 3. Crear el documento del guardia
+            val guard = AssignedGuard(
+                guardId = guardId,
+                email = guardEmail,
+                fullName = fullName,
+                addedAt = Timestamp.now(),
+                addedBy = addedBy
+            )
+
+            val guardData = hashMapOf(
+                "guardId" to guard.guardId,
+                "email" to guard.email,
+                "fullName" to guard.fullName,
+                "addedAt" to guard.addedAt,
+                "addedBy" to guard.addedBy
+            )
+
+            firestore.collection("events")
+                .document(eventId)
+                .collection("guards")
+                .document(guardId)
+                .set(guardData)
+                .await()
+
+            Log.d("FirebaseEvent", "✅ Guardia agregado correctamente")
+            GuardResult.Success(guard)
+        } catch (e: Exception) {
+            Log.e("FirebaseEvent", "❌ Error al agregar guardia", e)
+            GuardResult.Error(e.message ?: "Error al agregar guardia")
+        }
+    }
+
+    suspend fun removeGuard(eventId: String, guardId: String): GuardResult {
+        return try {
+            Log.d("FirebaseEvent", "🔹 Removiendo guardia: $guardId del evento: $eventId")
+
+            firestore.collection("events")
+                .document(eventId)
+                .collection("guards")
+                .document(guardId)
+                .delete()
+                .await()
+
+            Log.d("FirebaseEvent", "✅ Guardia removido correctamente")
+            GuardResult.Success(AssignedGuard(guardId = guardId))
+        } catch (e: Exception) {
+            Log.e("FirebaseEvent", "❌ Error al remover guardia", e)
+            GuardResult.Error(e.message ?: "Error al remover guardia")
+        }
+    }
+
+    suspend fun getEventGuards(eventId: String): GuardResult {
+        return try {
+            Log.d("FirebaseEvent", "🔹 Obteniendo guardias del evento: $eventId")
+
+            val snapshot = firestore.collection("events")
+                .document(eventId)
+                .collection("guards")
+                .get()
+                .await()
+
+            val guards = snapshot.documents.mapNotNull { doc ->
+                AssignedGuard(
+                    guardId = doc.id,
+                    email = doc.getString("email") ?: "",
+                    fullName = doc.getString("fullName") ?: "",
+                    addedAt = doc.getTimestamp("addedAt") ?: Timestamp.now(),
+                    addedBy = doc.getString("addedBy") ?: ""
+                )
+            }
+
+            Log.d("FirebaseEvent", "✅ ${guards.size} guardias obtenidos")
+            GuardResult.SuccessList(guards)
+        } catch (e: Exception) {
+            Log.e("FirebaseEvent", "❌ Error al obtener guardias", e)
+            GuardResult.Error(e.message ?: "Error al obtener guardias")
         }
     }
 

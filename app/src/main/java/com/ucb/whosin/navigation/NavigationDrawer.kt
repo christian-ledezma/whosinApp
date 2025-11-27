@@ -55,13 +55,6 @@ sealed class NavigationDrawer(
         route = Screen.Guard.route
     )
 
-    object Staff : NavigationDrawer(
-        label = "Staff",
-        selectedIcon = Icons.Filled.AccountCircle,
-        unselectedIcon = Icons.Outlined.AccountCircle,
-        route = Screen.Staff.route
-    )
-
     object Profile : NavigationDrawer(
         label = "Mi Perfil",
         selectedIcon = Icons.Filled.Settings,
@@ -76,7 +69,6 @@ sealed class NavigationDrawer(
             Guests,
             AcceptInvitation,
             Guard,
-            Staff,
             Profile
         )
     }

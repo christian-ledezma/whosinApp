@@ -6,11 +6,17 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.ucb.whosin.features.event.data.datasource.FirebaseEventDataSource
 import com.ucb.whosin.features.event.data.repository.EventRepository
 import com.ucb.whosin.features.event.domain.repository.IEventRepository
+import com.ucb.whosin.features.event.domain.usecase.AddGuardUseCase
+import com.ucb.whosin.features.event.domain.usecase.CancelEventUseCase
 import com.ucb.whosin.features.event.domain.usecase.DeleteEventUseCase
 import com.ucb.whosin.features.event.domain.usecase.FindEventsByNameUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetAllEventsUseCase
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
+import com.ucb.whosin.features.event.domain.usecase.GetEventGuardsUseCase
 import com.ucb.whosin.features.event.domain.usecase.RegisterEventUseCase
+import com.ucb.whosin.features.event.domain.usecase.RemoveGuardUseCase
+import com.ucb.whosin.features.event.domain.usecase.UpdateEventUseCase
+import com.ucb.whosin.features.event.presentation.EventEditViewModel
 import com.ucb.whosin.features.event.presentation.EventSelectorViewModel
 import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
@@ -76,9 +82,16 @@ val appModule = module {
     single { GetEventByIdUseCase(get()) }
     factory { DeleteEventUseCase(get()) }
     single { GetAllEventsUseCase(get()) }
+    single { UpdateEventUseCase(get()) }
+    single { CancelEventUseCase(get()) }
+    single { AddGuardUseCase(get()) }
+    single { RemoveGuardUseCase(get()) }
+    single { GetEventGuardsUseCase(get()) }
+
 
     // ViewModels - Eventos
     viewModel { RegisterEventViewModel(get()) }
-    viewModel { EventSelectorViewModel(get(), get(),get()) }
+    viewModel { EventSelectorViewModel(get(), get(),get(), get()) }
     viewModel { LocationViewModel() }
+    viewModel { EventEditViewModel(get(), get(), get(), get(), get(), get(), get()) }
 }
