@@ -80,7 +80,6 @@ class NavigationViewModel : ViewModel() {
             "OPEN_EVENTS" -> navigateTo(Screen.Event.route, NavigationOptions.REPLACE_HOME)
             "OPEN_GUESTS" -> navigateTo(Screen.Guest.route, NavigationOptions.REPLACE_HOME)
             "OPEN_GUARD" -> navigateTo(Screen.Guard.route, NavigationOptions.REPLACE_HOME)
-            "OPEN_STAFF" -> navigateTo(Screen.Staff.route, NavigationOptions.REPLACE_HOME)
             else -> navigateTo(Screen.Home.route, NavigationOptions.CLEAR_BACK_STACK)
         }
     }
@@ -91,7 +90,6 @@ class NavigationViewModel : ViewModel() {
             "events" -> navigateTo(Screen.Event.route, NavigationOptions.REPLACE_HOME)
             "guests" -> navigateTo(Screen.Guest.route, NavigationOptions.REPLACE_HOME)
             "guard" -> navigateTo(Screen.Guard.route, NavigationOptions.REPLACE_HOME)
-            "staff" -> navigateTo(Screen.Staff.route, NavigationOptions.REPLACE_HOME)
             else -> navigateTo(Screen.Home.route, NavigationOptions.CLEAR_BACK_STACK)
         }
     }
@@ -102,7 +100,6 @@ class NavigationViewModel : ViewModel() {
             "EVENT", "EVENTS" -> navigateTo(Screen.Event.route, NavigationOptions.REPLACE_HOME)
             "GUEST", "GUESTS" -> navigateTo(Screen.Guest.route, NavigationOptions.REPLACE_HOME)
             "GUARD" -> navigateTo(Screen.Guard.route, NavigationOptions.REPLACE_HOME)
-            "STAFF" -> navigateTo(Screen.Staff.route, NavigationOptions.REPLACE_HOME)
             else -> navigateTo(Screen.Home.route, NavigationOptions.CLEAR_BACK_STACK)
         }
     }

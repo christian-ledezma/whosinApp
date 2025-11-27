@@ -299,10 +299,6 @@ fun AppNavigation(
             GuestListScreen()
         }
 
-        composable(Screen.Staff.route) {
-            // StaffScreen()
-        }
-
         composable(Screen.AcceptInvitation.route) {
             AcceptInvitationScreen(
                 onNavigateBack = {
