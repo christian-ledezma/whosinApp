@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import com.ucb.whosin.features.login.domain.usecase.GetCurrentUserUseCase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,9 +38,11 @@ fun HomeScreen(
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val logoutUseCase: LogoutUseCase = get()
+    val getCurrentUserUseCase: GetCurrentUserUseCase = get() // ← AGREGAR
     val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntry?.destination?.route ?: ""
 
+    val userName by getCurrentUserUseCase().collectAsState(initial = null)
     val navigationItems = NavigationDrawer.getAllItems()
 
     WhosInModernTheme {
@@ -82,7 +85,6 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // 🔥 Items con animación
                     navigationItems.forEach { item ->
 
                         val selected = currentRoute == item.route
@@ -187,12 +189,21 @@ fun HomeScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        Text(
-                            text = "Bienvenido a Who's In",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = WhosInColors.LightGray,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Column {
+                            Text(
+                                text = "Bienvenido",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = WhosInColors.GrayBlue,
+                                fontWeight = FontWeight.Normal
+                            )
+
+                            Text(
+                                text = userName ?: "Invitado",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = WhosInColors.LightGray,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
                         Spacer(Modifier.height(16.dp))
 

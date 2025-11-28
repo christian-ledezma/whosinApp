@@ -27,6 +27,7 @@ import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
 import com.ucb.whosin.features.login.domain.usecase.ChangePasswordUseCase
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
+import com.ucb.whosin.features.login.domain.usecase.GetCurrentUserUseCase
 import com.ucb.whosin.features.login.domain.usecase.GetUserProfileUseCase
 import com.ucb.whosin.features.login.domain.usecase.LoginUserUseCase
 import com.ucb.whosin.features.login.domain.usecase.LogoutUseCase
@@ -57,6 +58,7 @@ val appModule = module {
     single { LoginUserUseCase(get()) }
     single { CheckSessionUseCase(get()) }
     single { LogoutUseCase(get(), get()) }
+    single { GetCurrentUserUseCase(get()) }
 
     // Use Cases - Perfil
     single { GetUserProfileUseCase(get()) }

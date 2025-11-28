@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +51,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -61,6 +66,7 @@ import com.ucb.whosin.ui.components.WhosInTextField
 import com.ucb.whosin.ui.theme.WhosInColors
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
+import com.ucb.whosin.R
 
 @Composable
 fun AnimatedEntrance(
@@ -134,7 +140,7 @@ private fun LoginScreenContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WhosInColors.LightGray)
+            .background(WhosInColors.DarkTeal)
     ) {
         // Elementos decorativos de fondo
         DecorationCircles()
@@ -155,18 +161,11 @@ private fun LoginScreenContent(
                 LogoSection()
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(-180.dp))
 
             // Título
             AnimatedEntrance(visible = startAnimation, delayMillis = 100) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Bienvenido",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = WhosInColors.DarkTeal,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Inicia sesión para continuar",
                         style = MaterialTheme.typography.bodyLarge,
@@ -252,7 +251,7 @@ private fun LoginScreenContent(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(-120.dp))
 
                         // Olvidaste contraseña
                         TextButton(
@@ -298,7 +297,7 @@ private fun LoginScreenContent(
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.SemiBold
                             ),
-                            color = WhosInColors.DarkTeal
+                            color = WhosInColors.LightGray
                         )
                     }
                 }
@@ -311,27 +310,28 @@ private fun LoginScreenContent(
 
 @Composable
 private fun LogoSection() {
-    Box(
-        modifier = Modifier
-            .size(100.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        WhosInColors.DarkTeal,
-                        WhosInColors.PetrolBlue
-                    )
-                )
-            ),
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "W",
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold
-            ),
-            color = WhosInColors.LimeGreen
+        Image(
+            painter = painterResource(id = R.drawable.ic_splash_logo),
+            contentDescription = "Logo Who's In",
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .width(400.dp)
+                .height(180.dp)
+                .offset(y = 20.dp)
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.ic_splash_text),
+            contentDescription = "Titulo",
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .width(300.dp)
+                .height(105.dp)
+                .offset(y = (-30).dp)
         )
     }
 }

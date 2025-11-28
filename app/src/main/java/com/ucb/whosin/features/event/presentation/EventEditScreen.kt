@@ -522,14 +522,14 @@ private fun GuardsTab(
                         Icon(
                             imageVector = Icons.Outlined.Security,
                             contentDescription = null,
-                            tint = WhosInColors.GrayBlue.copy(alpha = 0.5f),
+                            tint = WhosInColors.DarkTeal.copy(alpha = 0.5f),
                             modifier = Modifier.size(64.dp)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "No hay guardias asignados",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = WhosInColors.GrayBlue,
+                            color = WhosInColors.DarkTeal,
                             textAlign = TextAlign.Center
                         )
                     }
