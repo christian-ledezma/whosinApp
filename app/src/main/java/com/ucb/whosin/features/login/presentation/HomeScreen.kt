@@ -97,7 +97,7 @@ fun HomeScreen(
                                 Icon(
                                     imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
                                     contentDescription = item.label,
-                                    tint = if (selected) WhosInColors.DarkTeal else WhosInColors.LightGray,
+                                    tint = WhosInColors.DarkTeal,
                                     modifier = Modifier.size(26.dp)
                                 )
                             },
@@ -234,17 +234,6 @@ fun HomeScreen(
                                 ) { Text("Ver Eventos") }
 
                                 Spacer(Modifier.height(12.dp))
-
-                                Button(
-                                    onClick = {
-                                        navigationViewModel.navigateTo(NavigationDrawer.Guests.route)
-                                    },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = WhosInColors.LimeGreen,
-                                        contentColor = WhosInColors.DarkTeal
-                                    )
-                                ) { Text("Ver Invitados") }
                             }
                         }
                     }
