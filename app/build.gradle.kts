@@ -58,9 +58,14 @@ sentry {
     org.set("universidad-catolica-bk")
     projectName.set("android")
 
+
+    autoUploadProguardMapping.set(false)
+    uploadNativeSymbols.set(false)
+    includeSourceContext.set(false)
+    autoUploadSourceContext.set(false)
     // this will upload your source code to Sentry to show it as part of the stack traces
     // disable if you don't want to expose your sources
-    includeSourceContext.set(true)
+    //includeSourceContext.set(true)
 }
 
 dependencies {
