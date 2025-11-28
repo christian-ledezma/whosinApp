@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Tema base -->
     <style name="Theme.WhosIn" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Deshabilita el splash screen por defecto -->
-        </style>
+        <item name="android:statusBarColor">@color/dark_teal</item>
+        <item name="android:windowBackground">@color/dark_teal</item>
+    </style>
+
+    <!-- Tema SIN splash del sistema -->
+    <style name="Theme.WhosIn.NoSplash" parent="Theme.WhosIn">
+        <item name="android:windowBackground">@color/dark_teal</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
 </resources>

@@ -1,10 +1,12 @@
 package com.ucb.whosin
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -31,6 +33,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,6 +42,7 @@ import com.ucb.whosin.ui.theme.WhosInColors
 class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MaterialTheme {
                 SplashScreen()
@@ -56,37 +60,44 @@ class SplashActivity : ComponentActivity() {
 
 @Composable
 fun SplashScreen() {
-    // Animación de fade in para toda la pantalla
     var startAnimation by remember { mutableStateOf(false) }
 
-    val alphaAnim = animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 2000,
-            easing = FastOutSlowInEasing
-        ),
-        label = "alpha"
-    )
-
-    // Animación de escala para la primera imagen
     val scaleAnim1 = animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.3f,
+        targetValue = if (startAnimation) 1f else 0.5f,
         animationSpec = tween(
-            durationMillis = 1500,
+            durationMillis = 1000,
             easing = FastOutSlowInEasing
         ),
         label = "scale1"
     )
 
-    // Animación de escala para la segunda imagen (con delay)
-    val scaleAnim2 = animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.3f,
+    val alphaAnim1 = animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
         animationSpec = tween(
-            durationMillis = 1500,
-            delayMillis = 500, // Empieza 300ms después
+            durationMillis = 1000,
+            easing = LinearEasing
+        ),
+        label = "alpha1"
+    )
+
+    val scaleAnim2 = animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0.5f,
+        animationSpec = tween(
+            durationMillis = 1000,
+            delayMillis = 300,
             easing = FastOutSlowInEasing
         ),
         label = "scale2"
+    )
+
+    val alphaAnim2 = animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 1000,
+            delayMillis = 300,
+            easing = LinearEasing
+        ),
+        label = "alpha2"
     )
 
     LaunchedEffect(key1 = true) {
@@ -102,22 +113,20 @@ fun SplashScreen() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer(alpha = alphaAnim.value)
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Primera imagen
             Image(
                 painter = painterResource(id = R.drawable.ic_splash_logo),
                 contentDescription = "Logo",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .width(400.dp)
-                    .height(180.dp)
+                    .width(480.dp)
+                    .height(216.dp)
                     .offset(y = 20.dp)
                     .graphicsLayer(
                         scaleX = scaleAnim1.value,
-                        scaleY = scaleAnim1.value
+                        scaleY = scaleAnim1.value,
+                        alpha = alphaAnim1.value
                     )
             )
 
@@ -131,7 +140,8 @@ fun SplashScreen() {
                     .offset(y = (-20).dp)
                     .graphicsLayer(
                         scaleX = scaleAnim2.value,
-                        scaleY = scaleAnim2.value
+                        scaleY = scaleAnim2.value,
+                        alpha = alphaAnim2.value
                     )
             )
         }

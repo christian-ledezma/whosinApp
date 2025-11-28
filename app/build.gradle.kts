@@ -131,5 +131,5 @@ dependencies {
     // Compose BOM
     implementation(libs.androidx.compose.foundation)
 
-
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
