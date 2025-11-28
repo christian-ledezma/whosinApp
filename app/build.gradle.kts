@@ -124,4 +124,12 @@ dependencies {
 
     // Google Maps
     implementation(libs.bundles.googlemaps)
+
+    //splash
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // Compose BOM
+    implementation(libs.androidx.compose.foundation)
+
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
