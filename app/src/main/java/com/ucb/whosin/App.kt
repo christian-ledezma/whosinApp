@@ -7,6 +7,7 @@ import com.google.firebase.FirebaseOptions
 import com.ucb.whosin.di.appModule
 import com.ucb.whosin.di.guardModule
 import com.ucb.whosin.di.guestModule
+import com.ucb.whosin.remoteconfig.remoteConfigModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -39,7 +40,8 @@ class App : Application() {
             modules(
                 appModule,
                 guestModule,
-                guardModule // <-- ¡Módulo añadido!
+                guardModule,
+                remoteConfigModule
             )
         }
     }

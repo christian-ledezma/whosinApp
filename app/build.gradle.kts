@@ -137,4 +137,8 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
 
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // Remote Config
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-config")
 }

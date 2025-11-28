@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -26,7 +28,10 @@ import com.ucb.whosin.features.event.presentation.GuardEventsScreen
 import com.ucb.whosin.features.event.presentation.EventEditScreen
 import com.ucb.whosin.features.event.presentation.LocationViewModel
 import com.ucb.whosin.features.event.presentation.MapPickerScreen
+import com.ucb.whosin.features.login.presentation.MaintenanceScreen
 import com.ucb.whosin.features.qrscanner.ui.QrScannerScreen
+import com.ucb.whosin.remoteconfig.RemoteConfigService
+import com.ucb.whosin.ui.LoadingScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -37,6 +42,9 @@ fun AppNavigation(
 ) {
     val checkSessionUseCase: CheckSessionUseCase = org.koin.androidx.compose.get()
     val isLoggedIn by checkSessionUseCase().collectAsState(initial = false)
+
+    val remoteConfigService: RemoteConfigService = org.koin.androidx.compose.get()
+    var isMaintenance by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(Unit) {
         navigationViewModel.navigationCommand.collect { command ->
@@ -59,6 +67,29 @@ fun AppNavigation(
                 }
             }
         }
+    }
+
+    // 🔥 Consultamos RemoteConfig solo una vez
+    LaunchedEffect(Unit) {
+        isMaintenance = remoteConfigService.fetchMaintenanceFlag()
+    }
+
+    // ⏳ Aún no llega la respuesta de Firebase
+    if (isMaintenance == null) {
+        LoadingScreen()
+        return
+    }
+
+    // 🚨 MODO MANTENIMIENTO ACTIVADO
+    if (isMaintenance == true && isLoggedIn) {
+        MaintenanceScreen(
+            onLogout = {
+                navController.navigate(Screen.Login.route) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        )
+        return
     }
 
     NavHost(
