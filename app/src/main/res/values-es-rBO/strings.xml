@@ -8,6 +8,4 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Whos In</string>
-    <string name="correo">Correo electrónico</string>
-    <string name="pass">contraseña</string>
 </resources>
