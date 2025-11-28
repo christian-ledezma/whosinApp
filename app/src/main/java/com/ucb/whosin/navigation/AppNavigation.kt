@@ -21,6 +21,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventScreen
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
 import com.ucb.whosin.features.login.presentation.ProfileScreen
 import com.ucb.whosin.features.Guard.data.presentation.GuardScreen
+import com.ucb.whosin.features.Guest.presentation.GuestListViewModel
 import com.ucb.whosin.features.event.presentation.GuardEventsScreen
 import com.ucb.whosin.features.event.presentation.EventEditScreen
 import com.ucb.whosin.features.event.presentation.LocationViewModel
@@ -241,12 +242,20 @@ fun AppNavigation(
         // Pantalla de invitados con eventId
         composable(
             route = "guest/{eventId}",
-            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
-        ) {
+            arguments = listOf(
+                navArgument("eventId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+
+            val viewModel: GuestListViewModel = koinViewModel()
+
             GuestListScreen(
+                viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
+
+
 
         // Pantalla para aceptar invitación
         composable(Screen.AcceptInvitation.route) {

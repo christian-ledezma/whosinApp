@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.Guest.domain.model.Guest
 import com.ucb.whosin.features.Guest.domain.model.GuestResult
+import com.ucb.whosin.features.Guest.domain.usecase.AddGuestUseCase
 import com.ucb.whosin.features.Guest.domain.usecase.DeleteGuestUseCase
 import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
 import com.ucb.whosin.features.Guest.domain.usecase.UpdateGuestUseCase
@@ -30,14 +31,17 @@ class GuestListViewModel(
     private val updateGuestUseCase: UpdateGuestUseCase,
     private val deleteGuestUseCase: DeleteGuestUseCase,
     private val firebaseAuth: FirebaseAuth,
-    private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+    private val savedStateHandle: SavedStateHandle,
+    private val addGuestUseCase: AddGuestUseCase,
+
+    ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GuestListUiState())
     val uiState: StateFlow<GuestListUiState> = _uiState.asStateFlow()
 
     // Obtener eventId desde la navegación, o usar el hardcoded para testing
-    private val eventId: String = savedStateHandle.get<String>("eventId") ?: "test-event-123"
+    private val eventId: String = savedStateHandle["eventId"]
+        ?: throw IllegalStateException("eventId no fue pasado")
 
     init {
         checkAuthentication()
@@ -192,14 +196,18 @@ class GuestListViewModel(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
     fun addGuest(name: String, companions: Int) {
+        if (firebaseAuth.currentUser == null) {
+            _uiState.value = _uiState.value.copy(errorMessage = "No hay usuario autenticado")
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 errorMessage = null
             )
 
-            val newGuest = Guest(
-                userId = null,
+            val guest = Guest(
                 name = name,
                 plusOnesAllowed = companions,
                 groupSize = companions + 1,
@@ -207,10 +215,27 @@ class GuestListViewModel(
                 inviteStatus = "pending"
             )
 
-            // Aquí necesitarás inyectar AddGuestUseCase en el constructor
-            // Por ahora, solo actualizo el estado
-            _uiState.value = _uiState.value.copy(isLoading = false)
-            loadGuests()
+            when (val result = addGuestUseCase(eventId, guest)) {
+
+                is GuestResult.Success -> {
+                    _uiState.value = _uiState.value.copy(isLoading = false)
+                    loadGuests()
+                }
+
+                is GuestResult.Error -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = result.message
+                    )
+                }
+
+                else -> {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = "Error inesperado al agregar invitado"
+                    )
+                }
+            }
         }
     }
 
