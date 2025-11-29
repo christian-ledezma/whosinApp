@@ -1,3 +1,4 @@
+
 package com.ucb.whosin.features.Guest.presentation
 
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -90,6 +91,7 @@ private fun GuestListScreenContent(
         if (uiState.updateSuccess) {
             scope.launch {
                 snackbarHostState.showSnackbar("Invitado actualizado correctamente")
+                viewModel.resetSuccessFlags()
                 viewModel.loadGuests()
             }
         }
@@ -100,6 +102,7 @@ private fun GuestListScreenContent(
         if (uiState.deleteSuccess) {
             scope.launch {
                 snackbarHostState.showSnackbar("Invitado eliminado")
+                viewModel.resetSuccessFlags()
                 viewModel.loadGuests()
             }
         }
@@ -132,7 +135,7 @@ private fun GuestListScreenContent(
             guest = guest,
             onDismiss = { showEditDialog = null },
             onConfirm = { newName ->
-                viewModel.updateGuestName(guest.guestId, newName)
+                viewModel.updateGuest(guest.guestId, newName, guest.plusOnesAllowed)
                 showEditDialog = null
             }
         )
