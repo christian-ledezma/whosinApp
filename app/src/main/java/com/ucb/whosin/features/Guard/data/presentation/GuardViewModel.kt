@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -35,15 +36,15 @@ class GuardViewModel(
         } else {
             guests.filter { it.name.contains(query, ignoreCase = true) }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // Flujo de datos para las estadísticas
-    val stats: StateFlow<GuardStats> = _guests.combine(filteredGuests) { allGuests, _ ->
+    val stats: StateFlow<GuardStats> = _guests.map { allGuests ->
         GuardStats(
-            checkedIn = allGuests.count { it.checkedIn }, // <-- CORREGIDO: Contar por el campo booleano
+            checkedIn = allGuests.count { it.checkedIn },
             total = allGuests.size
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), GuardStats())
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, GuardStats())
 
     init {
         if (eventId.isNotEmpty()) {

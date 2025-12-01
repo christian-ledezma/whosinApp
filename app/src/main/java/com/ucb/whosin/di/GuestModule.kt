@@ -1,3 +1,4 @@
+
 package com.ucb.whosin.di
 
 import com.google.firebase.auth.FirebaseAuth
@@ -31,8 +32,8 @@ val guestModule = module {
     factory { UpdateGuestUseCase(get()) }
     factory { DeleteGuestUseCase(get()) }
 
-    // ViewModels - Ahora reciben FirebaseAuth y SavedStateHandle
-    viewModel { GuestListViewModel(get(), get(), get(), get<FirebaseAuth>(), get(),get()) }
+    // ViewModels
+    viewModel { GuestListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { AddGuestViewModel(get(), get<FirebaseAuth>(), get()) }
     viewModel { AcceptInvitationViewModel(get(), get(), get<FirebaseAuth>(), get(), get()) }
 }
