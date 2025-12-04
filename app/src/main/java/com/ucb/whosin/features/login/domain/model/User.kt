@@ -1,23 +1,24 @@
 package com.ucb.whosin.features.login.domain.model
 
 import com.google.firebase.Timestamp
+import com.ucb.whosin.features.login.domain.model.vo.*
 
-data class User (
-    val uid: String = "",
-    val email: String = "",
-    val name: String = "",
-    val lastname: String = "",
-    val secondLastname: String? = null,
-    val phone: String = "",
-    val countryCode: String = "",
-    val createdAt: Timestamp? = null
+data class User private constructor(
+    val uid: UserId,
+    val email: Email,
+    val name: PersonName,
+    val lastname: PersonName,
+    val secondLastname: OptionalPersonName,
+    val phoneNumber: PhoneNumber,
+    val countryCode: CountryCodeValue,
+    val createdAt: Timestamp?
 ) {
     fun fullName(): String {
         return buildString {
-            append(name)
+            append(name.value)
             append(" ")
-            append(lastname)
-            secondLastname?.let {
+            append(lastname.value)
+            secondLastname.value?.let {
                 if (it.isNotBlank()) {
                     append(" ")
                     append(it)
@@ -27,41 +28,68 @@ data class User (
     }
 
     fun fullPhone(): String {
-        return if (countryCode.isNotBlank() && phone.isNotBlank()) {
-            "$countryCode $phone"
-        } else {
-            phone
-        }
+        return "${countryCode.value} ${phoneNumber.value}"
     }
 
     fun toFirestoreMap(): Map<String, Any?> {
         return mapOf(
-            "email" to email,
-            "name" to name,
-            "lastname" to lastname,
-            "secondLastname" to secondLastname,
-            "phone" to phone,
-            "countryCode" to countryCode,
+            "email" to email.value,
+            "name" to name.value,
+            "lastname" to lastname.value,
+            "secondLastname" to secondLastname.value,
+            "phone" to phoneNumber.value,
+            "countryCode" to countryCode.value,
             "createdAt" to (createdAt ?: Timestamp.now())
         )
     }
 
     companion object {
-        fun fromFirestoreMap(uid: String, data: Map<String, Any?>): User {
-            return User(
-                uid = uid,
-                email = data["email"] as? String ?: "",
-                name = data["name"] as? String ?: "",
-                lastname = data["lastname"] as? String ?: "",
-                secondLastname = data["secondLastname"] as? String,
-                phone = data["phone"] as? String ?: "",
-                countryCode = data["countryCode"] as? String ?: "",
-                createdAt = data["createdAt"] as? Timestamp
-            )
+        fun fromFirestoreMap(uid: String, data: Map<String, Any?>): Result<User> {
+            return try {
+                val userIdVO = UserId.create(uid).getOrElse { return Result.failure(it) }
+                val emailVO = Email.create(data["email"] as? String ?: "").getOrElse { return Result.failure(it) }
+                val nameVO = PersonName.create(data["name"] as? String ?: "", "nombre").getOrElse { return Result.failure(it) }
+                val lastnameVO = PersonName.create(data["lastname"] as? String ?: "", "apellido").getOrElse { return Result.failure(it) }
+                val secondLastnameVO = OptionalPersonName.create(data["secondLastname"] as? String).getOrElse { return Result.failure(it) }
+
+                val countryCodeStr = data["countryCode"] as? String ?: ""
+                val countryCodeVO = CountryCodeValue.create(countryCodeStr).getOrElse { return Result.failure(it) }
+
+                val phoneStr = data["phone"] as? String ?: ""
+                val phoneVO = PhoneNumber.create(phoneStr, countryCodeVO.value).getOrElse { return Result.failure(it) }
+
+                Result.success(
+                    User(
+                        uid = userIdVO,
+                        email = emailVO,
+                        name = nameVO,
+                        lastname = lastnameVO,
+                        secondLastname = secondLastnameVO,
+                        phoneNumber = phoneVO,
+                        countryCode = countryCodeVO,
+                        createdAt = data["createdAt"] as? Timestamp
+                    )
+                )
+            } catch (e: Exception) {
+                Result.failure(IllegalArgumentException("Error al crear usuario desde Firestore: ${e.message}"))
+            }
+        }
+
+        // Builder para casos donde ya tienes Value Objects validados
+        fun create(
+            uid: UserId,
+            email: Email,
+            name: PersonName,
+            lastname: PersonName,
+            secondLastname: OptionalPersonName,
+            phoneNumber: PhoneNumber,
+            countryCode: CountryCodeValue,
+            createdAt: Timestamp? = null
+        ): User {
+            return User(uid, email, name, lastname, secondLastname, phoneNumber, countryCode, createdAt)
         }
     }
 }
-
 
 sealed class AuthResult {
     data class Success(val user: User) : AuthResult()

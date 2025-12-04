@@ -1,14 +1,29 @@
 package com.ucb.whosin.features.login.domain.usecase
 
 import com.ucb.whosin.features.login.domain.model.AuthResult
+import com.ucb.whosin.features.login.domain.model.vo.*
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
 
 class LoginUserUseCase (private val repository: AuthRepository) {
     suspend operator fun invoke(email: String, password: String): AuthResult {
-        if (email.isBlank() || password.isBlank()) {
-            return AuthResult.Error("El correo y la contraseña no pueden estar vacíos")
+        val emailResult = Email.create(email)
+        if (emailResult.isFailure) {
+            return AuthResult.Error(
+                emailResult.exceptionOrNull()?.message ?: "Email inválido"
+            )
         }
 
-        return repository.loginUser(email, password)
+        val passwordResult = Password.create(password)
+        if (passwordResult.isFailure) {
+            return AuthResult.Error(
+                passwordResult.exceptionOrNull()?.message ?: "Contraseña inválida"
+            )
+        }
+
+        // Login con value objects
+        return repository.loginUser(
+            emailResult.getOrThrow(),
+            passwordResult.getOrThrow()
+        )
     }
 }

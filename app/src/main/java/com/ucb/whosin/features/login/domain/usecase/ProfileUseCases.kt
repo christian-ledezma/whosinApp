@@ -1,27 +1,24 @@
 package com.ucb.whosin.features.login.domain.usecase
 
 import com.ucb.whosin.features.login.domain.model.User
+import com.ucb.whosin.features.login.domain.model.vo.*
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
 
 class GetUserProfileUseCase(private val repository: AuthRepository) {
-    suspend operator fun invoke(userId: String): User? {
-        return repository.getUserProfile(userId)
+    suspend operator fun invoke(userId: String):  Result<User> {
+        val userIdResult = UserId.create(userId)
+        if (userIdResult.isFailure) {
+            return Result.failure(
+                userIdResult.exceptionOrNull() ?: Exception("UserId inválido")
+            )
+        }
+
+        return repository.getUserProfile(userIdResult.getOrThrow())
     }
 }
 
 class UpdateUserProfileUseCase(private val repository: AuthRepository) {
     suspend operator fun invoke(user: User): Result<Unit> {
-        // Validaciones
-        if (user.name.isBlank()) {
-            return Result.failure(Exception("El nombre es obligatorio"))
-        }
-        if (user.lastname.isBlank()) {
-            return Result.failure(Exception("El apellido es obligatorio"))
-        }
-        if (user.phone.isBlank()) {
-            return Result.failure(Exception("El teléfono es obligatorio"))
-        }
-
         return repository.updateUserProfile(user)
     }
 }
@@ -32,23 +29,47 @@ class ChangePasswordUseCase(private val repository: AuthRepository) {
         newPassword: String,
         confirmPassword: String
     ): Result<Unit> {
-        // Validaciones
-        if (currentPassword.isBlank()) {
-            return Result.failure(Exception("La contraseña actual es obligatoria"))
-        }
-        if (newPassword.isBlank()) {
-            return Result.failure(Exception("La nueva contraseña es obligatoria"))
-        }
-        if (newPassword.length < 6) {
-            return Result.failure(Exception("La nueva contraseña debe tener al menos 6 caracteres"))
-        }
-        if (newPassword != confirmPassword) {
-            return Result.failure(Exception("Las contraseñas no coinciden"))
-        }
-        if (currentPassword == newPassword) {
-            return Result.failure(Exception("La nueva contraseña debe ser diferente a la actual"))
+        // Validar contraseña actual
+        val currentPasswordResult = Password.create(currentPassword)
+        if (currentPasswordResult.isFailure) {
+            return Result.failure(
+                currentPasswordResult.exceptionOrNull() ?: Exception("Contraseña actual inválida")
+            )
         }
 
-        return repository.changePassword(currentPassword, newPassword)
+        // Validar nueva contraseña
+        val newPasswordResult = Password.create(newPassword)
+        if (newPasswordResult.isFailure) {
+            return Result.failure(
+                newPasswordResult.exceptionOrNull() ?: Exception("Nueva contraseña inválida")
+            )
+        }
+
+        // Validar confirmación
+        val confirmPasswordResult = Password.create(confirmPassword)
+        if (confirmPasswordResult.isFailure) {
+            return Result.failure(
+                confirmPasswordResult.exceptionOrNull() ?: Exception("Confirmación de contraseña inválida")
+            )
+        }
+
+        // Verificar que las nuevas contraseñas coincidan
+        if (newPasswordResult.getOrThrow().value != confirmPasswordResult.getOrThrow().value) {
+            return Result.failure(Exception("Las contraseñas no coinciden"))
+        }
+
+        // Validar que sean diferentes
+        val validationResult = Password.validate(
+            currentPasswordResult.getOrThrow(),
+            newPasswordResult.getOrThrow()
+        )
+        if (validationResult.isFailure) {
+            return validationResult
+        }
+
+        return repository.changePassword(
+            currentPasswordResult.getOrThrow(),
+            newPasswordResult.getOrThrow()
+        )
     }
 }
