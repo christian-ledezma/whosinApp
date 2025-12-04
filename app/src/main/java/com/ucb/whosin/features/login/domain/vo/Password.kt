@@ -1,4 +1,4 @@
-package com.ucb.whosin.features.login.domain.model.vo
+package com.ucb.whosin.features.login.domain.vo
 
 @JvmInline
 value class Password private constructor(val value: String) {

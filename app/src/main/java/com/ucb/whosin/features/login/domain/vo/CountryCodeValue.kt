@@ -1,4 +1,6 @@
-package com.ucb.whosin.features.login.domain.model.vo
+package com.ucb.whosin.features.login.domain.vo
+
+import com.ucb.whosin.features.login.domain.model.CountryCode
 
 @JvmInline
 value class CountryCodeValue(val value: String) {
@@ -24,7 +26,7 @@ value class CountryCodeValue(val value: String) {
             }
         }
 
-        fun fromEnum(countryCode: com.ucb.whosin.features.login.domain.model.CountryCode): CountryCodeValue {
+        fun fromEnum(countryCode: CountryCode): CountryCodeValue {
             return CountryCodeValue(countryCode.code)
         }
     }

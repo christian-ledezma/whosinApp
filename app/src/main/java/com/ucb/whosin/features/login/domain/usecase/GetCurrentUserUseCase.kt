@@ -1,6 +1,6 @@
 package com.ucb.whosin.features.login.domain.usecase
 
-import com.ucb.whosin.features.login.domain.model.vo.UserId
+import com.ucb.whosin.features.login.domain.vo.UserId
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

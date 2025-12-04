@@ -438,7 +438,7 @@ private fun ProfileScreenContent(
                                         )
                                         Spacer(modifier = Modifier.width(12.dp))
                                         Text(
-                                            text = "Seguridad",
+                                            text = "Cambiar Contraseña",
                                             style = MaterialTheme.typography.titleMedium,
                                             color = WhosInColors.DarkTeal,
                                             fontWeight = FontWeight.SemiBold

@@ -191,11 +191,13 @@ fun HomeScreen(
 
                         Column {
                             Text(
-                                text = "Bienvenido",
+                                text = "Bienvenid@",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = WhosInColors.GrayBlue,
                                 fontWeight = FontWeight.Normal
                             )
+
+                            Spacer(Modifier.height(12.dp))
 
                             Text(
                                 text = userName ?: "Invitado",

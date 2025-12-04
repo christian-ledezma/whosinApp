@@ -1,9 +1,11 @@
-package com.ucb.whosin.features.login.domain.model.vo
+package com.ucb.whosin.features.login.domain.vo
+
+import android.util.Patterns
 
 @JvmInline
 value class Email private constructor(val value: String){
     companion object {
-        private val EMAIL_PATTERN = android.util.Patterns.EMAIL_ADDRESS
+        private val EMAIL_PATTERN = Patterns.EMAIL_ADDRESS
 
         fun create(email: String): Result<Email> {
             val normalized = normalize(email)

@@ -1,6 +1,11 @@
 package com.ucb.whosin.features.login.domain.model
 
-import com.ucb.whosin.features.login.domain.model.vo.*
+import com.ucb.whosin.features.login.domain.vo.CountryCodeValue
+import com.ucb.whosin.features.login.domain.vo.Email
+import com.ucb.whosin.features.login.domain.vo.OptionalPersonName
+import com.ucb.whosin.features.login.domain.vo.Password
+import com.ucb.whosin.features.login.domain.vo.PersonName
+import com.ucb.whosin.features.login.domain.vo.PhoneNumber
 
 data class RegisterData(
     val email: Email,

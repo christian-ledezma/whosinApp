@@ -1,8 +1,9 @@
 package com.ucb.whosin.features.login.domain.usecase
 
 import com.ucb.whosin.features.login.domain.model.User
-import com.ucb.whosin.features.login.domain.model.vo.*
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
+import com.ucb.whosin.features.login.domain.vo.Password
+import com.ucb.whosin.features.login.domain.vo.UserId
 
 class GetUserProfileUseCase(private val repository: AuthRepository) {
     suspend operator fun invoke(userId: String):  Result<User> {

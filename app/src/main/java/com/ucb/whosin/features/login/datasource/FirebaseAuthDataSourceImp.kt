@@ -1,14 +1,12 @@
 package com.ucb.whosin.features.login.datasource
 
 import android.util.Log
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ucb.whosin.features.login.domain.model.AuthResult
 import com.ucb.whosin.features.login.domain.model.RegisterData
 import com.ucb.whosin.features.login.domain.model.User
-import com.ucb.whosin.features.login.domain.model.vo.UserId
 import kotlinx.coroutines.tasks.await
 
 class FirebaseAuthDataSourceImp(

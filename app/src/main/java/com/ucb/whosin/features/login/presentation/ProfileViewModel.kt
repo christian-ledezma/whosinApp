@@ -5,10 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.login.domain.model.CountryCode
 import com.ucb.whosin.features.login.domain.model.User
-import com.ucb.whosin.features.login.domain.model.vo.*
 import com.ucb.whosin.features.login.domain.usecase.ChangePasswordUseCase
 import com.ucb.whosin.features.login.domain.usecase.GetUserProfileUseCase
 import com.ucb.whosin.features.login.domain.usecase.UpdateUserProfileUseCase
+import com.ucb.whosin.features.login.domain.vo.CountryCodeValue
+import com.ucb.whosin.features.login.domain.vo.Email
+import com.ucb.whosin.features.login.domain.vo.OptionalPersonName
+import com.ucb.whosin.features.login.domain.vo.PersonName
+import com.ucb.whosin.features.login.domain.vo.PhoneNumber
+import com.ucb.whosin.features.login.domain.vo.UserId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
