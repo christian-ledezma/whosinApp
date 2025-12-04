@@ -1,16 +1,19 @@
 package com.ucb.whosin.features.login.data
 
-import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
+import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSourceImp
 import com.ucb.whosin.features.login.domain.model.AuthResult
 import com.ucb.whosin.features.login.domain.model.RegisterData
 import com.ucb.whosin.features.login.domain.model.User
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
+import com.ucb.whosin.features.login.domain.model.vo.*
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepositoryImpl(
-    private val dataSource: FirebaseAuthDataSource,
+    private val dataSource: FirebaseAuthDataSourceImp,
     private val sessionManager: SessionManager
 ) : AuthRepository {
+
+    @Deprecated("Usar registerUser con RegisterData")
     override suspend fun registerUser(email: String, password: String): AuthResult {
         return dataSource.register(email, password)
     }
@@ -19,12 +22,12 @@ class AuthRepositoryImpl(
         return dataSource.register(registerData)
     }
 
-    override suspend fun loginUser(email: String, password: String): AuthResult {
-        return dataSource.login(email, password)
+    override suspend fun loginUser(email: Email, password: Password): AuthResult {
+        return dataSource.login(email.value, password.value)
     }
 
-    override suspend fun saveSession(userId: String, email: String) {
-        sessionManager.saveSession(userId, email)
+    override suspend fun saveSession(userId: UserId, email: Email) {
+        sessionManager.saveSession(userId.value, email.value)
     }
 
     override suspend fun clearSession() {
@@ -39,8 +42,8 @@ class AuthRepositoryImpl(
         return sessionManager.getSession()
     }
 
-    override suspend fun getUserProfile(userId: String): User? {
-        return dataSource.getUserProfile(userId)
+    override suspend fun getUserProfile(userId: UserId): Result<User> {
+        return dataSource.getUserProfile(userId.value)
     }
 
     override suspend fun updateUserProfile(user: User): Result<Unit> {
@@ -48,9 +51,9 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun changePassword(
-        currentPassword: String,
-        newPassword: String
+        currentPassword: Password,
+        newPassword: Password
     ): Result<Unit> {
-        return dataSource.changePassword(currentPassword, newPassword)
+        return dataSource.changePassword(currentPassword.value, newPassword.value)
     }
 }

@@ -11,7 +11,7 @@ import com.ucb.whosin.features.Guest.domain.usecase.GetGuestsUseCase
 import com.ucb.whosin.features.event.domain.model.EventModel
 import com.ucb.whosin.features.event.domain.model.EventResult
 import com.ucb.whosin.features.event.domain.usecase.GetEventByIdUseCase
-import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
+import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSourceImp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +30,7 @@ class AcceptInvitationViewModel(
     private val getEventByIdUseCase: GetEventByIdUseCase,
     private val addGuestUseCase: AddGuestUseCase,
     private val firebaseAuth: FirebaseAuth,
-    private val firebaseAuthDataSource: FirebaseAuthDataSource,
+    private val firebaseAuthDataSource: FirebaseAuthDataSourceImp,
     private val getGuestsUseCase: GetGuestsUseCase
 ) : ViewModel() {
 

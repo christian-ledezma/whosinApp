@@ -23,7 +23,7 @@ import com.ucb.whosin.features.event.presentation.RegisterEventViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import com.ucb.whosin.features.login.data.AuthRepositoryImpl
 import com.ucb.whosin.features.login.data.SessionManager
-import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSource
+import com.ucb.whosin.features.login.datasource.FirebaseAuthDataSourceImp
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
 import com.ucb.whosin.features.login.domain.usecase.ChangePasswordUseCase
 import com.ucb.whosin.features.login.domain.usecase.CheckSessionUseCase
@@ -48,7 +48,7 @@ val appModule = module {
     single { SessionManager(androidContext()) }
 
     // DataSource
-    single { FirebaseAuthDataSource(get(), get()) }
+    single { FirebaseAuthDataSourceImp(get(), get()) }
 
     // Repository
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
