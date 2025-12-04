@@ -20,6 +20,9 @@ class AddGuestUseCase(
         if (guest.name.isBlank()) {
             return GuestResult.Error("El nombre del invitado no puede estar vacío")
         }
+        if (guest.name.length < 2 || guest.name.length > 100) {
+            return GuestResult.Error("El nombre debe tener entre 2 y 100 caracteres")
+        }
         if (guest.plusOnesAllowed < 0) {
             return GuestResult.Error("Los acompañantes no pueden ser negativos")
         }

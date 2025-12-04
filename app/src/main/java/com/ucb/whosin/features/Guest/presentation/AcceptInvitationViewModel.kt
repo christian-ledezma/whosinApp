@@ -91,9 +91,9 @@ class AcceptInvitationViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
-            val userProfile = firebaseAuthDataSource.getUserProfile(currentUser.uid)
+            val userProfileResult = firebaseAuthDataSource.getUserProfile(currentUser.uid)
 
-            if (userProfile == null) {
+            if (userProfileResult.isFailure) {
                 Log.e("AcceptInvitation", "❌ No se pudo obtener el perfil del usuario")
                 _uiState.value = _uiState.value.copy(
                     errorMessage = "No se pudo obtener tu perfil. Por favor, intenta más tarde.",
@@ -102,7 +102,9 @@ class AcceptInvitationViewModel(
                 return@launch
             }
 
-            if (userProfile.name.isBlank() || userProfile.lastname.isBlank()) {
+            val userProfile = userProfileResult.getOrThrow()
+
+            if (userProfile.name.value.isBlank() || userProfile.lastname.value.isBlank()) {
                 Log.e("AcceptInvitation", "❌ Perfil incompleto: name='${userProfile.name}', lastname='${userProfile.lastname}'")
                 _uiState.value = _uiState.value.copy(
                     errorMessage = "Tu perfil está incompleto. Por favor, completa tus datos personales en la configuración de tu cuenta antes de aceptar invitaciones.",
