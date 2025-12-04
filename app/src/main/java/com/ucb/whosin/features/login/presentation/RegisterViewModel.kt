@@ -2,9 +2,9 @@ package com.ucb.whosin.features.login.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil3.util.CoilUtils.result
 import com.ucb.whosin.features.login.domain.model.AuthResult
 import com.ucb.whosin.features.login.domain.model.CountryCode
-import com.ucb.whosin.features.login.domain.model.RegisterData
 import com.ucb.whosin.features.login.domain.repository.AuthRepository
 import com.ucb.whosin.features.login.domain.usecase.RegisterUserUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,13 +88,16 @@ class RegisterViewModel(
     fun registerUser() {
         val state = _uiState.value
 
-        // Validaciones locales
-        if (!validateFields()) return
+        // Validaciones local de confirmación de contraseña
+        if (state.password != state.confirmPassword) {
+            _uiState.update { it.copy(confirmPasswordError = "Las contraseñas no coinciden") }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val registerData = RegisterData(
+            when (val result = registerUserUseCase(
                 email = state.email.trim(),
                 password = state.password,
                 name = state.name.trim(),
@@ -102,9 +105,7 @@ class RegisterViewModel(
                 secondLastname = state.secondLastname.trim().ifBlank { null },
                 phone = state.phone.trim(),
                 countryCode = state.selectedCountryCode
-            )
-
-            when (val result = registerUserUseCase.register(registerData)) {
+            )) {
                 is AuthResult.Success -> {
                     authRepository.saveSession(
                         result.user.uid,
@@ -119,53 +120,7 @@ class RegisterViewModel(
         }
     }
 
-    private fun validateFields(): Boolean {
-        val state = _uiState.value
-        var isValid = true
-
-        if (state.email.isBlank()) {
-            _uiState.update { it.copy(emailError = "El correo es obligatorio") }
-            isValid = false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
-            _uiState.update { it.copy(emailError = "Formato de correo inválido") }
-            isValid = false
-        }
-
-        if (state.password.isBlank()) {
-            _uiState.update { it.copy(passwordError = "La contraseña es obligatoria") }
-            isValid = false
-        } else if (state.password.length < 6) {
-            _uiState.update { it.copy(passwordError = "Mínimo 6 caracteres") }
-            isValid = false
-        }
-
-        if (state.confirmPassword != state.password) {
-            _uiState.update { it.copy(confirmPasswordError = "Las contraseñas no coinciden") }
-            isValid = false
-        }
-
-        if (state.name.isBlank()) {
-            _uiState.update { it.copy(nameError = "El nombre es obligatorio") }
-            isValid = false
-        }
-
-        if (state.lastname.isBlank()) {
-            _uiState.update { it.copy(lastnameError = "El apellido es obligatorio") }
-            isValid = false
-        }
-
-        if (state.phone.isBlank()) {
-            _uiState.update { it.copy(phoneError = "El teléfono es obligatorio") }
-            isValid = false
-        } else if (state.phone.length < 7) {
-            _uiState.update { it.copy(phoneError = "Teléfono inválido") }
-            isValid = false
-        }
-
-        return isValid
-    }
-
-    // Mantener compatibilidad con método antiguo
+    // Mantener compatibilidad con metodo antiguo
     fun registerUser(email: String, password: String) {
         _uiState.update { it.copy(email = email, password = password) }
         registerUser()

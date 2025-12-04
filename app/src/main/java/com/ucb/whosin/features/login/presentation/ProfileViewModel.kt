@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.ucb.whosin.features.login.domain.model.CountryCode
 import com.ucb.whosin.features.login.domain.model.User
+import com.ucb.whosin.features.login.domain.model.vo.*
 import com.ucb.whosin.features.login.domain.usecase.ChangePasswordUseCase
 import com.ucb.whosin.features.login.domain.usecase.GetUserProfileUseCase
 import com.ucb.whosin.features.login.domain.usecase.UpdateUserProfileUseCase
@@ -54,35 +55,37 @@ class ProfileViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val user = getUserProfileUseCase(userId)
+            val result = getUserProfileUseCase(userId)
 
-            if (user != null) {
-                val countryCode = CountryCode.entries.find { it.code == user.countryCode }
-                    ?: CountryCode.BO
+            result.fold(
+                onSuccess = { user ->
+                    val countryCode = CountryCode.entries.find { it.code == user.countryCode.value }
+                        ?: CountryCode.BO
 
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        user = user,
-                        name = user.name,
-                        lastname = user.lastname,
-                        secondLastname = user.secondLastname ?: "",
-                        phone = user.phone,
-                        selectedCountryCode = countryCode,
-                        email = user.email
-                    )
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            user = user,
+                            name = user.name.value,
+                            lastname = user.lastname.value,
+                            secondLastname = user.secondLastname.value ?: "",
+                            phone = user.phoneNumber.value,
+                            selectedCountryCode = countryCode,
+                            email = user.email.value
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    val email = firebaseAuth.currentUser?.email ?: ""
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            email = email,
+                            errorMessage = error.message
+                        )
+                    }
                 }
-            } else {
-                // Usuario sin perfil completo
-                val email = firebaseAuth.currentUser?.email ?: ""
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        email = email,
-                        user = User(uid = userId, email = email)
-                    )
-                }
-            }
+            )
         }
     }
 
@@ -122,14 +125,43 @@ class ProfileViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true, errorMessage = null, successMessage = null) }
 
-            val updatedUser = User(
-                uid = userId,
-                email = state.email,
-                name = state.name.trim(),
-                lastname = state.lastname.trim(),
-                secondLastname = state.secondLastname.trim().ifBlank { null },
-                phone = state.phone.trim(),
-                countryCode = state.selectedCountryCode.code,
+            val userIdResult = UserId.create(userId)
+            val emailResult = Email.create(state.email)
+            val nameResult = PersonName.create(state.name.trim(), "nombre")
+            val lastnameResult = PersonName.create(state.lastname.trim(), "apellido")
+            val secondLastnameResult = OptionalPersonName.create(state.secondLastname.trim().ifBlank { null })
+            val countryCodeResult = CountryCodeValue.fromEnum(state.selectedCountryCode)
+            val phoneResult = PhoneNumber.create(state.phone.trim(), countryCodeResult.value)
+
+            if (userIdResult.isFailure || emailResult.isFailure || nameResult.isFailure ||
+                lastnameResult.isFailure || secondLastnameResult.isFailure || phoneResult.isFailure) {
+
+                val error = listOf(
+                    userIdResult.exceptionOrNull(),
+                    emailResult.exceptionOrNull(),
+                    nameResult.exceptionOrNull(),
+                    lastnameResult.exceptionOrNull(),
+                    secondLastnameResult.exceptionOrNull(),
+                    phoneResult.exceptionOrNull()
+                ).firstNotNullOfOrNull { it }
+
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        errorMessage = error?.message ?: "Error de validación"
+                    )
+                }
+                return@launch
+            }
+
+            val updatedUser = User.create(
+                uid = userIdResult.getOrThrow(),
+                email = emailResult.getOrThrow(),
+                name = nameResult.getOrThrow(),
+                lastname = lastnameResult.getOrThrow(),
+                secondLastname = secondLastnameResult.getOrThrow(),
+                phoneNumber = phoneResult.getOrThrow(),
+                countryCode = countryCodeResult,
                 createdAt = state.user?.createdAt
             )
 
