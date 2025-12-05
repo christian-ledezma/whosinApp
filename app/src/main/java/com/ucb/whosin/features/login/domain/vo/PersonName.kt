@@ -5,7 +5,7 @@ value class PersonName private constructor(val value: String) {
     companion object {
         private const val MIN_LENGTH = 2
         private const val MAX_LENGTH = 50
-        private val VALID_NAME_PATTERN = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+(\\s[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)?$")
+        private val VALID_NAME_PATTERN = Regex("^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+(\\s[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+)*$")
 
         fun create(name: String, fieldName: String = "nombre"): Result<PersonName> {
             val normalized = normalize(name)

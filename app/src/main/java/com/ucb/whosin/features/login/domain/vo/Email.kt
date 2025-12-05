@@ -5,7 +5,8 @@ import android.util.Patterns
 @JvmInline
 value class Email private constructor(val value: String){
     companion object {
-        private val EMAIL_PATTERN = Patterns.EMAIL_ADDRESS
+        private val EMAIL_PATTERN = Regex(
+            "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
         fun create(email: String): Result<Email> {
             val normalized = normalize(email)
@@ -26,7 +27,7 @@ value class Email private constructor(val value: String){
         }
 
         private fun isValid(email: String): Boolean {
-            return EMAIL_PATTERN.matcher(email).matches()
+            return EMAIL_PATTERN.matches(email)
         }
     }
 
