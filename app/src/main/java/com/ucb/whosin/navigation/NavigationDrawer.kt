@@ -44,7 +44,7 @@ sealed class NavigationDrawer(
     )
 
     object AcceptInvitation : NavigationDrawer(
-        label = "Aceptar Invitación",
+        label = "Eventos con Invitación",
         selectedIcon = Icons.Filled.CheckCircle,
         unselectedIcon = Icons.Outlined.CheckCircle,
         route = Screen.AcceptInvitation.route
