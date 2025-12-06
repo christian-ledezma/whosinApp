@@ -19,6 +19,8 @@
     mockk = "1.13.8"
     mockitoCore = "5.7.0"
     mockitoKotlin = "5.1.0"
+    mockitoInline = "5.2.0"
+    turbine = "1.0.0"
     retrofit = "3.0.0"
     navcompose = "2.9.3"
     googleGmsGoogleServices = "4.4.3"
@@ -70,6 +72,8 @@
     mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
     mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
     mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+    mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
+    turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
     retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
     androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navcompose"}
     firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }

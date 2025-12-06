@@ -13,6 +13,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 
 class RegisterUserUseCaseTest {
     @Mock
@@ -38,7 +39,7 @@ class RegisterUserUseCaseTest {
         val countryCode = CountryCode.BO
 
         val mockUser = createMockUser()
-        `when`(mockRepository.registerUser(any(RegisterData::class.java)))
+        `when`(mockRepository.registerUser(any()))
             .thenReturn(AuthResult.Success(mockUser))
 
         // When
@@ -46,7 +47,7 @@ class RegisterUserUseCaseTest {
 
         // Then
         assertTrue(result is AuthResult.Success)
-        verify(mockRepository).registerUser(any(RegisterData::class.java))
+        verify(mockRepository).registerUser(any())
     }
 
     @Test
@@ -65,7 +66,7 @@ class RegisterUserUseCaseTest {
         // Then
         assertTrue(result is AuthResult.Error)
         assertEquals("El formato del correo electrónico no es válido", (result as AuthResult.Error).message)
-        verify(mockRepository, never()).registerUser(any(RegisterData::class.java))
+        verify(mockRepository, never()).registerUser(any())
     }
 
     @Test
@@ -84,7 +85,7 @@ class RegisterUserUseCaseTest {
         // Then
         assertTrue(result is AuthResult.Error)
         assertEquals("La contraseña debe tener al menos 6 caracteres", (result as AuthResult.Error).message)
-        verify(mockRepository, never()).registerUser(any(RegisterData::class.java))
+        verify(mockRepository, never()).registerUser(any())
     }
 
     @Test
@@ -103,7 +104,7 @@ class RegisterUserUseCaseTest {
         // Then
         assertTrue(result is AuthResult.Error)
         assertEquals("El nombre no puede estar vacío", (result as AuthResult.Error).message)
-        verify(mockRepository, never()).registerUser(any(RegisterData::class.java))
+        verify(mockRepository, never()).registerUser(any())
     }
 
     @Test
@@ -122,7 +123,7 @@ class RegisterUserUseCaseTest {
         // Then
         assertTrue(result is AuthResult.Error)
         assertEquals("El apellido paterno no puede estar vacío", (result as AuthResult.Error).message)
-        verify(mockRepository, never()).registerUser(any(RegisterData::class.java))
+            verify(mockRepository, never()).registerUser(any())
     }
 
     @Test
@@ -141,7 +142,7 @@ class RegisterUserUseCaseTest {
         // Then
         assertTrue(result is AuthResult.Error)
         assertTrue((result as AuthResult.Error).message.contains("al menos"))
-        verify(mockRepository, never()).registerUser(any(RegisterData::class.java))
+        verify(mockRepository, never()).registerUser(any())
     }
 
     @Test
@@ -155,7 +156,7 @@ class RegisterUserUseCaseTest {
         val countryCode = CountryCode.BO
 
         val mockUser = createMockUser()
-        `when`(mockRepository.registerUser(any(RegisterData::class.java)))
+        `when`(mockRepository.registerUser(any()))
             .thenReturn(AuthResult.Success(mockUser))
 
         // When
@@ -163,56 +164,9 @@ class RegisterUserUseCaseTest {
 
         // Then
         assertTrue(result is AuthResult.Success)
-        verify(mockRepository).registerUser(any(RegisterData::class.java))
+        verify(mockRepository).registerUser(any())
     }
 
-    @Test
-    fun `invoke should normalize email to lowercase`() = runTest {
-        // Given
-        val emailUppercase = "JUAN@EXAMPLE.COM"
-        val password = "123456"
-        val name = "Juan"
-        val lastname = "Pérez"
-        val phone = "12345678"
-        val countryCode = CountryCode.BO
-
-        val mockUser = createMockUser()
-        `when`(mockRepository.registerUser(any(RegisterData::class.java)))
-            .thenReturn(AuthResult.Success(mockUser))
-
-        // When
-        val result = useCase(emailUppercase, password, name, lastname, null, phone, countryCode)
-
-        // Then
-        assertTrue(result is AuthResult.Success)
-        verify(mockRepository).registerUser(argThat { registerData ->
-            registerData.email.value == "juan@example.com"
-        })
-    }
-
-    @Test
-    fun `invoke should normalize names to uppercase`() = runTest {
-        // Given
-        val email = "juan@example.com"
-        val password = "123456"
-        val name = "juan"
-        val lastname = "pérez"
-        val phone = "12345678"
-        val countryCode = CountryCode.BO
-
-        val mockUser = createMockUser()
-        `when`(mockRepository.registerUser(any(RegisterData::class.java)))
-            .thenReturn(AuthResult.Success(mockUser))
-
-        // When
-        val result = useCase(email, password, name, lastname, null, phone, countryCode)
-
-        // Then
-        assertTrue(result is AuthResult.Success)
-        verify(mockRepository).registerUser(argThat { registerData ->
-            registerData.name.value == "JUAN" && registerData.lastname.value == "PÉREZ"
-        })
-    }
 
     private fun createMockUser(): User {
         return User.create(

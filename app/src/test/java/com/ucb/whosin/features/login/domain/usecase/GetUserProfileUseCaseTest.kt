@@ -10,6 +10,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 
 class GetUserProfileUseCaseTest {
 
@@ -30,7 +31,7 @@ class GetUserProfileUseCaseTest {
         val userId = "user123"
         val mockUser = createMockUser()
 
-        `when`(mockRepository.getUserProfile(any(UserId::class.java)))
+        `when`(mockRepository.getUserProfile(any()))
             .thenReturn(Result.success(mockUser))
 
         // When
@@ -39,7 +40,7 @@ class GetUserProfileUseCaseTest {
         // Then
         assertTrue(result.isSuccess)
         assertEquals(mockUser, result.getOrNull())
-        verify(mockRepository).getUserProfile(any(UserId::class.java))
+        verify(mockRepository).getUserProfile(any())
     }
 
     @Test
@@ -53,7 +54,7 @@ class GetUserProfileUseCaseTest {
         // Then
         assertTrue(result.isFailure)
         assertEquals("El ID de usuario no puede estar vacío", result.exceptionOrNull()?.message)
-        verify(mockRepository, never()).getUserProfile(any(UserId::class.java))
+        verify(mockRepository, never()).getUserProfile(any())
     }
 
     @Test
@@ -61,7 +62,7 @@ class GetUserProfileUseCaseTest {
         // Given
         val userId = "user123"
 
-        `when`(mockRepository.getUserProfile(any(UserId::class.java)))
+        `when`(mockRepository.getUserProfile(any()))
             .thenReturn(Result.failure(Exception("Usuario no encontrado")))
 
         // When

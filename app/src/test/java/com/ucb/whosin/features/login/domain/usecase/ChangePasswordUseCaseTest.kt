@@ -9,6 +9,7 @@ import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 
 
 class ChangePasswordUseCaseTest {
@@ -31,7 +32,7 @@ class ChangePasswordUseCaseTest {
         val newPassword = "newpass123"
         val confirmPassword = "newpass123"
 
-        `when`(mockRepository.changePassword(any(Password::class.java), any(Password::class.java)))
+        `when`(mockRepository.changePassword(any(), any()))
             .thenReturn(Result.success(Unit))
 
         // When
@@ -39,7 +40,7 @@ class ChangePasswordUseCaseTest {
 
         // Then
         assertTrue(result.isSuccess)
-        verify(mockRepository).changePassword(any(Password::class.java), any(Password::class.java))
+        verify(mockRepository).changePassword(any(), any())
     }
 
     @Test
@@ -55,7 +56,7 @@ class ChangePasswordUseCaseTest {
         // Then
         assertTrue(result.isFailure)
         assertEquals("La contraseña no puede estar vacía", result.exceptionOrNull()?.message)
-        verify(mockRepository, never()).changePassword(any(Password::class.java), any(Password::class.java))
+        verify(mockRepository, never()).changePassword(any(), any())
     }
 
     @Test
@@ -71,7 +72,7 @@ class ChangePasswordUseCaseTest {
         // Then
         assertTrue(result.isFailure)
         assertEquals("La contraseña debe tener al menos 6 caracteres", result.exceptionOrNull()?.message)
-        verify(mockRepository, never()).changePassword(any(Password::class.java), any(Password::class.java))
+        verify(mockRepository, never()).changePassword(any(), any())
     }
 
     @Test
@@ -87,7 +88,7 @@ class ChangePasswordUseCaseTest {
         // Then
         assertTrue(result.isFailure)
         assertEquals("Las contraseñas no coinciden", result.exceptionOrNull()?.message)
-        verify(mockRepository, never()).changePassword(any(Password::class.java), any(Password::class.java))
+        verify(mockRepository, never()).changePassword(any(), any())
     }
 
     @Test
@@ -103,7 +104,7 @@ class ChangePasswordUseCaseTest {
         // Then
         assertTrue(result.isFailure)
         assertEquals("La nueva contraseña debe ser diferente a la actual", result.exceptionOrNull()?.message)
-        verify(mockRepository, never()).changePassword(any(Password::class.java), any(Password::class.java))
+        verify(mockRepository, never()).changePassword(any(), any())
     }
 
     @Test
@@ -113,7 +114,7 @@ class ChangePasswordUseCaseTest {
         val newPassword = "newpass123"
         val confirmPassword = "newpass123"
 
-        `when`(mockRepository.changePassword(any(Password::class.java), any(Password::class.java)))
+        `when`(mockRepository.changePassword(any(), any()))
             .thenReturn(Result.failure(Exception("Error de autenticación")))
 
         // When
@@ -137,6 +138,6 @@ class ChangePasswordUseCaseTest {
         // Then
         assertTrue(result.isFailure)
         // Falla porque confirmPassword es muy corto (< 6 caracteres)
-        verify(mockRepository, never()).changePassword(any(Password::class.java), any(Password::class.java))
+        verify(mockRepository, never()).changePassword(any(), any())
     }
 }

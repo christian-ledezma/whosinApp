@@ -21,8 +21,8 @@ android {
         applicationId = "com.ucb.whosin"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.7.2"
+        versionCode = 12
+        versionName = "1.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -214,6 +214,8 @@ dependencies {
     testImplementation(libs.room.testing)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.inline)
+    testImplementation(libs.turbine)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
