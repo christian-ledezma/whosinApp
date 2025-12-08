@@ -21,8 +21,8 @@ android {
         applicationId = "com.ucb.whosin"
         minSdk = 24
         targetSdk = 35
-        versionCode = 12
-        versionName = "1.8.0"
+        versionCode = 14
+        versionName = "1.8.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
