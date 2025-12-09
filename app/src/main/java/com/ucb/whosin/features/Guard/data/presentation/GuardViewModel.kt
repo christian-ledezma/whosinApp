@@ -41,8 +41,8 @@ class GuardViewModel(
     // Flujo de datos para las estadísticas
     val stats: StateFlow<GuardStats> = _guests.map { allGuests ->
         GuardStats(
-            checkedIn = allGuests.count { it.checkedIn },
-            total = allGuests.size
+            checkedIn = allGuests.filter { it.checkedIn }.sumOf { it.groupSize },
+            total = allGuests.sumOf { it.groupSize }
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, GuardStats())
 

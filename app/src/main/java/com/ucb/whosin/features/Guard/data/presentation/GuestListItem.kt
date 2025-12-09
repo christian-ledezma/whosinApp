@@ -47,6 +47,13 @@ fun GuestListItem(guest: Guest, onCheckIn: (String) -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
 
+                Text(
+                    text = "Invitados: ${guest.groupSize}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WhosInColors.GrayBlue,
+                    fontWeight = FontWeight.Medium
+                )
+
                 val statusText: String
                 val statusColor = if (guest.checkedIn) {
                     statusText = "Verificado"
