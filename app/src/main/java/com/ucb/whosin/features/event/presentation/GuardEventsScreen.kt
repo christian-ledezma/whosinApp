@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.text.get
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -226,6 +227,7 @@ private fun GuardEventsScreenContent(
                         items(uiState.value.events) { event ->
                             GuardEventCard(
                                 event = event,
+                                totalInvited = uiState.value.totalInvitedByEvent[event.eventId] ?: 0,
                                 onClick = { onEventSelected(event.eventId) }
                             )
                         }
@@ -238,6 +240,7 @@ private fun GuardEventsScreenContent(
 @Composable
 private fun GuardEventCard(
     event: EventModel,
+    totalInvited: Int,
     onClick: () -> Unit
 ) {
     val dateFormatter = SimpleDateFormat("dd MMM yyyy", Locale("es", "ES"))
@@ -418,7 +421,7 @@ private fun GuardEventCard(
                             tint = WhosInColors.OliveGreen
                         )
                         Text(
-                            text = event.totalInvited.toString(),
+                            text = totalInvited.toString(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Companion.Bold,
                             color = WhosInColors.DarkTeal

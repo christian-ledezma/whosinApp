@@ -311,6 +311,15 @@ private fun EventDataTab(
         }
     }
 
+    // Inicializar ubicación en el ViewModel si existe
+    LaunchedEffect(event) {
+        event?.let {
+            if (it.latitude != 0.0 && it.longitude != 0.0) {
+                locationViewModel.setLocation(it.latitude, it.longitude)
+            }
+        }
+    }
+
     // Observar cambios de ubicación
     LaunchedEffect(Unit) {
         locationViewModel.selectedLocation.collect { location ->

@@ -18,5 +18,5 @@ val guardModule = module {
 
 
     viewModel { GuardViewModel(get(), get<FirebaseAuth>(), get()) }
-    viewModel { GuardEventsViewModel(get(), get<FirebaseAuth>()) }
+    viewModel { GuardEventsViewModel(get(), get<FirebaseAuth>(), get()) }
 }

@@ -14,7 +14,7 @@ fun GuestList(guests: List<Guest>, onCheckIn: (String) -> Unit) {
         modifier = Modifier,
         contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
-        items(guests, key = { it.userId ?: it.name }) {
+        items(guests, key = { it.guestId }) {
             guest ->
             GuestListItem(guest = guest, onCheckIn = onCheckIn)
         }
