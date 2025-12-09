@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -48,7 +49,8 @@ data class EventSummary(
     val name: String,
     val date: Timestamp,
     val locationName: String,
-    val totalInvited: Int
+    val totalInvited: Int,
+    val calculatedTotalInvited: Int = 0
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -272,7 +274,8 @@ private fun EventSelectorScreenContent(
                                         name = event.name,
                                         date = event.date,
                                         locationName = event.locationName,
-                                        totalInvited = event.totalInvited
+                                        totalInvited = event.totalInvited,
+                                        calculatedTotalInvited = event.calculatedTotalInvited
                                     ),
                                     onCardClick = { onEventSelected(event.eventId) },
                                     onManageClick = { onManageEventClicked(event.eventId) },
@@ -466,7 +469,7 @@ private fun ModernEventCard(
             ) {
                 // Invitados badge
                 Surface(
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(16.dp),
                     color = WhosInColors.LimeGreen.copy(alpha = 0.2f)
                 ) {
                     Row(
@@ -476,12 +479,13 @@ private fun ModernEventCard(
                         Icon(
                             imageVector = Icons.Outlined.People,
                             contentDescription = null,
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(16.dp),
                             tint = WhosInColors.OliveGreen
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "${event.totalInvited}",
+                            text = "${event.calculatedTotalInvited}",
+                            fontSize = 16.sp,
                             style = MaterialTheme.typography.labelMedium,
                             color = WhosInColors.OliveGreen,
                             fontWeight = FontWeight.SemiBold
