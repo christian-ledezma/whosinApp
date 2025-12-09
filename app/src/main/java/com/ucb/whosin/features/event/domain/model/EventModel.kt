@@ -15,7 +15,8 @@ data class EventModel(
     val guardModeEnabled: Boolean = false,
     val createdAt: Timestamp = Timestamp.now(),
     val totalCheckedIn: Int = 0,
-    val totalInvited: Int = 0
+    val totalInvited: Int = 0,
+    val calculatedTotalInvited: Int = 0
 )
 
 sealed class EventResult {

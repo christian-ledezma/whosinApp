@@ -421,7 +421,7 @@ private fun GuardEventCard(
                             tint = WhosInColors.OliveGreen
                         )
                         Text(
-                            text = totalInvited.toString(),
+                            text = event.calculatedTotalInvited.toString(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Companion.Bold,
                             color = WhosInColors.DarkTeal

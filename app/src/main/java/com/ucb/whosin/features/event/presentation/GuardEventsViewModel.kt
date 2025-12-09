@@ -44,14 +44,16 @@ class GuardEventsViewModel(
             try {
                 val events = getEventsWhereUserIsGuardUseCase(currentUser.uid)
 
-                val totalsMap = mutableMapOf<String, Int>()
-                events.forEach { event ->
-                    totalsMap[event.eventId] = calculateTotalGuestsForEvent(event.eventId)
+                val eventsWithCalculatedTotals = events.map { event ->
+                    val guestsData = calculateGuestsDataForEvent(event.eventId)
+                    event.copy(
+                        calculatedTotalInvited = guestsData.first,
+                        totalCheckedIn = guestsData.second
+                    )
                 }
 
                 _uiState.value = _uiState.value.copy(
-                    events = events,
-                    totalInvitedByEvent = totalsMap,
+                    events = eventsWithCalculatedTotals,
                     isLoading = false
                 )
             } catch (e: Exception) {
@@ -63,7 +65,7 @@ class GuardEventsViewModel(
         }
     }
 
-    private suspend fun calculateTotalGuestsForEvent(eventId: String): Int {
+    private suspend fun calculateGuestsDataForEvent(eventId: String): Pair<Int, Int> {
         return try {
             val snapshot = com.google.firebase.firestore.FirebaseFirestore.getInstance()
                 .collection("events")
@@ -72,12 +74,23 @@ class GuardEventsViewModel(
                 .get()
                 .await()
 
-            snapshot.documents.sumOf { doc ->
-                doc.getLong("groupSize")?.toInt() ?: 0
+            var totalInvited = 0
+            var totalCheckedIn = 0
+
+            snapshot.documents.forEach { doc ->
+                val groupSize = doc.getLong("groupSize")?.toInt() ?: 0
+                val isCheckedIn = doc.getBoolean("checkedIn") ?: false
+
+                totalInvited += groupSize
+                if (isCheckedIn) {
+                    totalCheckedIn += groupSize
+                }
             }
+
+            Pair(totalInvited, totalCheckedIn)
         } catch (e: Exception) {
             Log.e("GuardEventsVM", "Error calculando total invitados", e)
-            0
+            Pair(0, 0)
         }
     }
 
