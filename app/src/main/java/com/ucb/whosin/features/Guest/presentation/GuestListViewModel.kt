@@ -23,7 +23,10 @@ data class GuestListUiState(
     val errorMessage: String? = null,
     val searchQuery: String = "",
     val updateSuccess: Boolean = false,
-    val deleteSuccess: Boolean = false
+    val deleteSuccess: Boolean = false,
+    val totalPeople: Int = 0,
+    val confirmedPeople: Int = 0,
+    val checkedInPeople: Int = 0
 )
 
 class GuestListViewModel(
@@ -54,9 +57,20 @@ class GuestListViewModel(
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             when (val result = getGuestsUseCase(eventId)) {
                 is GuestResult.SuccessList -> {
+                    val totalPeople = result.guests.sumOf { it.groupSize }
+                    val confirmedPeople = result.guests
+                        .filter { it.inviteStatus == "confirmed" }
+                        .sumOf { it.groupSize }
+                    val checkedInPeople = result.guests
+                        .filter { it.checkedIn }
+                        .sumOf { it.groupSize }
+
                     _uiState.value = _uiState.value.copy(
                         guests = result.guests,
                         filteredGuests = result.guests,
+                        totalPeople = totalPeople,
+                        confirmedPeople = confirmedPeople,
+                        checkedInPeople = checkedInPeople,
                         isLoading = false
                     )
                 }

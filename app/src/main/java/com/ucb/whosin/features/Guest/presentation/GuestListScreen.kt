@@ -232,9 +232,9 @@ private fun GuestListScreenContent(
                 // Estadísticas
                 AnimatedEntrance(visible = startAnimation, delayMillis = 100) {
                     GuestStatsCard(
-                        totalGuests = uiState.guests.size,
-                        confirmedGuests = uiState.guests.count { it.inviteStatus == "confirmed" },
-                        checkedInGuests = uiState.guests.count { it.checkedIn }
+                        totalGuests = uiState.totalPeople,
+                        confirmedGuests = uiState.confirmedPeople,
+                        checkedInGuests = uiState.checkedInPeople
                     )
                 }
 
