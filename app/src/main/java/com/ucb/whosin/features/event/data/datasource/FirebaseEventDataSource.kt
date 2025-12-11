@@ -99,6 +99,7 @@ class FirebaseEventDataSource(
         return try {
             val snapshot = firestore.collection("events")
                 .whereEqualTo("userId", userId)
+                .whereEqualTo("status", "upcoming")
                 .get()
                 .await()
 
