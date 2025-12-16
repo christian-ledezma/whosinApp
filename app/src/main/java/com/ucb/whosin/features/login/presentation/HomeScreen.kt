@@ -1,5 +1,6 @@
 package com.ucb.whosin.features.login.presentation
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.ucb.whosin.features.login.domain.usecase.GetCurrentUserUseCase
+import com.ucb.whosin.ui.components.BottomNavItem
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import com.ucb.whosin.ui.components.ModernTopAppBar
+import com.ucb.whosin.ui.components.WhosInBottomNavigation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,144 +42,74 @@ fun HomeScreen(
     navigationViewModel: NavigationViewModel,
     navController: NavHostController
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val logoutUseCase: LogoutUseCase = get()
-    val getCurrentUserUseCase: GetCurrentUserUseCase = get() // ← AGREGAR
+    val getCurrentUserUseCase: GetCurrentUserUseCase = get()
     val scope = rememberCoroutineScope()
     val currentRoute = navController.currentBackStackEntry?.destination?.route ?: ""
 
     val userName by getCurrentUserUseCase().collectAsState(initial = null)
-    val navigationItems = NavigationDrawer.getAllItems()
+
+    val bottomNavItems = remember {
+        listOf(
+            BottomNavItem(
+                route = Screen.Home.route,
+                selectedIcon = Icons.Filled.Home,
+                unselectedIcon = Icons.Outlined.Home,
+                label = "Inicio"
+            ),
+            BottomNavItem(
+                route = Screen.Event.route,
+                selectedIcon = Icons.Filled.DateRange,
+                unselectedIcon = Icons.Outlined.DateRange,
+                label = "Eventos"
+            ),
+            BottomNavItem(
+                route = Screen.AcceptInvitation.route,
+                selectedIcon = Icons.Filled.CheckCircle,
+                unselectedIcon = Icons.Outlined.CheckCircle,
+                label = "Invitación"
+            ),
+            BottomNavItem(
+                route = Screen.GuardEvents.route,
+                selectedIcon = Icons.Filled.Security,
+                unselectedIcon = Icons.Outlined.Security,
+                label = "Guardia"
+            )
+        )
+    }
 
     WhosInModernTheme {
-
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier
-                        .fillMaxWidth(0.78f)
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    WhosInColors.DarkTeal.copy(alpha = 0.92f),
-                                    WhosInColors.PetrolBlue.copy(alpha = 0.96f)
-                                )
-                            )
-                        )
-                ) {
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    // Header del Drawer
-                    Column(
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    ) {
-                        Text(
-                            text = "Who's In",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = WhosInColors.DarkTeal,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        HorizontalDivider(
-                            color = WhosInColors.LightGray.copy(alpha = 0.2f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    navigationItems.forEach { item ->
-
-                        val selected = currentRoute == item.route
-                        val animatedAlpha by animateFloatAsState(
-                            targetValue = if (selected) 1f else 0.55f,
-                            animationSpec = tween(300),
-                            label = "alphaAnim"
-                        )
-
-                        NavigationDrawerItem(
-                            icon = {
-                                Icon(
-                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                    contentDescription = item.label,
-                                    tint = WhosInColors.DarkTeal,
-                                    modifier = Modifier.size(26.dp)
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = item.label,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = WhosInColors.DarkTeal,
-                                    modifier = Modifier.alpha(animatedAlpha)
-                                )
-                            },
-                            selected = selected,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    if (!selected) navigationViewModel.navigateTo(item.route)
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(horizontal = 16.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    if (selected)
-                                        WhosInColors.LimeGreen.copy(alpha = 0.15f)
-                                    else
-                                        Color.Transparent
-                                )
-                                .padding(horizontal = 8.dp)
-                        )
-                    }
-                }
-            }
-        )
-         {
-
             Scaffold(
                 containerColor = WhosInColors.DarkTeal,
                 topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                "Inicio",
-                                color = WhosInColors.DarkTeal
-                            )
+                    ModernTopAppBar(
+                        title = "Inicio",
+                        userName = userName,
+                        onProfileClick = {
+                            navController.navigate(Screen.Profile.route)
                         },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                scope.launch { drawerState.open() }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menú",
-                                    tint = WhosInColors.DarkTeal
-                                )
-                            }
-                        },
-                        actions = {
-                            TextButton(
-                                onClick = {
-                                    scope.launch {
-                                        logoutUseCase()
-                                        navController.navigate(Screen.Login.route) {
-                                            popUpTo(0) { inclusive = true }
-                                        }
-                                    }
+                        onLogoutClick = {
+                            scope.launch {
+                                logoutUseCase()
+                                navController.navigate(Screen.Login.route) {
+                                    popUpTo(0) { inclusive = true }
                                 }
-                            ) {
-                                Text("Cerrar Sesión", color = WhosInColors.DarkTeal)
                             }
                         }
                     )
-                }
-            ) { paddingValues ->
-
+                },
+                bottomBar = {
+                    WhosInBottomNavigation(
+                        items = bottomNavItems,
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            if (route != currentRoute) {
+                                navigationViewModel.navigateTo(route)
+                            }
+                        }
+                    )
+                })
+            { paddingValues ->
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -207,17 +143,9 @@ fun HomeScreen(
                             )
                         }
 
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(24.dp))
 
-                        Text(
-                            text = "Usa el menú lateral para navegar entre las secciones.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = WhosInColors.GrayBlue
-                        )
-
-                        Spacer(Modifier.height(32.dp))
-
-                        // Card de accesos rápidos
+                        // Card de otros accesos
                         Surface(
                             shape = RoundedCornerShape(20.dp),
                             color = WhosInColors.White,
@@ -228,7 +156,7 @@ fun HomeScreen(
                                 modifier = Modifier.padding(20.dp)
                             ) {
                                 Text(
-                                    text = "Accesos Rápidos",
+                                    text = "Otros Accesos",
                                     style = MaterialTheme.typography.titleMedium,
                                     color = WhosInColors.DarkTeal
                                 )
@@ -244,7 +172,7 @@ fun HomeScreen(
                                         containerColor = WhosInColors.MintGreen,
                                         contentColor = WhosInColors.DarkTeal
                                     )
-                                ) { Text("Ver Eventos") }
+                                ) { Text("Ver Eventos Aceptados") }
 
                                 Spacer(Modifier.height(12.dp))
                             }
@@ -252,7 +180,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
     }
 }
 

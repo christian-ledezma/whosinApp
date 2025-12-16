@@ -34,17 +34,17 @@ fun WhosInBottomNavigation (
 ) {
     Surface(
     modifier = modifier.fillMaxWidth(),
-    color = WhosInColors.White,
+    color = WhosInColors.DarkTealLight,
     shadowElevation = 12.dp,
     tonalElevation = 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(72.dp)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+                .height(88.dp)
+                .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Top
         ) {
             items.forEach { item ->
                 val isSelected = currentRoute == item.route
@@ -122,7 +122,7 @@ private fun BottomNavItemView(
         Icon(
             imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
             contentDescription = item.label,
-            tint = if (isSelected) WhosInColors.DarkTeal else WhosInColors.GrayBlue,
+            tint = if (isSelected) WhosInColors.LightGray else WhosInColors.GrayBlue,
             modifier = Modifier
                 .size(26.dp)
                 .scale(scale)
@@ -135,7 +135,7 @@ private fun BottomNavItemView(
             text = item.label,
             fontSize = if (isSelected) 12.sp else 11.sp,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (isSelected) WhosInColors.DarkTeal else WhosInColors.GrayBlue,
+            color = if (isSelected) WhosInColors.LightGray else WhosInColors.GrayBlue,
             maxLines = 1
         )
     }

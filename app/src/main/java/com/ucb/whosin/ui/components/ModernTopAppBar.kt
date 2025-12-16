@@ -27,11 +27,12 @@ fun ModernTopAppBar(
     title: String,
     userName: String?,
     onProfileClick: () -> Unit,
-    onGuardModeClick: () -> Unit,
     onLogoutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Animación del avatar al hacer hover (simulado con scale)
     var isAvatarPressed by remember { mutableStateOf(false) }
@@ -45,9 +46,10 @@ fun ModernTopAppBar(
         title = {
             Text(
                 text = title,
+                fontSize = 24.sp,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = WhosInColors.DarkTeal
+                color = WhosInColors.LightGray
             )
         },
         actions = {
@@ -92,89 +94,83 @@ fun ModernTopAppBar(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // Menú de opciones
-            Box {
-                IconButton(
-                    onClick = { showMenu = true }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Más opciones",
-                        tint = WhosInColors.DarkTeal
-                    )
-                }
+            // Botón de cerrar sesión
+            IconButton(
+                onClick = { showLogoutDialog = true }
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Logout,
+                    contentDescription = "Cerrar Sesión",
+                    tint = WhosInColors.LightGray
+                )
+            }
 
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier
-                        .background(WhosInColors.White)
-                        .padding(vertical = 4.dp)
-                ) {
-                    // Opción Modo Guardia
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Modal de confirmación
+            if (showLogoutDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLogoutDialog = false },
+                    title = {
+                        Text(
+                            text = "Cerrar Sesión",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "¿Estás seguro de que deseas cerrar sesión?",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    confirmButton = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = { showLogoutDialog = false },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = WhosInColors.LightGray,
+                                    contentColor = WhosInColors.DarkTeal
+                                ),
+                                modifier = Modifier.weight(1f).padding(end = 4.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Security,
-                                    contentDescription = null,
-                                    tint = WhosInColors.DarkTeal,
-                                    modifier = Modifier.size(22.dp)
-                                )
                                 Text(
-                                    "Modo Guardia",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = WhosInColors.DarkTeal
+                                    "Cancelar",
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
-                        },
-                        onClick = {
-                            showMenu = false
-                            onGuardModeClick()
-                        }
-                    )
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        color = WhosInColors.GrayBlue.copy(alpha = 0.2f)
-                    )
-
-                    // Opción Cerrar Sesión
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            Button(
+                                onClick = {
+                                    showLogoutDialog = false
+                                    onLogoutClick()
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = WhosInColors.Error,
+                                    contentColor = WhosInColors.White
+                                ),
+                                modifier = Modifier.weight(1f).padding(start = 4.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Logout,
-                                    contentDescription = null,
-                                    tint = WhosInColors.Error,
-                                    modifier = Modifier.size(22.dp)
-                                )
                                 Text(
                                     "Cerrar Sesión",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = WhosInColors.Error
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
-                        },
-                        onClick = {
-                            showMenu = false
-                            onLogoutClick()
                         }
-                    )
-                }
+                    },
+                    dismissButton = null,
+
+                    containerColor = WhosInColors.LightGray
+                )
             }
 
             Spacer(modifier = Modifier.width(8.dp))
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = WhosInColors.White,
-            titleContentColor = WhosInColors.DarkTeal
+            containerColor = WhosInColors.DarkTealLight,
+            titleContentColor = WhosInColors.LightGray
         ),
         modifier = modifier
     )
