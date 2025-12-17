@@ -1,10 +1,12 @@
 package com.ucb.whosin.utils
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.drawable.Drawable
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.qrcode.QRCodeWriter
@@ -77,6 +79,35 @@ object QrCodeGenerator {
         }
 
         return bitmap
+    }
+
+    // Convierte un Drawable (incluyendo adaptive icons) a Bitmap del tamaño indicado
+    private fun drawableToBitmap(drawable: Drawable, size: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, size, size)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    // Obtiene el icono de la app como Bitmap
+    fun getAppIconBitmap(context: Context, size: Int): Bitmap {
+        val pm = context.packageManager
+        val drawable = pm.getApplicationIcon(context.applicationInfo)
+        return drawableToBitmap(drawable, size)
+    }
+
+    // Sobrecarga que genera el QR usando el icono de la app como logo
+    fun generateQrCodeWithAppIcon(
+        context: Context,
+        content: String,
+        size: Int = 512,
+        primaryColor: Int = Color.parseColor("#003D3D"),
+        backgroundColor: Int = Color.WHITE
+    ): Bitmap {
+        val logoSize = (size * 0.2f).toInt()
+        val appIcon = getAppIconBitmap(context, logoSize)
+        return generateQrCode(content, size, primaryColor, backgroundColor, appIcon)
     }
 
     fun generateSimpleQrCode(

@@ -74,7 +74,8 @@ fun QrCodeDialog(
     LaunchedEffect(qrCode) {
         scope.launch(Dispatchers.Default) {
             try {
-                val bitmap = QrCodeGenerator.generateSimpleQrCode(
+                val bitmap = QrCodeGenerator.generateQrCodeWithAppIcon(
+                    context = context,
                     content = qrCode,
                     size = 512,
                     primaryColor = android.graphics.Color.parseColor("#003D3D"), // DarkTeal
