@@ -200,6 +200,9 @@ dependencies {
     implementation(libs.google.mlkit.barcode.scanning)
     implementation("com.google.guava:guava:33.0.0-android")
 
+    // QR Code Generation
+    implementation(libs.zxing.core)
+
     // Google Maps
     implementation(libs.bundles.googlemaps)
 

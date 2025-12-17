@@ -1,5 +1,9 @@
 package com.ucb.whosin.features.Guest.presentation
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -116,6 +120,7 @@ private fun AcceptInvitationScreenContent(
     var eventId by remember { mutableStateOf("") }
     var companions by remember { mutableStateOf(0) }
     var startAnimation by remember { mutableStateOf(false) }
+    var showQrDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         delay(100)
@@ -336,7 +341,17 @@ private fun AcceptInvitationScreenContent(
                                 // Usuario YA invitado - mostrar banner
                                 AlreadyInvitedBanner()
 
-                                Spacer(modifier = Modifier.height(24.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Botón para ver QR
+                                if (uiState.guestQrCode != null) {
+                                    WhosInPrimaryButton(
+                                        text = "Ver Código QR de acceso",
+                                        onClick = { showQrDialog = true }
+                                    )
+
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                }
 
                                 // Botón para regresar
                                 WhosInPrimaryButton(
@@ -387,6 +402,14 @@ private fun AcceptInvitationScreenContent(
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
+            }
+
+            if (showQrDialog && uiState.guestQrCode != null) {
+                QrCodeDialog(
+                    qrCode = uiState.guestQrCode!!,
+                    eventName = uiState.event?.name ?: "Evento",
+                    onDismiss = { showQrDialog = false }
+                )
             }
         }
     }

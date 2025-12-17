@@ -11,6 +11,7 @@ import kotlinx.coroutines.tasks.await
 interface GuardRepository {
     fun getGuests(eventId: String): Flow<List<Guest>>
     suspend fun checkInGuest(eventId: String, guestId: String, guardId: String)
+    suspend fun checkInGuestByQrCode(eventId: String, qrCode: String, guardId: String)
 }
 
 class GuardRepositoryFirebase(private val firestore: FirebaseFirestore) : GuardRepository {
@@ -48,6 +49,43 @@ class GuardRepositoryFirebase(private val firestore: FirebaseFirestore) : GuardR
             ))
 
             // 2. Incrementa el contador de check-ins en el evento
+            batch.update(eventRef, "totalCheckedIn", FieldValue.increment(1))
+        }.await()
+    }
+
+    override suspend fun checkInGuestByQrCode(eventId: String, qrCode: String, guardId: String) {
+        val eventRef = firestore.collection("events").document(eventId)
+
+        // Buscar el invitado por qrCode
+        val guestSnapshot = eventRef.collection("guests")
+            .whereEqualTo("qrCode", qrCode)
+            .limit(1)
+            .get()
+            .await()
+
+        if (guestSnapshot.isEmpty) {
+            throw Exception("No se encontró un invitado con ese código QR")
+        }
+
+        val guestDoc = guestSnapshot.documents.first()
+        val guestId = guestDoc.id
+
+        // Verificar si ya está registrado
+        val alreadyCheckedIn = guestDoc.getBoolean("checkedIn") ?: false
+        if (alreadyCheckedIn) {
+            throw Exception("Este invitado ya fue registrado anteriormente")
+        }
+
+        // Realizar el check-in
+        val guestRef = eventRef.collection("guests").document(guestId)
+
+        firestore.runBatch { batch ->
+            batch.update(guestRef, mapOf(
+                "checkedIn" to true,
+                "checkedInAt" to FieldValue.serverTimestamp(),
+                "checkedInBy" to guardId
+            ))
+
             batch.update(eventRef, "totalCheckedIn", FieldValue.increment(1))
         }.await()
     }

@@ -30,6 +30,9 @@ class GuardViewModel(
 
     private val _guests = MutableStateFlow<List<Guest>>(emptyList())
 
+    private val _checkInStatus = MutableStateFlow<CheckInStatus>(CheckInStatus.Idle)
+    val checkInStatus = _checkInStatus.asStateFlow()
+
     val filteredGuests: StateFlow<List<Guest>> = combine(_guests, _searchQuery) { guests, query ->
         if (query.isBlank()) {
             guests
@@ -64,7 +67,38 @@ class GuardViewModel(
         val guardId = firebaseAuth.currentUser?.uid ?: return
 
         viewModelScope.launch {
-            guardRepository.checkInGuest(eventId, guestId, guardId)
+            try {
+                _checkInStatus.value = CheckInStatus.Loading
+                guardRepository.checkInGuest(eventId, guestId, guardId)
+                _checkInStatus.value = CheckInStatus.Success
+            } catch (e: Exception) {
+                _checkInStatus.value = CheckInStatus.Error(e.message ?: "Error al registrar")
+            }
         }
     }
+
+    fun checkInByQrCode(qrCode: String) {
+        val guardId = firebaseAuth.currentUser?.uid ?: return
+
+        viewModelScope.launch {
+            try {
+                _checkInStatus.value = CheckInStatus.Loading
+                guardRepository.checkInGuestByQrCode(eventId, qrCode, guardId)
+                _checkInStatus.value = CheckInStatus.Success
+            } catch (e: Exception) {
+                _checkInStatus.value = CheckInStatus.Error(e.message ?: "Error al escanear QR")
+            }
+        }
+    }
+
+    fun resetCheckInStatus() {
+        _checkInStatus.value = CheckInStatus.Idle
+    }
+}
+
+sealed class CheckInStatus {
+    object Idle : CheckInStatus()
+    object Loading : CheckInStatus()
+    object Success : CheckInStatus()
+    data class Error(val message: String) : CheckInStatus()
 }

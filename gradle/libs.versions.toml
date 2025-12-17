@@ -44,6 +44,7 @@
     playServicesLocation = "21.3.0"
     uiGraphics = "1.9.5"
     lifecycleRuntime = "2.7.0"
+    zxing = "3.5.3"
 
     [libraries]
     androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -80,6 +81,7 @@
     firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
     datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore"}
     androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+    zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
     #room
     room-runtime = { group="androidx.room", name="room-runtime", version.ref="room"}
     room-compiler = { group="androidx.room", name="room-compiler", version.ref="room"}

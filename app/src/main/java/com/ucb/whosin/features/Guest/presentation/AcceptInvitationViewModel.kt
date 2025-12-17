@@ -23,7 +23,8 @@ data class AcceptInvitationUiState(
     val errorMessage: String? = null,
     val isSuccess: Boolean = false,
     val event: EventModel? = null,
-    val isUserAlreadyInvited: Boolean = false
+    val isUserAlreadyInvited: Boolean = false,
+    val guestQrCode: String? = null
 )
 
 class AcceptInvitationViewModel(
@@ -136,9 +137,11 @@ class AcceptInvitationViewModel(
             when (val result = addGuestUseCase(eventId, guest)) {
                 is GuestResult.Success -> {
                     Log.d("AcceptInvitation", "✅ Asistencia confirmada exitosamente")
+                    val confirmedGuest = result.guest
                     _uiState.value = _uiState.value.copy(
                         isSuccess = true,
-                        isLoading = false
+                        isLoading = false,
+                        guestQrCode = confirmedGuest?.qrCode
                     )
                 }
                 is GuestResult.Error -> {
@@ -173,12 +176,12 @@ class AcceptInvitationViewModel(
             when (val result = getGuestsUseCase(eventId)) {
                 is GuestResult.SuccessList -> {
                     // Validar si el userId actual ya está en la lista
-                    val isInvited = result.guests.any { guest ->
-                        guest.userId == currentUser.uid
-                    }
+                    val guest = result.guests.find { it.userId == currentUser.uid }
+                    val isInvited = guest != null
 
                     _uiState.value = _uiState.value.copy(
-                        isUserAlreadyInvited = isInvited
+                        isUserAlreadyInvited = isInvited,
+                        guestQrCode = guest?.qrCode
                     )
 
                     Log.d("AcceptInvitation", "Usuario ${currentUser.uid} ya invitado: $isInvited")
@@ -190,6 +193,25 @@ class AcceptInvitationViewModel(
                 }
                 else -> {
                     _uiState.value = _uiState.value.copy(isUserAlreadyInvited = false)
+                }
+            }
+        }
+    }
+
+    private fun loadGuestQrCode(eventId: String) {
+        val currentUser = firebaseAuth.currentUser ?: return
+
+        viewModelScope.launch {
+            when (val result = getGuestsUseCase(eventId)) {
+                is GuestResult.SuccessList -> {
+                    val guest = result.guests.find { it.userId == currentUser.uid }
+                    _uiState.value = _uiState.value.copy(
+                        guestQrCode = guest?.qrCode
+                    )
+                    Log.d("AcceptInvitation", "QR Code cargado: ${guest?.qrCode}")
+                }
+                else -> {
+                    Log.e("AcceptInvitation", "Error al cargar QR Code")
                 }
             }
         }
